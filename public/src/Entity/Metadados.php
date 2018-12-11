@@ -58,7 +58,7 @@ class Metadados
         if (file_exists(PATH_HOME . "entity/relevant/{$entity}.json"))
             return json_decode(file_get_contents(PATH_HOME . "entity/relevant/{$entity}.json"), true);
         else
-            return json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-form/public/entity/relevant.json"), true);
+            return json_decode(file_get_contents(PATH_HOME . VENDOR . "entityUi/public/entity/relevant.json"), true);
     }
 
     /**
