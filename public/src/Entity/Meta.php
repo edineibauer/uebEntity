@@ -451,7 +451,7 @@ class Meta
     {
         if (!empty($dados)) {
             if (!$default)
-                $default = json_decode(file_get_contents(PATH_HOME . VENDOR . "entityUi/public/entity/input_type.json"), true)['default'];
+                $default = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true)['default'];
 
             foreach (array_replace_recursive($default, $dados) as $dado => $value) {
                 switch ($dado) {
@@ -658,7 +658,7 @@ class Meta
      */
     private function defaultForm(): array
     {
-        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entityUi/public/entity/input_type.json"), true);
+        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
         return $input['default']['form'];
     }
 
@@ -668,7 +668,7 @@ class Meta
      */
     private function defaultDatagrid(): array
     {
-        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entityUi/public/entity/input_type.json"), true);
+        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
         return $input['default']['datagrid'];
     }
 }

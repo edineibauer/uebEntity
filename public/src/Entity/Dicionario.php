@@ -23,7 +23,7 @@ class Dicionario
     public function __construct(string $entity)
     {
         $this->entity = $entity;
-        $this->defaultMeta = json_decode(file_get_contents(PATH_HOME . VENDOR . "entityUi/public/entity/input_type.json"), true);
+        $this->defaultMeta = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
 
         if (!empty($this->entity) && file_exists(PATH_HOME . "entity/cache/{$this->entity}.json")) {
             $this->defaultDicionarioData();
