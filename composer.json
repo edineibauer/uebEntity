@@ -1,0 +1,21 @@
+{
+  "name": "ueb/entity",
+  "description": "Controla as Entidades do sistema uebster",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Edinei J. Bauer",
+      "email": "edineibauer@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "ueb/dashboard": "*"
+  },
+  "autoload": {
+    "psr-0": {
+      "Entity": "public/src/"
+    }
+  }
+}
