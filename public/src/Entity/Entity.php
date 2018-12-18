@@ -60,7 +60,9 @@ class Entity extends EntityCreate
 
     /**
      * Retorna o dicionário da entidade ou então a lista de dicionário de entidades permitida
+     *
      * @param string|null $entity
+     * @return array|mixed|null
      */
     public static function dicionario(string $entity = null)
     {
@@ -87,7 +89,10 @@ class Entity extends EntityCreate
                 $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
 
                 if(!in_array($entity, $entidadesNaoPermitidas)) {
-                    return \Entity\Metadados::getDicionario($entity, true, true);
+                    $dic = \Entity\Metadados::getDicionario($entity, true, true);
+                    $dic['info'] = Metadados::getInfo($entity);
+
+                    return $dic;
                 }
             }
         }
