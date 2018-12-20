@@ -4,7 +4,7 @@ $time = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT, FILTER_REQUIRE
 
 $setor = empty($_SESSION['userlogin']['setor']) ? 20 : $_SESSION['userlogin']['setor'];
 $entidades = \Config\Config::getEntityNotAllow();
-$read = new \ConnCrud\Read();
+$read = new \Conn\Read();
 
 $json = new \Entity\Json();
 $hist = $json->get("historic");

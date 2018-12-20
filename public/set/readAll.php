@@ -6,7 +6,7 @@ $setor = empty($_SESSION['userlogin']['setor']) ? 20 : $_SESSION['userlogin']['s
 $entidades = \Config\Config::getEntityNotAllow();
 
 if (\Entity\Entity::checkPermission($entity) && !empty($entidades[$setor]) && !in_array($entity, $entidades[$setor])) {
-    $read = new \ConnCrud\Read();
+    $read = new \Conn\Read();
     $read->exeRead($entity);
     $data['data'] = $read->getResult();
 }
