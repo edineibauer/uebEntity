@@ -88,12 +88,8 @@ class Entity extends EntityCreate
                 $entidadesNaoPermitidas = \Config\Config::getEntityNotAllow();
                 $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
 
-                if(!in_array($entity, $entidadesNaoPermitidas)) {
-                    $dic = \Entity\Metadados::getDicionario($entity, true, true);
-                    $dic['info'] = Metadados::getInfo($entity);
-
-                    return $dic;
-                }
+                if(!in_array($entity, $entidadesNaoPermitidas))
+                    return \Entity\Metadados::getDicionario($entity, true, true);
             }
         }
 
