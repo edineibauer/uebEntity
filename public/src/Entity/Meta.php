@@ -50,7 +50,7 @@ class Meta
             $this->error = null;
 
         if ($this->type === "json")
-            $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : ""));
+            $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : null));
         elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
             $this->checkValueAssociacaoSimples($value);
         elseif ($this->key === "source")
