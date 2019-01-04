@@ -49,9 +49,9 @@ class Meta
         if ($validate)
             $this->error = null;
 
-        if (in_array($this->format, ["list_mult", "selecao_mult", "extend_mult", "checkbox_mult"]))
-            $this->checkValueAssociacaoMult($value);
-        elseif (in_array($this->key, ["extend", "extend_add", "list", "selecao", "checkbox_rel"]))
+        if ($this->type === "json")
+            $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : ""));
+        elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
             $this->checkValueAssociacaoSimples($value);
         elseif ($this->key === "source")
             $this->value = $this->convertSource($value);
