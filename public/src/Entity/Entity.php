@@ -113,7 +113,7 @@ class Entity extends EntityCreate
 
         if (!$login) {
             //Anônimo tem permissão para criar caso não esteja na lista negra
-            return (!$id && !in_array($entity, $allowCreate[0]));
+            return (!$id && !empty($allowCreate[0]) && !in_array($entity, $allowCreate[0]));
 
         } else {
             //Logado
