@@ -218,7 +218,7 @@ class Validate
         if ($m->getType() === "json" && is_array($m->getValue()))
             $m->setValue(json_encode($m->getValue()), false);
         elseif($m->getGroup() === "boolean")
-            $m->setValue($m->getValue() ? 1 : 0, false);
+            $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, false);
 
         if ($m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
             $m->setValue(Check::password($m->getValue()), false);
