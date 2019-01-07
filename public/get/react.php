@@ -3,7 +3,7 @@
 /**
  * Cria arquivos minificados dos reacts na pasta publica
  * Retorna lista de arquivos reacts disponíveis
-*/
+ */
 
 $data['data'] = [];
 $setor = $_SESSION['userlogin']['setor'] ?? null;
