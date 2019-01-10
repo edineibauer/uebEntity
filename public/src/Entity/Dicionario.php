@@ -386,6 +386,13 @@ class Dicionario
             if (!$this->getError() || !empty($id))
                 $this->saveAssociacaoSimples();
 
+            if (!$this->info)
+                $this->info = Metadados::getInfo($this->entity);
+
+            //verifica se possui owner ou autor
+            if(!empty($this->info['autor']) && $this->info['autor'] === 1 || $this->info['autor'] === 2)
+                $this->dicionario[999999]->setValue($_SESSION['userlogin']['id']);
+
             // Create or Update Data
             if (!empty($id)) {
                 $dicDataAtual = new Dicionario($this->entity);
@@ -397,11 +404,7 @@ class Dicionario
             }
 
             if (!$this->getError() || !empty($id)) {
-                if (!$this->info)
-                    $this->info = Metadados::getInfo($this->entity);
-
                 $this->createRelationalData();
-
                 $dados = $this->getDataForm();
                 if (!empty($id)) {
                     new React("update", $this->entity, $dados, $oldDados);
