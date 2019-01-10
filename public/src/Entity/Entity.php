@@ -104,7 +104,6 @@ class Entity extends EntityCreate
      */
     public static function checkPermission(string $entity, $id = null, bool $check = true): bool
     {
-
         return true;
 
         $login = $_SESSION['userlogin'] ?? null;
@@ -116,7 +115,7 @@ class Entity extends EntityCreate
 
         if (!$login) {
             //Anônimo tem permissão para criar caso não esteja na lista negra
-            return (!$id && !empty($allowCreate[0]) && !in_array($entity, $allowCreate[0]));
+            return (!$id && !empty($allowCreate) && !in_array($entity, $allowCreate[0]));
 
         } else {
             //Logado
