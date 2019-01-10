@@ -26,6 +26,12 @@ class Metadados
                 }
             }
 
+            $info = Metadados::getInfo($entity);
+            if(!empty($info['autor']) && $info['autor'] === 1) {
+                $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
+                $data[999999] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999999, "default" => $_SESSION['userlogin']['id']]);
+            }
+
             return Helper::convertStringToValueArray($data);
         }
 
