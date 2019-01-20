@@ -9,7 +9,7 @@ $json = new \Entity\Json();
 $hist = $json->get("historic");
 $data['data'] = [];
 
-if (empty($permissoes[$setor][$entity]) || $permissoes[$setor][$entity]['read']) {
+if (empty($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read']) {
     //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
     $info = \Entity\Metadados::getInfo($entity);
     $where = null;
