@@ -49,12 +49,13 @@ class Meta
         if ($validate)
             $this->error = null;
 
+        if ($this->key === "source")
+            $this->value = $this->convertSource($value);
+
         if ($this->type === "json")
             $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : null));
         elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
             $this->checkValueAssociacaoSimples($value);
-        elseif ($this->key === "source")
-            $this->value = $this->convertSource($value);
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $this->value = $value ?? $_SESSION['userlogin']['id'];
         elseif ($this->key === "publisher")
@@ -641,12 +642,15 @@ class Meta
 
         if(is_array($value)) {
             foreach ($value as $i => $item) {
-                foreach ($item as $column => $v) {
-                    if($column === "url")
-                        $value[$i][$column] = str_replace('\\', '/', $v);
-                }
+
+                // Decode base64 data
+                list($type, $data) = explode(';', $item['url']);
+                list(, $data) = explode(',', $data);
+                $file_data = base64_decode($data);
+
+                $value[$i]['url'] = "uploads/" . $item['name'] . '.' . $item['type'];
+                file_put_contents(PATH_HOME . $value[$i]['url'], $file_data);
             }
-            $value = json_encode($value);
         }
 
         return $value;
