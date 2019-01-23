@@ -4,6 +4,8 @@ namespace Entity;
 
 use Conn\Read;
 use Helpers\Check;
+use Helpers\Helper;
+use WideImage\WideImage;
 
 class Meta
 {
@@ -50,7 +52,7 @@ class Meta
             $this->error = null;
 
         if ($this->key === "source")
-            $this->value = $this->convertSource($value);
+            $value = $this->convertSource($value);
 
         if ($this->type === "json")
             $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : null));
@@ -72,7 +74,7 @@ class Meta
      */
     public function setAllow($allow = null)
     {
-        $content = ['regex', 'validate', 'names', 'values'];
+        $content = ['regex', 'validate', 'options'];
         if ($allow) {
             $this->allow = $allow;
         } else {
@@ -644,12 +646,23 @@ class Meta
             foreach ($value as $i => $item) {
 
                 // Decode base64 data
-                list($type, $data) = explode(';', $item['url']);
-                list(, $data) = explode(',', $data);
-                $file_data = base64_decode($data);
+                if(!empty($item['url']) && is_string($item['url']) && preg_match('/;/i', $item['url'])) {
+                    list($type, $data) = explode(';', $item['url']);
+                    list(, $data) = explode(',', $data);
+                    $file_data = base64_decode($data);
 
-                $value[$i]['url'] = "uploads/" . $item['name'] . '.' . $item['type'];
-                file_put_contents(PATH_HOME . $value[$i]['url'], $file_data);
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads");
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y"));
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m"));
+
+                    $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/" . $item['name'] . "-" . strtotime('now') . '.' . $item['type'];
+                    file_put_contents(PATH_HOME . $dir, $file_data);
+                    $value[$i]['url'] = HOME . $dir;
+
+                } elseif(empty($item['url']) || !is_string($item['url'])) {
+                    $value[$i]['url'] = null;
+                }
             }
         }
 
