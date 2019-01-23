@@ -358,6 +358,15 @@ class Dicionario
     }
 
     /**
+     * @param string $semantic
+     * @return mixed
+     */
+    public function searchSemantic(string $semantic)
+    {
+        return $this->search($this->getInfo()[$semantic]);
+    }
+
+    /**
      * Deleta uma Meta do dicionário,
      * aceita indice, column ou Meta como parâmentro
      *
