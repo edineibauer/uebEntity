@@ -59,7 +59,7 @@ class Meta
         elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
             $this->checkValueAssociacaoSimples($value);
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
-            $this->value = $value ?? $_SESSION['userlogin']['id'];
+            $this->value = ($_SESSION['userlogin']['setor'] == 1 ? (!empty($value) ? $value : null) : $_SESSION['userlogin']['id']);
         elseif ($this->key === "publisher")
             $this->error = "Precisa estar Logado";
         else

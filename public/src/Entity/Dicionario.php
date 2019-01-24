@@ -399,8 +399,10 @@ class Dicionario
                 $this->info = Metadados::getInfo($this->entity);
 
             //verifica se possui owner ou autor
-            if(!empty($this->info['autor']) && $this->info['autor'] === 1 || $this->info['autor'] === 2)
-                $this->dicionario[999999]->setValue($_SESSION['userlogin']['id']);
+            if(!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
+                if((empty($this->dicionario[999999]) && empty($id)) || $_SESSION['userlogin']['setor'] != 1)
+                    $this->dicionario[999999]->setValue($_SESSION['userlogin']['id']);
+            }
 
             // Create or Update Data
             if (!empty($id)) {
