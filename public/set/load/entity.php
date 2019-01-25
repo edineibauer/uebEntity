@@ -2,18 +2,18 @@
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
 $time = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
 
-$setor = empty($_SESSION['userlogin']['setor']) ? 0 : $_SESSION['userlogin']['setor'];
+$setor = empty($_SESSION['userlogin']['setor']) ? 0 : (int) $_SESSION['userlogin']['setor'];
 $permissoes = \Config\Config::getPermission();
 
 $json = new \Entity\Json();
 $hist = $json->get("historic");
 $data['data'] = [];
 
-if (!isset($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read']) {
+if ($setor === 1 || (isset($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read'])) {
     //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
     $info = \Entity\Metadados::getInfo($entity);
     $where = null;
-    if(!empty($info['autor']) && $info['autor'] === 2)
+    if($setor !== 1 && !empty($info['autor']) && $info['autor'] === 2)
         $where = "WHERE ownerpub = " . $_SESSION['userlogin']['id'];
 
     //preenche caso não tenha nada de informação
