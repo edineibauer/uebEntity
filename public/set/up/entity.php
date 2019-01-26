@@ -1,7 +1,7 @@
 <?php
 
-$entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
-$dados = filter_input(INPUT_POST, 'dados', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+$entity = strip_tags(trim(filter_input(INPUT_POST, 'entity', FILTER_DEFAULT)));
+$dados = json_decode(filter_input(INPUT_POST, 'dados', FILTER_DEFAULT), true);
 
 if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
     $id = \Entity\Entity::add($entity, $dados);
