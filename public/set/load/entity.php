@@ -1,5 +1,7 @@
 <?php
 
+use \Helpers\Helper;
+
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
 $historicFront = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
 $setor = empty($_SESSION['userlogin']['setor']) ? 0 : (int)$_SESSION['userlogin']['setor'];
