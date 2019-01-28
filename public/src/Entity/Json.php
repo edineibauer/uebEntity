@@ -89,11 +89,11 @@ class Json extends VersionControl
 
                 if (!file_exists($this->file)) {
                     //Novo
-                    $data['created'] = strtotime("now");
-                    $data['updated'] = strtotime("now");
-
-                    if ($this->versionamento)
+                    if($this->versionamento) {
+                        $data['created'] = strtotime("now");
+                        $data['updated'] = strtotime("now");
                         parent::deleteVerion($this->file);
+                    }
 
                     $f = fopen($this->file, "w+");
                     fwrite($f, json_encode($data));
@@ -120,12 +120,17 @@ class Json extends VersionControl
     {
         $this->setFile($id);
         if ($this->file && file_exists($this->file)) {
-            $dadosUpdate['updated'] = strtotime("now");
+
+            if(isset($dadosUpdate['updated']))
+                $dadosUpdate['updated'] = strtotime("now");
             $dadosAtuais = $this->get($id);
+
             unset($dadosAtuais['id']);
-            $dadosAtuais['userlogin-action'] = "update";
-            if ($this->versionamento)
+
+            if ($this->versionamento) {
+                $dadosAtuais['userlogin-action'] = "update";
                 parent::createVerion($this->file, $dadosAtuais, $recursiveVersion);
+            }
 
             $f = fopen($this->file, "w+");
             fwrite($f, json_encode(Helper::arrayMerge($dadosAtuais, $dadosUpdate)));
