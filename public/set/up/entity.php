@@ -48,8 +48,8 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     //salva alterações
     if (!empty($dados)) {
         //se tiver mais que 50 resultados, deleta os acima de 50
-        if(count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 49) {
-            $excluir = 51 - count($total);
+        if(count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 99) {
+            $excluir = 101 - count($total);
             for($i = 0; $i < $excluir; $i++) {
                 if(isset($total[$i])) {
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$total[$i]}");
