@@ -4,7 +4,7 @@ use Entity\Json;
 
 $entity = strip_tags(trim(filter_input(INPUT_POST, 'entity', FILTER_DEFAULT)));
 $dados = json_decode(filter_input(INPUT_POST, 'dados', FILTER_DEFAULT), true);
-$data['data'] = ['error' => 0, 'historic' => 0];
+$data['data'] = ['error' => 0, 'data' => '', 'historic' => 0];
 
 if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") && !empty($dados) && is_array($dados)) {
     $read = new \Conn\Read();
@@ -12,10 +12,10 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
 
     foreach ($dados as $i => $dado) {
         if ($dado['db_action'] === "delete") {
-            if(is_array($dado['delete'])) {
+            if (is_array($dado['delete'])) {
                 foreach ($dado['delete'] as $item)
                     $del->exeDelete($entity, "WHERE id = :id", "id={$item}");
-            } elseif(is_numeric($dado['delete'])) {
+            } elseif (is_numeric($dado['delete'])) {
                 $del->exeDelete($entity, "WHERE id = :id", "id={$dado['delete']}");
             }
 
@@ -25,15 +25,17 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
             unset($registro['db_action']);
 
             //remove id se existir e for criar
-            if($dado['db_action'] === "create" && isset($registro['id']))
+            if ($dado['db_action'] === "create" && isset($registro['id']))
                 unset($registro['id']);
 
             $id = \Entity\Entity::add($entity, $registro);
 
-            if(is_numeric($id))
+            if (is_numeric($id)) {
+                $data['data']['data'] = (int) $id;
                 $dados[$i]['id'] = $id;
-            else
+            } else {
                 $data['data']['error'] += 1;
+            }
         }
     }
 
@@ -43,7 +45,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     $json->save("historic", $hist);
 
     //salva alterações
-    if(!empty($dados)) {
+    if (!empty($dados)) {
         $store = new Json("update/{$entity}");
         $store->setVersionamento(false);
         $store->save($hist[$entity], $dados);
