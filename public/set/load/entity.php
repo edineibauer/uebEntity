@@ -1,7 +1,5 @@
 <?php
 
-use \Helpers\Helper;
-
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
 $historicFront = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
 $setor = empty($_SESSION['userlogin']['setor']) ? 0 : (int)$_SESSION['userlogin']['setor'];
@@ -10,24 +8,12 @@ $json = new \Entity\Json();
 $hist = $json->get("historic");
 $data['data'] = ['historic' => 0];
 
-function createEmptyUpdateHistoric($entity, $historic)
-{
-    Helper::createFolderIfNoExist(PATH_HOME . "_cdn/update");
-    Helper::createFolderIfNoExist(PATH_HOME . "_cdn/update/{$entity}");
-    $f = fopen(PATH_HOME . "_cdn/update/{$entity}/{$historic}.json", "w+");
-    fwrite($f, "[]");
-    fclose($f);
-}
-
 if ($setor === 1 || (isset($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read'])) {
 
     //preenche caso não tenha nada de informação
     if (empty($hist[$entity])) {
         $hist[$entity] = strtotime('now');
         $json->save("historic", $hist);
-        createEmptyUpdateHistoric($entity, $hist[$entity]);
-    } elseif (!file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json")) {
-        createEmptyUpdateHistoric($entity, $hist[$entity]);
     }
 
     //verifica se há alterações nessa entidade que não forão recebidas pelo app, caso tenha, atualiza os dados
