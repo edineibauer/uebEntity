@@ -651,7 +651,7 @@ class Meta
                 if(!empty($item['url']) && is_string($item['url']) && preg_match('/;/i', $item['url'])) {
                     list($type, $data) = explode(';', $item['url']);
                     list(, $data) = explode(',', $data);
-                    $file_data = base64_decode($data);
+                    $file_data = base64_decode(str_replace(' ',"+", $data));
 
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads");
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
