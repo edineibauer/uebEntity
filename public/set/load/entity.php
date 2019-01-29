@@ -19,7 +19,7 @@ if ($setor === 1 || (isset($permissoes[$setor][$entity]['read']) || $permissoes[
     }
 
     //verifica se há alterações nessa entidade que não forão recebidas pelo app, caso tenha, atualiza os dados
-    if (empty($historicFront) || !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json")) {
+    if (empty($historicFront) || ($historicFront < $hist[$entity] && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
         //download all data
 
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
