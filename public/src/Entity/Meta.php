@@ -661,7 +661,7 @@ class Meta
                     $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/" . $item['name'] . "-" . strtotime('now') . '.' . $item['type'];
                     file_put_contents(PATH_HOME . $dir, $file_data);
                     $value[$i]['url'] = HOME . $dir;
-                    $value[$i]['image'] = HOME . (preg_match('/^data:image\//i') ? $dir : "assetsPublic/img/file.png");
+                    $value[$i]['image'] = HOME . (preg_match('/^data:image\//i', $type) ? $dir : "assetsPublic/img/file.png");
 
                 } elseif(empty($item['url']) || !is_string($item['url'])) {
                     $value[$i]['url'] = null;
