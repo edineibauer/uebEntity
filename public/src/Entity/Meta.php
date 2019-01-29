@@ -107,11 +107,11 @@ class Meta
     public function setDefault($default)
     {
         if ($default === "datetime")
-            $this->default = date("Y-m-d H:i:s");
+            $this->default = "";
         elseif ($default === "date")
-            $this->default = date("Y-m-d");
+            $this->default = "";
         elseif ($default === "time")
-            $this->default = date("H:i:s");
+            $this->default = "";
         else
             $this->default = $default;
 
