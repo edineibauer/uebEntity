@@ -32,8 +32,10 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
             $id = \Entity\Entity::add($entity, $registro);
 
             if (is_numeric($id)) {
-                $data['data']['data'] = (int) $id;
-                $dados[$i]['id'] = $id;
+                $read->exeRead($entity, "WHERE id = :id", "id={$id}");
+                $action = $dados[$i]['db_action'];
+                $data['data']['data'] = $dados[$i] = ($read->getResult() ? $read->getResult()[0] : []);
+                $dados[$i]['db_action'] = $action;
             } else {
                 $data['data']['error'] += 1;
             }
@@ -48,10 +50,10 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     //salva alterações
     if (!empty($dados)) {
         //se tiver mais que 50 resultados, deleta os acima de 50
-        if(count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 99) {
+        if (count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 99) {
             $excluir = 101 - count($total);
-            for($i = 0; $i < $excluir; $i++) {
-                if(isset($total[$i])) {
+            for ($i = 0; $i < $excluir; $i++) {
+                if (isset($total[$i])) {
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$total[$i]}");
                 } else {
                     break;
