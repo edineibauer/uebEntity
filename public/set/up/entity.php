@@ -4,7 +4,7 @@ use Entity\Json;
 use \Helpers\Helper;
 
 $entity = strip_tags(trim(filter_input(INPUT_POST, 'entity', FILTER_DEFAULT)));
-$dados = json_decode(filter_input(INPUT_POST, 'dados', FILTER_DEFAULT), true)['dados'];
+$dados = json_decode(filter_input(INPUT_POST, 'dados', FILTER_DEFAULT), true);
 $data['data'] = ['error' => 0, 'data' => '', 'historic' => 0];
 
 if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") && !empty($dados) && is_array($dados)) {
