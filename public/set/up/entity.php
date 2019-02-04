@@ -55,10 +55,16 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     //remove updates anteriores de registros que serão excluídos
     if(!empty($delList)) {
         foreach ($delList as $id) {
-            foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $hist) {
-                $dados = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$hist}"), true);
-                if($dados['id'] == $id)
-                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$hist}");
+            foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
+                $dados = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), true);
+                if(is_array($dados)) {
+                    foreach ($dados as $dado) {
+                        if ($dado['id'] == $id)
+                            unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
+                    }
+                } elseif(isset($dados['id']) && $dados['id'] == $id) {
+                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
+                }
             }
         }
     }
