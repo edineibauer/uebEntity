@@ -37,8 +37,12 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
 
             if (is_numeric($id)) {
                 $read->exeRead($entity, "WHERE id = :id", "id={$id}");
+                $result = ($read->getResult() ? $read->getResult()[0] : []);
+                if($entity === "usuarios")
+                    $result['password'] = "";
+
                 $action = $dados[$i]['db_action'];
-                $data['data']['data'] = $dados[$i] = ($read->getResult() ? $read->getResult()[0] : []);
+                $data['data']['data'] = $dados[$i] = $result;
                 $dados[$i]['db_action'] = $action;
             } else {
                 $data['data']['error'] += 1;
@@ -82,6 +86,10 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 }
             }
         }
+
+        if($entity === "usuarios" && isset($dados['password']))
+            unset($dados['password']);
+
         $store = new Json("update/{$entity}");
         $store->setVersionamento(false);
         $store->save($hist[$entity], $dados);

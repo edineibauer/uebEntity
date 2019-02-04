@@ -30,7 +30,12 @@ if ($setor === 1 || (isset($permissoes[$setor][$entity]['read']) || $permissoes[
 
         $read = new \Conn\Read();
         $read->exeRead($entity, $where);
-        $data['data']['data'] = $read->getResult() ?? [];
+        $results = $read->getResult() ?? [];
+        if($entity === "usuarios" && !empty($results)) {
+            foreach ($results as $i => $result)
+                $results[$i]['password'] = "";
+        }
+        $data['data']['data'] = $results;
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
 

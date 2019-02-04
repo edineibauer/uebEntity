@@ -220,7 +220,7 @@ class Validate
         elseif($m->getGroup() === "boolean")
             $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, false);
 
-        if ($m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
+        if (!empty($m->getValue()) && $m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
             $m->setValue(Check::password($m->getValue()), false);
 
         } elseif ($m->getFormat() === "valor" && strlen($m->getValue()) > 2 && !preg_match('/\./i', $m->getValue())){
