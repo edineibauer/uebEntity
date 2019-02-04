@@ -11,13 +11,17 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     $read = new \Conn\Read();
     $del = new \Conn\Delete();
 
+    $delList = [];
     foreach ($dados as $i => $dado) {
         if ($dado['db_action'] === "delete") {
             if (is_array($dado['delete'])) {
-                foreach ($dado['delete'] as $item)
+                foreach ($dado['delete'] as $item) {
                     $del->exeDelete($entity, "WHERE id = :id", "id={$item}");
+                    $delList[] = (int) $item;
+                }
             } elseif (is_numeric($dado['delete'])) {
                 $del->exeDelete($entity, "WHERE id = :id", "id={$dado['delete']}");
+                $delList[] = (int) $dado['delete'];
             }
 
         } else {
@@ -42,10 +46,22 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
         }
     }
 
+    //salva historico de alterações
     $json = new Json();
     $hist = $json->get("historic");
     $hist[$entity] = strtotime('now');
     $json->save("historic", $hist);
+
+    //remove updates anteriores de registros que serão excluídos
+    if(!empty($delList)) {
+        foreach ($delList as $id) {
+            foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $hist) {
+                $dados = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$hist}"), true);
+                if($dados['id'] == $id)
+                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$hist}");
+            }
+        }
+    }
 
     //salva alterações
     if (!empty($dados)) {
