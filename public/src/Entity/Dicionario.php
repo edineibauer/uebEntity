@@ -155,7 +155,7 @@ class Dicionario
     {
         $data = [];
         foreach ($this->dicionario as $meta) {
-            if (!in_array($meta->getFormat(), ["extend_mult", "list_mult", "selecao_mult", "information", "checkbox_mult"]) && ($meta->getFormat() !== "password" || strlen($meta->getValue()) > 3))
+            if (!in_array($meta->getFormat(), ["list_mult", "selecao_mult", "information", "checkbox_mult"]) && ($meta->getFormat() !== "password" || strlen($meta->getValue()) > 3))
                 $data[$meta->getColumn()] = $meta->getValue();
         }
         return $data;
