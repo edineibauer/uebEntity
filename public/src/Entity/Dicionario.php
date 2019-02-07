@@ -58,7 +58,7 @@ class Dicionario
                 }
 
             } elseif (is_array($data)) {
-                if (!empty($data[0]) && get_class($data[0]) === "Entity\Meta") {
+                if (!empty($data[0]) && is_object($data[0]) && get_class($data[0]) === "Entity\Meta") {
                     $metas = $data;
                     $data = [];
                     foreach ($metas as $meta) {
@@ -379,6 +379,28 @@ class Dicionario
             unset($this->dicionario[$indice]);
     }
 
+    private function checkDataToSave($id)
+    {
+        $this->checkSetorChangeToHigh();
+        if (!$this->getError() || !empty($id))
+            $this->saveAssociacaoSimples();
+
+        if (!$this->info)
+            $this->info = Metadados::getInfo($this->entity);
+
+        //verifica se possui owner ou autor
+        if(!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
+            if((empty($this->dicionario[999999]) && empty($id)) || $_SESSION['userlogin']['setor'] != 1)
+                $this->dicionario[999999]->setValue($_SESSION['userlogin']['id'], !1);
+        }
+
+        foreach ($this->dicionario as $i => $meta) {
+            if($meta->getType() === "json")
+                $this->dicionario[$i]->setValueDirect(!empty($meta->getValue()) ? json_encode($meta->getValue()) : null);
+        }
+
+    }
+
     /**
      * Salva os dados do dicionário no banco de dados ou atualiza se for o caso
      */
@@ -391,18 +413,8 @@ class Dicionario
             $columnPass = $d->search($d->getInfo()['password'])->getColumn();
         }
         if (!$passCheck || $passCheck->getValue() === $_SESSION['userlogin'][$columnPass]) {
-            $this->checkSetorChangeToHigh();
-            if (!$this->getError() || !empty($id))
-                $this->saveAssociacaoSimples();
 
-            if (!$this->info)
-                $this->info = Metadados::getInfo($this->entity);
-
-            //verifica se possui owner ou autor
-            if(!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
-                if((empty($this->dicionario[999999]) && empty($id)) || $_SESSION['userlogin']['setor'] != 1)
-                    $this->dicionario[999999]->setValue($_SESSION['userlogin']['id']);
-            }
+            $this->checkDataToSave($id);
 
             // Create or Update Data
             if (!empty($id)) {
@@ -434,7 +446,7 @@ class Dicionario
         if ($this->getEntity() === "usuarios") {
             $setor = $this->search("setor");
             if (!empty($_SESSION['userlogin']) && $setor->getValue() < $_SESSION['userlogin']['setor']) {
-                $setor->setValue($_SESSION['userlogin']['setor'], false);
+                $setor->setValue($_SESSION['userlogin']['setor'], !1);
                 $setor->setError("Permissão Negada");
             }
         }
@@ -462,7 +474,7 @@ class Dicionario
             }
         } else {
             $metaId = $this->search(0);
-            $metaId->setValue(null, false);
+            $metaId->setValue(null, !1);
             $metaId->setError("Você não tem Permissão para Atualizar estas Informações!");
         }
     }
@@ -480,7 +492,7 @@ class Dicionario
         if ($create->getErro()) {
             $this->search(0)->setError($create->getErro());
         } elseif ($create->getResult()) {
-            $this->search(0)->setValue((int)$create->getResult(), false);
+            $this->search(0)->setValue((int)$create->getResult(), !1);
             $this->checkToSetOwnerList($create->getResult());
         }
     }
@@ -525,7 +537,7 @@ class Dicionario
                     $this->dicionario[$metaOne->getId()]->setError($d->getError()[$d->getEntity()]);
 
                 if (!empty($d->search(0)->getValue()))
-                    $this->dicionario[$metaOne->getId()]->setValue((int)$d->search(0)->getValue(), false);
+                    $this->dicionario[$metaOne->getId()]->setValue((int)$d->search(0)->getValue(), !1);
             }
         }
     }

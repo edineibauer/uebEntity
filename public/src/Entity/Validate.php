@@ -24,7 +24,6 @@ class Validate
                 self::checkType($m);
                 self::checkSize($m);
                 self::checkValidate($m);
-                self::checkValues($m);
             }
         }
     }
@@ -38,7 +37,6 @@ class Validate
             foreach ($d->getDicionario() as $m) {
                 if ($m->getColumn() !== "id" && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"])) {
                     self::checkLink($d, $m);
-                    self::checkUnique($d, $m);
 
                     if ($m->getKey() === "link" && $m->getError()) {
                         $d->getRelevant()->setError($m->getError());
@@ -215,8 +213,8 @@ class Validate
      */
     private static function convertValues(Meta $m)
     {
-        if ($m->getType() === "json" && is_array($m->getValue()))
-            $m->setValue(json_encode($m->getValue()), false);
+        if ($m->getType() === "json" && Check::isJson($m->getValue()))
+            $m->setValue(json_decode($m->getValue(), true), false);
         elseif($m->getGroup() === "boolean")
             $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, false);
 
@@ -269,7 +267,7 @@ class Validate
             if (!preg_match('/\d{2}:\d{2}/i', $m->getValue()))
                 $m->setError("formato de tempo inválido ex válido:(21:58)");
 
-        } elseif ($m->getType() === "json" && !Check::isJson($m->getValue())) {
+        } elseif ($m->getType() === "json" && !is_array($m->getValue())) {
             $m->setError("formato json inválido");
         }
     }
@@ -281,7 +279,7 @@ class Validate
      */
     private static function checkSize(Meta $m)
     {
-        if ($m->getSize()) {
+        if ($m->getSize() && in_array($m->getType(), ["varchar", "char", "tinytext", "text", "mediumtext", "longtext", "tinyint", "smallint", "mediumint", "int", "bigint"])) {
             $length = strlen($m->getValue());
             if ($m->getType() === "varchar" && $length > $m->getSize())
                 $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
@@ -328,22 +326,6 @@ class Validate
     }
 
     /**
-     * Verifica se o valor precisa ser único
-     *
-     * @param Dicionario $d
-     * @param Meta $m
-     */
-    private static function checkUnique(Dicionario $d, Meta $m)
-    {
-        if ($m->getUnique()) {
-            $read = new Read();
-            $read->exeRead($d->getEntity(), "WHERE {$m->getColumn()} = '{$m->getValue()}'" . (!empty($d->search("id")->getValue()) ? " && id != " . $d->search("id")->getValue() : ""));
-            if ($read->getResult())
-                $m->setError("Valor já existe, informe outro");
-        }
-    }
-
-    /**
      * Verifica se existe expressão regular, e se existe, aplica a verificação
      *
      * @param Meta $m
@@ -370,32 +352,6 @@ class Validate
 
             elseif ($m->getAllow()['validate'] === "cnpj" && !Check::cnpj($m->getValue()))
                 $m->setError("CNPJ inválido.");
-        }
-    }
-
-    /**
-     * Verifica se existem valores exatos permitidos
-     *
-     * @param Meta $m
-     */
-    private static function checkValues(Meta $m)
-    {
-        if ($m->getType() === "json") {
-            if (!empty($m->getValue()) && !empty($m->getAllow()['values'])) {
-                if (in_array($m->getFormat(), ["sources", "source"])) {
-                    foreach (json_decode($m->getValue(), true) as $v) {
-                        if (!in_array(pathinfo($v['url'], PATHINFO_EXTENSION), $m->getAllow()['values']))
-                            $m->setError("valor não é permitido");
-                    }
-                } else {
-                    foreach (json_decode($m->getValue(), true) as $item) {
-                        if (!empty($item) && !in_array($item, $m->getAllow()['values']))
-                            $m->setError("valor não é permitido");
-                    }
-                }
-            }
-        } elseif (!empty($m->getAllow()['values']) && !empty($m->getValue()) && !in_array($m->getValue(), $m->getAllow()['values'])) {
-            $m->setError("valor não é permitido");
         }
     }
 }

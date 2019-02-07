@@ -42,6 +42,47 @@ class Meta
             $this->setDados($dados, $default);
     }
 
+    public function setValueDirect($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @param Meta $meta
+     * @param $value
+     */
+    private function processaUploadsJson(Meta $meta, $value)
+    {
+        if (!empty($value)) {
+            if (is_array($value) && !empty($value[0])) {
+                $result = [];
+                foreach ($value as $item) {
+                    $d = new Dicionario($meta->relation);
+                    foreach ($d->getDicionario() as $i => $meta) {
+                        if ($meta->key === "source" && !empty($item[$meta->column])) {
+                            $item[$meta->column] = $this->uploadSource($item[$meta->column]);
+                        } else if($meta->key === "relation" && $meta->type === "json" && !empty($item[$meta->column])){
+                            $item[$meta->column] = $this->processaUploadsJson($meta, $item[$meta->column]);
+                        }
+                    }
+                    $result[] = $item;
+                }
+                $value = $result;
+                unset($result);
+            } else {
+                $d = new Dicionario($meta->relation);
+                foreach ($d->getDicionario() as $i => $meta) {
+                    if ($meta->key === "source" && !empty($value[$meta->column])) {
+                        $value[$meta->column] = $this->uploadSource($value[$meta->column]);
+                    } else if($meta->key === "relation" && $meta->type === "json"){
+                        $value[$meta->column] = $this->processaUploadsJson($meta, $value[$meta->column]);
+                    }
+                }
+            }
+        }
+        return $value;
+    }
+
     /**
      * @param mixed $value
      * @param bool $validate
@@ -51,21 +92,27 @@ class Meta
         if ($validate)
             $this->error = null;
 
-        if ($this->key === "source")
-            $value = $this->convertSource($value);
-
         if ($this->type === "json")
-            $this->value = (Check::isJson($value) ? $value : (is_array($value) || is_object($value) ? json_encode($value) : null));
-        elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
-            $this->checkValueAssociacaoSimples($value);
+            $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
-            $this->value = (int) ($_SESSION['userlogin']['setor'] == 1 ? (!empty($value) ? $value : $_SESSION['userlogin']['id']) : $_SESSION['userlogin']['id']);
+            $value = (int)($_SESSION['userlogin']['setor'] == 1 ? (!empty($value) ? $value : $_SESSION['userlogin']['id']) : $_SESSION['userlogin']['id']);
         elseif ($this->key === "publisher")
             $this->error = "Precisa estar Logado";
         elseif ($this->group === "boolean")
-            $this->value = $value ? 1 : 0;
+            $value = $value ? 1 : 0;
         else
-            $this->value = $value;
+            $value = $value;
+
+//        elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
+//            $this->checkValueAssociacaoSimples($value);
+
+        //dados relacionais em formato json
+        if ($this->key === "relation" && $this->type === "json")
+            $value = $this->processaUploadsJson($this, $value);
+        elseif ($this->key === "source" && !empty($value))
+            $value = $this->uploadSource($value);
+
+        $this->value = $value;
 
         if ($validate)
             Validate::meta($this);
@@ -90,7 +137,7 @@ class Meta
      */
     public function setId(int $id)
     {
-        $this->id = (int) $id;
+        $this->id = (int)$id;
     }
 
     /**
@@ -639,19 +686,20 @@ class Meta
         return (int)$return;
     }
 
-    private function convertSource($value)
+    /**
+     * @param array $value
+     * @return array|mixed|string
+     */
+    private function uploadSource(array $value)
     {
-        if(is_string($value) && Check::isJson($value))
-            $value = json_decode($value, true);
-
-        if(is_array($value)) {
+        if (is_array($value)) {
             foreach ($value as $i => $item) {
 
                 // Decode base64 data
-                if(!empty($item['url']) && is_string($item['url']) && preg_match('/;/i', $item['url'])) {
+                if (!empty($item['url']) && is_string($item['url']) && preg_match('/;/i', $item['url'])) {
                     list($type, $data) = explode(';', $item['url']);
                     list(, $data) = explode(',', $data);
-                    $file_data = base64_decode(str_replace(' ',"+", $data));
+                    $file_data = base64_decode(str_replace(' ', "+", $data));
 
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads");
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
@@ -663,7 +711,7 @@ class Meta
                     $value[$i]['url'] = HOME . $dir;
                     $value[$i]['image'] = HOME . "image/" . (preg_match('/^data:image\//i', $type) ? $dir : "assetsPublic/img/file.png");
 
-                } elseif(empty($item['url']) || !is_string($item['url'])) {
+                } elseif (empty($item['url']) || !is_string($item['url'])) {
                     $value[$i]['url'] = null;
                     $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
                 }
