@@ -12,7 +12,7 @@ class Dicionario
 {
     private $entity;
     private $defaultMeta;
-    private $dicionario;
+    private $dicionario = [];
     private $info;
     private $relevant;
     private $metasEdited;

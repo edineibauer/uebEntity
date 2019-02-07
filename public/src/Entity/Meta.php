@@ -48,21 +48,22 @@ class Meta
     }
 
     /**
-     * @param Meta $meta
+     * @param string $entity
      * @param $value
+     * @return array
      */
-    private function processaUploadsJson(Meta $meta, $value)
+    private function processaUploadsJson(string $entity, $value)
     {
-        if (!empty($value)) {
+        if (!empty($value) && !empty($entity)) {
             if (is_array($value) && !empty($value[0])) {
                 $result = [];
                 foreach ($value as $item) {
-                    $d = new Dicionario($meta->relation);
-                    foreach ($d->getDicionario() as $i => $meta) {
-                        if ($meta->key === "source" && !empty($item[$meta->column])) {
-                            $item[$meta->column] = $this->uploadSource($item[$meta->column]);
-                        } else if($meta->key === "relation" && $meta->type === "json" && !empty($item[$meta->column])){
-                            $item[$meta->column] = $this->processaUploadsJson($meta, $item[$meta->column]);
+                    $d = new Dicionario($entity);
+                    foreach ($d->getDicionario() as $i => $m) {
+                        if ($m->key === "source" && !empty($item[$m->column])) {
+                            $item[$m->column] = $this->uploadSource($item[$m->column]);
+                        } else if($m->key === "relation" && $m->type === "json" && !empty($item[$m->column])){
+                            $item[$m->column] = $this->processaUploadsJson($m->relation, $item[$m->column]);
                         }
                     }
                     $result[] = $item;
@@ -70,12 +71,12 @@ class Meta
                 $value = $result;
                 unset($result);
             } else {
-                $d = new Dicionario($meta->relation);
-                foreach ($d->getDicionario() as $i => $meta) {
-                    if ($meta->key === "source" && !empty($value[$meta->column])) {
-                        $value[$meta->column] = $this->uploadSource($value[$meta->column]);
-                    } else if($meta->key === "relation" && $meta->type === "json"){
-                        $value[$meta->column] = $this->processaUploadsJson($meta, $value[$meta->column]);
+                $d = new Dicionario($entity);
+                foreach ($d->getDicionario() as $i => $m) {
+                    if ($m->key === "source" && !empty($value[$m->column])) {
+                        $value[$m->column] = $this->uploadSource($value[$m->column]);
+                    } else if($m->key === "relation" && $m->type === "json"){
+                        $value[$m->column] = $this->processaUploadsJson($m, $value[$m->column]);
                     }
                 }
             }
@@ -108,7 +109,7 @@ class Meta
 
         //dados relacionais em formato json
         if ($this->key === "relation" && $this->type === "json")
-            $value = $this->processaUploadsJson($this, $value);
+            $value = $this->processaUploadsJson($this->relation, $value);
         elseif ($this->key === "source" && !empty($value))
             $value = $this->uploadSource($value);
 
