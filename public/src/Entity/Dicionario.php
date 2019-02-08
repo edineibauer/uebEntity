@@ -427,7 +427,7 @@ class Dicionario
             }
 
             if (!$this->getError() || !empty($id)) {
-                $this->createRelationalData();
+//                $this->createRelationalData();
                 $dados = $this->getDataForm();
                 if (!empty($id)) {
                     new React("update", $this->entity, $dados, $oldDados);

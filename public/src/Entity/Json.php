@@ -59,17 +59,19 @@ class Json extends VersionControl
     /**
      * Cria ou Atualiza arquivo
      *
-     * @param string $id
+     * @param $id
      * @param array $data
      */
-    public function save(string $id, array $data)
+    public function save($id, array $data)
     {
-        $this->setFile($id);
-        if ($this->file) {
-            if (file_exists($this->file)) {
-                $this->update($id, $data);
-            } else {
-                $this->add($id, $data);
+        if(!empty($id) && is_string($id)) {
+            $this->setFile($id);
+            if ($this->file) {
+                if (file_exists($this->file)) {
+                    $this->update($id, $data);
+                } else {
+                    $this->add($id, $data);
+                }
             }
         }
     }
