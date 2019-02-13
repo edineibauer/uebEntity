@@ -5,7 +5,7 @@ use \Helpers\Helper;
 
 $entity = strip_tags(trim(filter_input(INPUT_POST, 'entity', FILTER_DEFAULT)));
 $dados = filter_input(INPUT_POST, 'dados', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-$data['data'] = ['error' => 0, 'data' => '', 'historic' => 0];
+$data['data'] = ['error' => 0, 'data' => [], 'historic' => 0];
 
 if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") && !empty($dados) && is_array($dados)) {
     $read = new \Conn\Read();
@@ -13,7 +13,8 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
 
     $delList = [];
     foreach ($dados as $i => $dado) {
-        if ($dado['db_action'] === "delete") {
+        $action = $dado['db_action'];
+        if ($action === "delete") {
             if (is_array($dado['delete'])) {
                 foreach ($dado['delete'] as $item) {
                     $del->exeDelete($entity, "WHERE id = :id", "id={$item}");
@@ -24,13 +25,16 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 $delList[] = (int) $dado['delete'];
             }
 
+            $dado['id_old'] = $dado['delete'];
+            $data['data']['data'][] = $dado;
         } else {
 
             $registro = $dado;
             unset($registro['db_action']);
 
             //remove id se existir e for criar
-            if ($dado['db_action'] === "create" && isset($registro['id']))
+            $idOld = $registro['id'];
+            if ($action === "create")
                 unset($registro['id']);
 
             $id = \Entity\Entity::add($entity, $registro);
@@ -38,13 +42,21 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
             if (is_numeric($id)) {
                 $read->exeRead($entity, "WHERE id = :id", "id={$id}");
                 $result = ($read->getResult() ? $read->getResult()[0] : []);
-                if($entity === "usuarios")
-                    $result['password'] = "";
+                $result['db_action'] = $action;
+                $dados[$i] = $result;
 
-                $action = $dados[$i]['db_action'];
-                $data['data']['data'] = $dados[$i] = $result;
-                $dados[$i]['db_action'] = $action;
+                $dic = new \Entity\Dicionario($entity);
+                foreach ($dic->getDicionario() as $i => $meta) {
+                    if($meta->getFormat() === "password" || $meta->getFormat() === "passwordRequired") {
+                        $result[$meta->getColumn()] = $meta->getFormat() === "password" ? $dado[$meta->getColumn()] : "";
+                        unset($dados[$meta->getColumn()]);
+                    }
+                }
+
+                $result['id_old'] = $idOld;
+                $data['data']['data'][] = $result;
             } else {
+                $data['data']['data'][] = [];
                 $data['data']['error'] += 1;
             }
         }
@@ -86,9 +98,6 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 }
             }
         }
-
-        if($entity === "usuarios" && isset($dados['password']))
-            unset($dados['password']);
 
         $store = new Json("update/{$entity}");
         $store->setVersionamento(false);
