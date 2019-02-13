@@ -17,11 +17,21 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
         if ($action === "delete") {
             if (is_array($dado['delete'])) {
                 foreach ($dado['delete'] as $item) {
-                    $del->exeDelete($entity, "WHERE id = :id", "id={$item}");
+                    $read->exeRead($entity, "WHERE id = :id", "id={$item}");
+                    if($read->getResult()) {
+                        $item = $read->getResult()[0];
+                        $del->exeDelete($entity, "WHERE id = :id", "id={$item['id']}");
+                        new \Entity\React("delete", $entity, $item, $item);
+                    }
                     $delList[] = (int) $item;
                 }
             } elseif (is_numeric($dado['delete'])) {
-                $del->exeDelete($entity, "WHERE id = :id", "id={$dado['delete']}");
+                $read->exeRead($entity, "WHERE id = :id", "id={$dado['delete']}");
+                if($read->getResult()) {
+                    $item = $read->getResult()[0];
+                    $del->exeDelete($entity, "WHERE id = :id", "id={$item['id']}");
+                    new \Entity\React("delete", $entity, $item, $item);
+                }
                 $delList[] = (int) $dado['delete'];
             }
 
