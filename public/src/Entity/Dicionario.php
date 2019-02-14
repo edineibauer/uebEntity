@@ -428,11 +428,11 @@ class Dicionario
 
             if (!$this->getError() || !empty($id)) {
 //                $this->createRelationalData();
-                $dados = $this->getDataForm();
+
                 if (!empty($id)) {
-                    new React("update", $this->entity, $dados, $oldDados);
+                    new React("update", $this->entity, $this->getDataForm(), $oldDados);
                 } else {
-                    new React("create", $this->entity, $dados);
+                    new React("create", $this->entity, $this->getDataForm());
                 }
                 $this->setData($this->search(0)->getValue());
             }

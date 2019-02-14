@@ -72,47 +72,5 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
         }
     }
 
-    //salva historico de alterações
-    $json = new Json();
-    $hist = $json->get("historic");
-    $hist[$entity] = strtotime('now');
-    $json->save("historic", $hist);
-
-    //remove updates anteriores de registros que serão excluídos
-    if(!empty($delList)) {
-        foreach ($delList as $id) {
-            foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
-                $dados = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), true);
-                if(is_array($dados)) {
-                    foreach ($dados as $dado) {
-                        if ($dado['id'] == $id)
-                            unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
-                    }
-                } elseif(isset($dados['id']) && $dados['id'] == $id) {
-                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
-                }
-            }
-        }
-    }
-
-    //salva alterações
-    if (!empty($dados)) {
-        //se tiver mais que 50 resultados, deleta os acima de 50
-        if (count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 99) {
-            $excluir = 101 - count($total);
-            for ($i = 0; $i < $excluir; $i++) {
-                if (isset($total[$i])) {
-                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$total[$i]}");
-                } else {
-                    break;
-                }
-            }
-        }
-
-        $store = new Json("update/{$entity}");
-        $store->setVersionamento(false);
-        $store->save($hist[$entity], $dados);
-    }
-
-    $data['data']['historic'] = $hist[$entity];
+    $data['data']['historic'] = strtotime('now');
 }

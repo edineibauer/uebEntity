@@ -64,7 +64,7 @@ class Json extends VersionControl
      */
     public function save($id, array $data)
     {
-        if(!empty($id) && is_string($id)) {
+        if(!empty($id) && (is_string($id) || is_numeric($id))) {
             $this->setFile($id);
             if ($this->file) {
                 if (file_exists($this->file)) {
