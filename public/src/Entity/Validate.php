@@ -199,10 +199,15 @@ class Validate
             $m->setValue(null, false);
 
         if ($m->getValue() === null) {
-            if ($m->getDefault() === false)
-                $m->setError("Preencha este Campo");
-            elseif (!empty($m->getDefault()))
+            if ($m->getDefault() === false) {
+                if ($m->getDefault() === false)
+                    $m->setError("Preencha este Campo");
+                else
+                    $m->setValue("");
+            } elseif (!empty($m->getDefault())) {
                 $m->setValue($m->getDefault(), false);
+
+            }
         }
     }
 
@@ -215,14 +220,14 @@ class Validate
     {
         if ($m->getType() === "json" && Check::isJson($m->getValue()))
             $m->setValue(json_decode($m->getValue(), true), false);
-        elseif($m->getGroup() === "boolean")
+        elseif ($m->getGroup() === "boolean")
             $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, false);
 
         if (!empty($m->getValue()) && $m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
             $m->setValue(Check::password($m->getValue()), false);
 
-        } elseif ($m->getFormat() === "valor" && strlen($m->getValue()) > 2 && !preg_match('/\./i', $m->getValue())){
-            if(strlen($m->getValue()) === 3)
+        } elseif ($m->getFormat() === "valor" && strlen($m->getValue()) > 2 && !preg_match('/\./i', $m->getValue())) {
+            if (strlen($m->getValue()) === 3)
                 $formatado = (substr($m->getValue(), 0, 1) . "." . substr($m->getValue(), 1, 2));
             else
                 $formatado = (substr($m->getValue(), 0, strlen($m->getValue()) - 2) . "." . substr($m->getValue(), -2, 2));
@@ -242,33 +247,58 @@ class Validate
     private static function checkType(Meta $m)
     {
         if (in_array($m->getType(), ["tinyint", "smallint", "mediumint", "int", "bigint"])) {
-            if (!is_numeric($m->getValue()))
-                $m->setError("número inválido");
-
-        } elseif ($m->getType() === "decimal") {
+            if (!is_numeric($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("número inválido");
+                else
+                    $m->setValue("");
+            }
 
         } elseif (in_array($m->getType(), array("double", "real", "float"))) {
-            if (!is_numeric($m->getValue()))
-                $m->setError("valor não é um número");
+            if (!is_numeric($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("valor não é um número");
+                else
+                    $m->setValue("");
+            }
 
         } elseif (in_array($m->getType(), array("bit", "boolean", "serial"))) {
-            if (!is_bool($m->getValue()))
-                $m->setError("valor boleano inválido. (true ou false)");
+            if (!is_bool($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("valor boleano inválido. (true ou false)");
+                else
+                    $m->setValue("");
+            }
 
         } elseif (in_array($m->getType(), array("datetime", "timestamp"))) {
-            if (!preg_match('/\d{4}-\d{2}-\d{2}[T\s]+\d{2}:\d{2}/i', $m->getValue()))
-                $m->setError("formato de data inválido ex válido:(2017-08-23 21:58:00)");
+            if (!preg_match('/\d{4}-\d{2}-\d{2}[T\s]+\d{2}:\d{2}/i', $m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("formato de data inválido ex válido:(2017-08-23 21:58:00)");
+                else
+                    $m->setValue("");
+            }
 
         } elseif ($m->getType() === "date") {
-            if (!preg_match('/\d{4}-\d{2}-\d{2}/i', $m->getValue()))
-                $m->setError("formato de data inválido ex válido:(2017-08-23)");
+            if (!preg_match('/\d{4}-\d{2}-\d{2}/i', $m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("formato de data inválido ex válido:(2017-08-23)");
+                else
+                    $m->setValue("");
+            }
 
         } elseif ($m->getType() === "time") {
-            if (!preg_match('/\d{2}:\d{2}/i', $m->getValue()))
-                $m->setError("formato de tempo inválido ex válido:(21:58)");
+            if (!preg_match('/\d{2}:\d{2}/i', $m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("formato de tempo inválido ex válido:(21:58)");
+                else
+                    $m->setValue("");
+            }
 
         } elseif ($m->getType() === "json" && !is_array($m->getValue())) {
-            $m->setError("formato json inválido");
+            if ($m->getDefault() === false)
+                $m->setError("formato json inválido");
+            else
+                $m->setValue("");
         }
     }
 
@@ -281,38 +311,71 @@ class Validate
     {
         if ($m->getSize() && in_array($m->getType(), ["varchar", "char", "tinytext", "text", "mediumtext", "longtext", "tinyint", "smallint", "mediumint", "int", "bigint"])) {
             $length = strlen($m->getValue());
-            if ($m->getType() === "varchar" && $length > $m->getSize())
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            if ($m->getType() === "varchar" && $length > $m->getSize()) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
+            } elseif ($m->getType() === "char" && $length > 1) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "char" && $length > 1)
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            } elseif ($m->getType() === "tinytext" && ($length > 255 || $length > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "tinytext" && ($length > 255 || $length > $m->getSize()))
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            } elseif ($m->getType() === "text" && ($length > 65535 || $length > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "text" && ($length > 65535 || $length > $m->getSize()))
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            } elseif ($m->getType() === "mediumtext" && ($length > 16777215 || $length > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "mediumtext" && ($length > 16777215 || $length > $m->getSize()))
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            } elseif ($m->getType() === "longtext" && ($length > 4294967295 || $length > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "longtext" && ($length > 4294967295 || $length > $m->getSize()))
-                $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
+            } elseif ($m->getType() === "tinyint" && ($m->getValue() > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "tinyint" && ($m->getValue() > $m->getSize()))
-                $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+            } elseif ($m->getType() === "smallint" && ($m->getValue() > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "smallint" && ($m->getValue() > $m->getSize()))
-                $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+            } elseif ($m->getType() === "mediumint" && ($m->getValue() > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "mediumint" && ($m->getValue() > $m->getSize()))
-                $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+            } elseif ($m->getType() === "int" && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"]) && ($m->getValue() > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getType() === "int" && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"]) && ($m->getValue() > $m->getSize()))
-                $m->setError("numero excedeu seu limite. Max " . $m->getSize());
-
-            elseif ($m->getType() === "bigint" && ($m->getValue() > $m->getSize()))
-                $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+            } elseif ($m->getType() === "bigint" && ($m->getValue() > $m->getSize())) {
+                if ($m->getDefault() === false)
+                    $m->setError("numero excedeu seu limite. Max " . $m->getSize());
+                else
+                    $m->setValue($m->getDefault());
+            }
         }
     }
 
@@ -322,7 +385,7 @@ class Validate
      */
     private static function intLength(int $value): int
     {
-        return (int) (pow(2, ($value * 2)) - 1);
+        return (int)(pow(2, ($value * 2)) - 1);
     }
 
     /**
@@ -332,8 +395,12 @@ class Validate
      */
     private static function checkRegular(Meta $m)
     {
-        if (!empty($m->getAllow()['regex']) && is_string($m->getValue()) && !preg_match($m->getAllow()['regex'], $m->getValue()))
-            $m->setError("formato não permitido.");
+        if (!empty($m->getAllow()['regex']) && is_string($m->getValue()) && !preg_match($m->getAllow()['regex'], $m->getValue())) {
+            if ($m->getDefault() === false)
+                $m->setError("formato não permitido.");
+            else
+                $m->setValue($m->getDefault());
+        }
     }
 
     /**
@@ -344,14 +411,24 @@ class Validate
     private static function checkValidate(Meta $m)
     {
         if (!empty($m->getAllow()['validate'])) {
-            if ($m->getAllow()['validate'] === "email" && !Check::email($m->getValue()))
-                $m->setError("email inválido.");
+            if ($m->getAllow()['validate'] === "email" && !Check::email($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("email inválido.");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getAllow()['validate'] === "cpf" && !Check::cpf($m->getValue()))
-                $m->setError("CPF inválido.");
+            } elseif ($m->getAllow()['validate'] === "cpf" && !Check::cpf($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("CPF inválido.");
+                else
+                    $m->setValue($m->getDefault());
 
-            elseif ($m->getAllow()['validate'] === "cnpj" && !Check::cnpj($m->getValue()))
-                $m->setError("CNPJ inválido.");
+            } elseif ($m->getAllow()['validate'] === "cnpj" && !Check::cnpj($m->getValue())) {
+                if ($m->getDefault() === false)
+                    $m->setError("CNPJ inválido.");
+                else
+                    $m->setValue($m->getDefault());
+            }
         }
     }
 }
