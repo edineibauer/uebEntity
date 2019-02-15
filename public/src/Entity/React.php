@@ -65,10 +65,10 @@ class React
                 $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), true);
                 if (is_array($dadosE)) {
                     foreach ($dadosE as $dado) {
-                        if ($dado['id'] == $dados['id'])
+                        if (!empty($dado['id']) && !empty($dados['id']) && $dado['id'] == $dados['id'])
                             unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
                     }
-                } elseif (isset($dadosE['id']) && $dadosE['id'] == $dados['id']) {
+                } elseif (!empty($dadosE['id']) && $dadosE['id'] == $dados['id']) {
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
                 }
             }
