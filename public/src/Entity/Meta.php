@@ -101,7 +101,7 @@ class Meta
             $this->error = "Precisa estar Logado";
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
-        elseif (in_array($this->format, ["cnpj", "cpf", "tel", "valor", "cep", "rg", "ie", "percent", "card_number"]))
+        elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "percent", "card_number"]))
             $value = str_replace(["(", ")", " ", "-", ".", ",", "R$", "$", "/", "\\", "%"], "", $value);
         else
             $value = $value;

@@ -226,13 +226,17 @@ class Validate
         if (!empty($m->getValue()) && $m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
             $m->setValue(Check::password($m->getValue()), false);
 
-        } elseif ($m->getFormat() === "valor" && strlen($m->getValue()) > 2 && !preg_match('/\./i', $m->getValue())) {
-            if (strlen($m->getValue()) === 3)
-                $formatado = (substr($m->getValue(), 0, 1) . "." . substr($m->getValue(), 1, 2));
-            else
-                $formatado = (substr($m->getValue(), 0, strlen($m->getValue()) - 2) . "." . substr($m->getValue(), -2, 2));
-
-            $m->setValue($formatado, false);
+        } elseif ($m->getFormat() === "valor") {
+            $value = $m->getValue();
+            $f = "";
+            for($i=0; $i < strlen($value); $i ++) {
+                if(is_numeric($value[$i]))
+                    $f .= $value[$i];
+                elseif($value[$i] === "." || $value[$i] === ",")
+                    $f = str_replace([',', '.'], '', $f) . ".";
+            }
+            $value = (float) number_format((float) $f, 2, '.', '');
+            $m->setValue($value, !1);
         }
 
         if ($m->getKey() === "link")
