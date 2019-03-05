@@ -76,7 +76,7 @@ class Meta
                     if ($m->key === "source" && !empty($value[$m->column])) {
                         $value[$m->column] = $this->uploadSource($value[$m->column]);
                     } else if($m->key === "relation" && $m->type === "json"){
-                        $value[$m->column] = $this->processaUploadsJson($m, $value[$m->column]);
+                        $value[$m->column] = $this->processaUploadsJson($m->relation, $value[$m->column]);
                     }
                 }
             }

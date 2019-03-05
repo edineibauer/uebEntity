@@ -28,7 +28,7 @@ class Dicionario
         if (!empty($this->entity) && file_exists(PATH_HOME . "entity/cache/{$this->entity}.json")) {
             $this->defaultDicionarioData();
         } else {
-            echo "Entidade não existe";
+            echo "Entidade '{$this->entity}' não existe";
         }
     }
 
