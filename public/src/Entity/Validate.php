@@ -41,11 +41,11 @@ class Validate
                     if ($m->getKey() === "link" && $m->getError()) {
                         $d->getRelevant()->setError($m->getError());
                         $m->setError(null);
-                        $m->setValue(null, false);
+                        $m->setValue(null, !1);
                     }
 
                     if ($m->getError())
-                        $m->setValue(null, false);
+                        $m->setValue(null, !1);
                 }
             }
 
@@ -82,7 +82,7 @@ class Validate
     {
         if ($m->getKey() === "link") {
             if (!empty($d->getRelevant()->getValue()))
-                $m->setValue(Check::name($d->getRelevant()->getValue()));
+                $m->setValue(Check::name($d->getRelevant()->getValue()), !1);
         }
     }
 
@@ -196,16 +196,16 @@ class Validate
     protected static function checkDefaultSet(Meta $m)
     {
         if ($m->getValue() === "")
-            $m->setValue(null, false);
+            $m->setValue(null, !1);
 
         if ($m->getValue() === null) {
             if ($m->getDefault() === false) {
                 if ($m->getDefault() === false)
                     $m->setError("Preencha este Campo");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             } elseif (!empty($m->getDefault())) {
-                $m->setValue($m->getDefault(), false);
+                $m->setValue($m->getDefault(), !1);
 
             }
         }
@@ -219,12 +219,12 @@ class Validate
     private static function convertValues(Meta $m)
     {
         if ($m->getType() === "json" && Check::isJson($m->getValue()))
-            $m->setValue(json_decode($m->getValue(), true), false);
+            $m->setValue(json_decode($m->getValue(), true), !1);
         elseif ($m->getGroup() === "boolean")
-            $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, false);
+            $m->setValue($m->getValue() === "true" || $m->getValue() === "1" || $m->getValue() === 1 || $m->getValue() === true ? 1 : 0, !1);
 
         if (!empty($m->getValue()) && $m->getFormat() === "password" || $m->getFormat() === "passwordRequired") {
-            $m->setValue(Check::password($m->getValue()), false);
+            $m->setValue(Check::password($m->getValue()), !1);
 
         } elseif ($m->getFormat() === "valor") {
             $value = $m->getValue();
@@ -240,7 +240,7 @@ class Validate
         }
 
         if ($m->getKey() === "link")
-            $m->setValue(Check::name($m->getValue()), false);
+            $m->setValue(Check::name($m->getValue()), !1);
     }
 
     /**
@@ -255,7 +255,7 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("número inválido");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif (in_array($m->getType(), array("double", "real", "float"))) {
@@ -263,7 +263,7 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("valor não é um número");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif (in_array($m->getType(), array("bit", "boolean", "serial"))) {
@@ -271,7 +271,7 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("valor boleano inválido. (true ou false)");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif (in_array($m->getType(), array("datetime", "timestamp"))) {
@@ -279,7 +279,7 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("formato de data inválido ex válido:(2017-08-23 21:58:00)");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif ($m->getType() === "date") {
@@ -287,7 +287,7 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("formato de data inválido ex válido:(2017-08-23)");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif ($m->getType() === "time") {
@@ -295,14 +295,14 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("formato de tempo inválido ex válido:(21:58)");
                 else
-                    $m->setValue("");
+                    $m->setValue("", !1);
             }
 
         } elseif ($m->getType() === "json" && !is_array($m->getValue())) {
             if ($m->getDefault() === false)
                 $m->setError("formato json inválido");
             else
-                $m->setValue("");
+                $m->setValue("", !1);
         }
     }
 
@@ -319,66 +319,66 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
             } elseif ($m->getType() === "char" && $length > 1) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "tinytext" && ($length > 255 || $length > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "text" && ($length > 65535 || $length > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "mediumtext" && ($length > 16777215 || $length > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "longtext" && ($length > 4294967295 || $length > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "tinyint" && ($m->getValue() > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("numero excedeu seu limite. Max " . $m->getSize());
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "smallint" && ($m->getValue() > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("numero excedeu seu limite. Max " . $m->getSize());
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "mediumint" && ($m->getValue() > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("numero excedeu seu limite. Max " . $m->getSize());
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "int" && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"]) && ($m->getValue() > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("numero excedeu seu limite. Max " . $m->getSize());
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getType() === "bigint" && ($m->getValue() > $m->getSize())) {
                 if ($m->getDefault() === false)
                     $m->setError("numero excedeu seu limite. Max " . $m->getSize());
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
             }
         }
     }
@@ -403,7 +403,7 @@ class Validate
             if ($m->getDefault() === false)
                 $m->setError("formato não permitido.");
             else
-                $m->setValue($m->getDefault());
+                $m->setValue($m->getDefault(), !1);
         }
     }
 
@@ -419,19 +419,19 @@ class Validate
                 if ($m->getDefault() === false)
                     $m->setError("email inválido.");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getAllow()['validate'] === "cpf" && !Check::cpf($m->getValue())) {
                 if ($m->getDefault() === false)
                     $m->setError("CPF inválido.");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
 
             } elseif ($m->getAllow()['validate'] === "cnpj" && !Check::cnpj($m->getValue())) {
                 if ($m->getDefault() === false)
                     $m->setError("CNPJ inválido.");
                 else
-                    $m->setValue($m->getDefault());
+                    $m->setValue($m->getDefault(), !1);
             }
         }
     }
