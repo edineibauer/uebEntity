@@ -6,6 +6,16 @@ use Helpers\Helper;
 
 class React
 {
+    private $response;
+
+    /**
+     * @return mixed
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
     /**
      * React constructor.
      * @param string $action
@@ -15,6 +25,7 @@ class React
      */
     public function __construct(string $action, string $entity, array $dados, array $dadosOld = [])
     {
+        $data = ["data" => "", "response" => 1, "error" => ""];
         if (!empty($_SESSION['userlogin']['setor']) && file_exists(PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php"))
             include PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php";
         elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
@@ -29,6 +40,8 @@ class React
 
         $this->log($action, $entity, $dados);
         $this->createUpdateSyncIndexedDb($action, $entity, $dados);
+
+        $this->response = $data;
     }
 
     /**

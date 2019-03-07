@@ -430,11 +430,25 @@ class Dicionario
 //                $this->createRelationalData();
 
                 if (!empty($id)) {
-                    new React("update", $this->entity, $this->getDataForm(), $oldDados);
+                    $react = new React("update", $this->entity, $this->getDataForm(), $oldDados);
                 } else {
-                    new React("create", $this->entity, $this->getDataForm());
+                    $react = new React("create", $this->entity, $this->getDataForm());
                 }
-                $this->setData($this->search(0)->getValue());
+
+                $data = $react->getResponse();
+                if(!empty($data['error'])) {
+                    if(is_array($data['error'])) {
+                        foreach ($data['error'] as $column => $err) {
+                            if(is_string($column) && is_string($err) && $meta = $this->search($column)) {
+                                $meta->setError($err);
+                            }
+                        }
+                    } else {
+                        $this->search(0)->setError($data['error']);
+                    }
+                } else {
+                    $this->setData($this->search(0)->getValue());
+                }
             }
         } else {
             $passCheck->setError("Senha Inválida");
