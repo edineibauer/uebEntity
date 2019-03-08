@@ -16,8 +16,23 @@ class Metadados
         $path = PATH_HOME . "entity/cache/" . $entity . '.json';
         $data = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
         if ($data) {
-            if (!$keepId)
-                unset($data[0]);
+
+            if($keepId) {
+                $data[0] = self::generatePrimary();
+
+                $info = self::getInfo($entity);
+                if($info['user'] === 1)
+                    $data["999997"] = self::generateUser();
+
+                if(!empty($info['autor'])) {
+                    $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
+
+                    if($info['autor'] === 1)
+                        $data["999998"] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999998, "default" => $_SESSION['userlogin']['id']]);
+                    elseif($info['autor'] === 2)
+                        $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999, "default" => $_SESSION['userlogin']['id']]);
+                }
+            }
 
             if(!$keepStrings) {
                 foreach ($data as $i => $datum) {
@@ -26,21 +41,61 @@ class Metadados
                 }
             }
 
-            $info = Metadados::getInfo($entity);
-            if(!empty($info['autor'])) {
-                if($info['autor'] === 1) {
-                    $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
-                    $data[999999] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999999, "default" => $_SESSION['userlogin']['id']]);
-                } elseif($info['autor'] === 2) {
-                    $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
-                    $data[999999] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999, "default" => $_SESSION['userlogin']['id']]);
-                }
-            }
-
             return Helper::convertStringToValueArray($data);
         }
 
         return null;
+    }
+
+    public static function generateUser()
+    {
+        $types = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), !0);
+        $mode = Helper::arrayMerge($types["default"], $types['list']);
+        $mode['nome'] = "Usuário Acesso Vínculo";
+        $mode['column'] = "usuarios_id";
+        $mode['form'] = "false";
+        $mode['datagrid'] = "false";
+        $mode['default'] = "false";
+        $mode['unique'] = "false";
+        $mode['update'] = "false";
+        $mode['size'] = "";
+        $mode['minimo'] = "";
+        $mode['relation'] = "usuarios";
+        $mode['indice'] = "999998";
+
+        return $mode;
+    }
+
+    private static function generatePrimary()
+    {
+        return [
+            "format" => "none",
+            "type" => "int",
+            "nome" => "id",
+            "column" => "id",
+            "size" => "",
+            "key" => "identifier",
+            "unique" => "true",
+            "default" => "false",
+            "update" => "false",
+            "relation" => "",
+            "minimo" => "",
+            "allow" => [
+                "regex" => "",
+                "options" => "",
+                "validate" => ""
+            ],
+            "form" => [
+                "input" => "hidden",
+                "cols" => "12",
+                "colm" => "",
+                "coll" => "",
+                "class" => "",
+                "style" => ""
+            ],
+            "select" => [],
+            "filter" => []
+        ];
     }
 
     /**
