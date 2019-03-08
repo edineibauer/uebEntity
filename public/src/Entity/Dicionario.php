@@ -381,7 +381,6 @@ class Dicionario
 
     private function checkDataToSave($id)
     {
-        $this->checkSetorChangeToHigh();
         if (!$this->getError() || !empty($id))
             $this->saveAssociacaoSimples();
 
@@ -469,7 +468,7 @@ class Dicionario
     {
         $action = (empty($dados['usuarios_id']) ? "create" : $action);
         $info = Metadados::getInfo($entity);
-        if ($info['user'] === 1) {
+        if (!empty($info['user']) && $info['user'] === 1) {
             if ($action === "create") {
                 $user = [
                     "nome" => "",
@@ -504,17 +503,6 @@ class Dicionario
         }
 
         return $dados;
-    }
-
-    private function checkSetorChangeToHigh()
-    {
-        if ($this->getEntity() === "usuarios") {
-            $setor = $this->search("setor");
-            if (!empty($_SESSION['userlogin']) && $setor->getValue() < $_SESSION['userlogin']['setor']) {
-                $setor->setValue($_SESSION['userlogin']['setor'], !1);
-                $setor->setError("Permissão Negada");
-            }
-        }
     }
 
     /**

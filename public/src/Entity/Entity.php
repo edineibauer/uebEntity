@@ -62,9 +62,10 @@ class Entity extends EntityCreate
      * Retorna o dicionário da entidade ou então a lista de dicionário de entidades permitida
      *
      * @param string|null $entity
+     * @param bool|null $info
      * @return array|mixed|null
      */
-    public static function dicionario(string $entity = null)
+    public static function dicionario(string $entity = null, bool $info = null)
     {
         if(file_exists(PATH_HOME . "entity/cache") && (empty($entity) || file_exists(PATH_HOME . "entity/cache/{$entity}.json"))) {
             if(empty($entity)){
@@ -74,8 +75,12 @@ class Entity extends EntityCreate
                 foreach (\Helpers\Helper::listFolder(PATH_HOME . "entity/cache") as $json) {
                     if(preg_match('/^\w+\.json$/i', $json)){
                         $entity = str_replace('.json', '', $json);
-                        if($dic = self::dicionario($entity))
+                        if($dic = self::dicionario($entity)) {
+                            if($info)
+                                $dic = ["dicionario" => $dic, "info" => Metadados::getInfo($entity)];
+
                             $list[$entity] = $dic;
+                        }
                     }
                 }
 
@@ -88,8 +93,12 @@ class Entity extends EntityCreate
                 $entidadesNaoPermitidas = \Config\Config::getEntityNotAllow();
                 $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
 
-                if($setor == 1 || !in_array($entity, $entidadesNaoPermitidas))
-                    return \Entity\Metadados::getDicionario($entity, true, true);
+                if(!in_array($entity, $entidadesNaoPermitidas)) {
+                    if($info)
+                        return ["dicionario" => Metadados::getDicionario($entity, true, true), "info" => Metadados::getInfo($entity)];
+                    else
+                        return Metadados::getDicionario($entity, true, true);
+                }
             }
         }
 

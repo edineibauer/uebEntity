@@ -21,16 +21,16 @@ class Metadados
                 $data[0] = self::generatePrimary();
 
                 $info = self::getInfo($entity);
-                if($info['user'] === 1)
+                if(!empty($info['user']) && $info['user'] === 1)
                     $data["999997"] = self::generateUser();
 
                 if(!empty($info['autor'])) {
                     $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
 
                     if($info['autor'] === 1)
-                        $data["999998"] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999998, "default" => $_SESSION['userlogin']['id']]);
+                        $data["999998"] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999998]);
                     elseif($info['autor'] === 2)
-                        $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999, "default" => $_SESSION['userlogin']['id']]);
+                        $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999]);
                 }
             }
 

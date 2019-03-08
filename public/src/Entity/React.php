@@ -26,14 +26,15 @@ class React
     public function __construct(string $action, string $entity, array $dados, array $dadosOld = [])
     {
         $data = ["data" => "", "response" => 1, "error" => ""];
-        if (!empty($_SESSION['userlogin']['setor']) && file_exists(PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php"))
-            include PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php";
+
+        if (!empty($_SESSION['userlogin']['setor']['entity']) && file_exists(PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php"))
+            include PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php";
         elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
             include PATH_HOME . "public/react/{$entity}/{$action}.php";
 
         foreach (Helper::listFolder(PATH_HOME . VENDOR) as $lib) {
-            if (!empty($_SESSION['userlogin']['setor']) && file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php"))
-                include PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']}/{$entity}/{$action}.php";
+            if (!empty($_SESSION['userlogin']['setor']['entity']) && file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php"))
+                include PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php";
             elseif (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php"))
                 include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
         }

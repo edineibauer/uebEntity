@@ -96,7 +96,7 @@ class Meta
         if ($this->type === "json")
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
-            $value = (int)($_SESSION['userlogin']['setor'] == 1 ? (!empty($value) ? $value : $_SESSION['userlogin']['id']) : $_SESSION['userlogin']['id']);
+            $value = (int) (empty($_SESSION['userlogin']['setor']) && !empty($value) ? $value : $_SESSION['userlogin']['id']);
         elseif ($this->key === "publisher")
             $this->error = "Precisa estar Logado";
         elseif ($this->group === "boolean")
