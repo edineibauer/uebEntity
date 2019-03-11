@@ -2,6 +2,9 @@
 
 namespace Entity;
 
+use Conn\Create;
+use Conn\Read;
+use Conn\Update;
 use Helpers\Helper;
 
 class React
@@ -26,15 +29,16 @@ class React
     public function __construct(string $action, string $entity, array $dados, array $dadosOld = [])
     {
         $data = ["data" => "", "response" => 1, "error" => ""];
+        $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
 
-        if (!empty($_SESSION['userlogin']['setor']['entity']) && file_exists(PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php"))
-            include PATH_HOME . "public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php";
+        if (file_exists(PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php"))
+            include PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php";
         elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
             include PATH_HOME . "public/react/{$entity}/{$action}.php";
 
         foreach (Helper::listFolder(PATH_HOME . VENDOR) as $lib) {
-            if (!empty($_SESSION['userlogin']['setor']['entity']) && file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php"))
-                include PATH_HOME . VENDOR . "{$lib}/public/react/{$_SESSION['userlogin']['setor']['entity']}/{$entity}/{$action}.php";
+            if (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php"))
+                include PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php";
             elseif (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php"))
                 include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
         }
@@ -57,6 +61,12 @@ class React
         $hist = $json->get("historic");
         $hist[$entity] = strtotime('now');
         $json->save("historic", $hist);
+
+        $d = new Dicionario($entity);
+        foreach ($d->getDicionario() as $meta) {
+            if($meta->getFormat() === "password")
+                $dados[$meta->getColumn()] = null;
+        }
 
         $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados);
         $dados['db_action'] = $action;

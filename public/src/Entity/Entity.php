@@ -89,7 +89,7 @@ class Entity extends EntityCreate
             } else {
 
                 //read dicionario específico
-                $setor = empty($_SESSION['userlogin']['setor']) ? 0 : $_SESSION['userlogin']['setor'];
+                $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
                 $entidadesNaoPermitidas = \Config\Config::getEntityNotAllow();
                 $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
 

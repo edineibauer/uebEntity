@@ -55,13 +55,12 @@ class Metadados
         $mode['column'] = "usuarios_id";
         $mode['form'] = "false";
         $mode['datagrid'] = "false";
-        $mode['default'] = "false";
         $mode['unique'] = "false";
-        $mode['update'] = "false";
+        $mode['update'] = "true";
         $mode['size'] = "";
         $mode['minimo'] = "";
         $mode['relation'] = "usuarios";
-        $mode['indice'] = "999998";
+        $mode['indice'] = "999997";
 
         return $mode;
     }

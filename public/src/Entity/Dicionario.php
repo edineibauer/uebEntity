@@ -15,7 +15,6 @@ class Dicionario
     private $dicionario = [];
     private $info;
     private $relevant;
-    private $metasEdited;
 
     /**
      * @param string $entity
@@ -39,7 +38,6 @@ class Dicionario
      */
     public function setData($data)
     {
-        $this->metasEdited = [];
         $this->defaultDicionarioData();
 
         // ID de dados na tabela
@@ -155,7 +153,7 @@ class Dicionario
     {
         $data = [];
         foreach ($this->dicionario as $meta) {
-            if (!in_array($meta->getFormat(), ["list_mult", "selecao_mult", "information", "checkbox_mult"]) && ($meta->getFormat() !== "password" || strlen($meta->getValue()) > 3))
+            if ($meta->getFormat() !== "information" && ($meta->getFormat() !== "password" || strlen($meta->getValue()) > 3))
                 $data[$meta->getColumn()] = ($meta->getValue() === "" ? null : $meta->getValue());
         }
         return $data;
@@ -431,10 +429,11 @@ class Dicionario
                 if (!$this->getError() || !empty($id)) {
 //                $this->createRelationalData();
 
+                    $dadosEntity['id'] = (int) $this->search(0)->getValue();
                     if (!empty($id)) {
-                        $react = new React("update", $this->entity, $this->getDataForm(), $oldDados);
+                        $react = new React("update", $this->entity, $dadosEntity, $oldDados);
                     } else {
-                        $react = new React("create", $this->entity, $this->getDataForm());
+                        $react = new React("create", $this->entity, $dadosEntity);
                     }
 
                     $data = $react->getResponse();
@@ -466,14 +465,15 @@ class Dicionario
      */
     private function createUpdateUser(string $entity, array $dados, string $action)
     {
-        $action = (empty($dados['usuarios_id']) ? "create" : $action);
         $info = Metadados::getInfo($entity);
         if (!empty($info['user']) && $info['user'] === 1) {
+            $action = (empty($dados['usuarios_id']) ? "create" : $action);
             if ($action === "create") {
                 $user = [
                     "nome" => "",
                     "password" => "",
                     "status" => 1,
+                    "data" => date("Y-m-d H:i:s"),
                     "setor" => $entity
                 ];
             } else {
@@ -483,21 +483,38 @@ class Dicionario
             foreach (Metadados::getDicionario($entity) as $i => $meta) {
                 if ($meta['format'] === "title")
                     $user['nome'] = $dados[$meta['column']];
-                elseif ($meta['format'] === "password")
+                elseif ($meta['format'] === "password" && !empty($dados[$meta['column']]))
                     $user['password'] = $dados[$meta['column']];
-                elseif ($meta['format'] === "status")
+                elseif ($meta['format'] === "status" && isset($dados[$meta['column']]))
                     $user['status'] = $dados[$meta['column']];
             }
 
-            if (($action === "create" && !empty($user['password']) && !empty($user['nome'])) || ($action === "update" && !empty($user))) {
-                $up = new Update();
-                $read = new Read();
-                $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p && id !=:id", "p={$user['password']}id={$dados['id']}");
+            $read = new Read();
+            if ($action === "create" && !empty($user['password']) && !empty($user['nome'])) {
+                $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p", "p={$user['password']}");
                 if (!$read->getResult()) {
-                    $user['id'] = ($action === "create" ? $dados['usuarios_id'] : null);
-                    $id = Entity::add("usuarios", $user);
-                    if($action === "create" && is_numeric($id))
-                        $dados['usuarios_id'] = $id;
+                    $create = new Create();
+                    $create->exeCreate("usuarios", $user);
+                    if($create->getResult()) {
+                        $dados['usuarios_id'] = $user['id'] = (int) $create->getResult();
+                        $r = new React("create", "usuarios", $user);
+                    }
+                } else {
+                    $dados['usuarios_id'] = $read->getResult()[0]['id'];
+                }
+
+            } elseif ($action === "update" && !empty($user)) {
+                $read->exeRead("usuarios", "WHERE id = :idf", "idf={$dados['usuarios_id']}");
+                if($read->getResult()) {
+                    $oldData = $read->getResult()[0];
+                    $newData = Helper::arrayMerge($oldData, $user);
+                    $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}");
+                    if (!$read->getResult()) {
+                        $up = new Update();
+                        $up->exeUpdate("usuarios", $newData, "WHERE id = :ui", "ui={$dados['usuarios_id']}");
+                        $newData['id'] = $dados['usuarios_id'];
+                        $r = new React("update", "usuarios", $newData, $oldData);
+                    }
                 }
             }
         }
@@ -515,7 +532,7 @@ class Dicionario
             foreach ($this->dicionario as $meta) {
 
                 //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
-                if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $this->metasEdited))
+                if ($meta->getError() || !$meta->getUpdate())
                     unset($dadosEntity[$meta->getColumn()]);
             }
 
@@ -545,14 +562,14 @@ class Dicionario
             $this->search(0)->setError($create->getErro());
         } elseif ($create->getResult()) {
             $this->search(0)->setValue((int)$create->getResult(), !1);
-            $this->checkToSetOwnerList($create->getResult());
+//            $this->checkToSetOwnerList($create->getResult());
         }
     }
 
     /**
      * @param int $id
      */
-    private function checkToSetOwnerList(int $id)
+   /* private function checkToSetOwnerList(int $id)
     {
         $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), true);
         if (!empty($general[$this->entity]['owner']) || !empty($general[$this->entity]['ownerPublisher'])) {
@@ -576,7 +593,7 @@ class Dicionario
                 }
             }
         }
-    }
+    }*/
 
     private function saveAssociacaoSimples()
     {
@@ -620,7 +637,6 @@ class Dicionario
     private function setDataArray(array $data)
     {
         foreach ($data as $column => $value) {
-            $this->metasEdited[] = $column;
             if (is_numeric($column) && isset($this->dicionario[$column]))
                 $this->dicionario[$column]->setValue($value);
             elseif (isset($this->dicionario[$field = $this->searchValue($column)]))
