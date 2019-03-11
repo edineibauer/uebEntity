@@ -32,6 +32,8 @@ class Metadados
                     elseif($info['autor'] === 2)
                         $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999]);
                 }
+            } elseif (isset($data[0])) {
+                unset($data[0]);
             }
 
             if(!$keepStrings) {
