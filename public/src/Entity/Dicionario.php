@@ -386,8 +386,13 @@ class Dicionario
             $this->info = Metadados::getInfo($this->entity);
 
         //verifica se possui owner ou autor
-        if (!empty($this->info['autor']) && empty($id) && ($this->info['autor'] === 1 || $this->info['autor'] === 2))
-            $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['id'], !1);
+        if (!empty($this->info['autor']) && empty($id) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)){
+            if($this->info['user'] === 2) {
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['groupData']['id'], !1);
+            } else {
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['id'], !1);
+            }
+        }
 
         foreach ($this->dicionario as $i => $meta) {
             if ($meta->getType() === "json")
@@ -462,6 +467,7 @@ class Dicionario
      * @param string $entity
      * @param array $dados
      * @param string $action
+     * @return array
      */
     private function createUpdateUser(string $entity, array $dados, string $action)
     {
@@ -569,31 +575,31 @@ class Dicionario
     /**
      * @param int $id
      */
-   /* private function checkToSetOwnerList(int $id)
-    {
-        $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), true);
-        if (!empty($general[$this->entity]['owner']) || !empty($general[$this->entity]['ownerPublisher'])) {
-            foreach (array_merge($general[$this->entity]['owner'] ?? [], $general[$this->entity]['ownerPublisher'] ?? []) as $item) {
-                $entityRelation = $item[0];
-                $column = $item[1];
-                $userColumn = $item[2];
+    /* private function checkToSetOwnerList(int $id)
+     {
+         $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), true);
+         if (!empty($general[$this->entity]['owner']) || !empty($general[$this->entity]['ownerPublisher'])) {
+             foreach (array_merge($general[$this->entity]['owner'] ?? [], $general[$this->entity]['ownerPublisher'] ?? []) as $item) {
+                 $entityRelation = $item[0];
+                 $column = $item[1];
+                 $userColumn = $item[2];
 
-                $read = new Read();
-                $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", "user={$_SESSION['userlogin']['id']}");
-                if ($read->getResult()) {
-                    $idUser = $read->getResult()[0]['id'];
+                 $read = new Read();
+                 $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", "user={$_SESSION['userlogin']['id']}");
+                 if ($read->getResult()) {
+                     $idUser = $read->getResult()[0]['id'];
 
-                    $tableRelational = PRE . $entityRelation . "_" . $column;
-                    $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :ai && {$this->entity}_id = :bi", "ai={$idUser}&bi={$id}");
-                    if (!$read->getResult()) {
+                     $tableRelational = PRE . $entityRelation . "_" . $column;
+                     $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :ai && {$this->entity}_id = :bi", "ai={$idUser}&bi={$id}");
+                     if (!$read->getResult()) {
 
-                        $create = new Create();
-                        $create->exeCreate($tableRelational, [$entityRelation . "_id" => $idUser, $this->entity . "_id" => $id]);
-                    }
-                }
-            }
-        }
-    }*/
+                         $create = new Create();
+                         $create->exeCreate($tableRelational, [$entityRelation . "_id" => $idUser, $this->entity . "_id" => $id]);
+                     }
+                 }
+             }
+         }
+     }*/
 
     private function saveAssociacaoSimples()
     {
