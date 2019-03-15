@@ -57,7 +57,7 @@ abstract class EntityDelete
                 $del = new TableCrud($entity);
                 $del->loadArray($data);
                 if ($del->exist()) {
-                    if(Entity::checkPermission($entity, $data['id'], $checkPermission)) {
+                    if(Entity::checkPermission($entity, $del->getDados()['id'], $checkPermission)) {
                         $dados = $del->getDados();
                         self::deleteLinkedContent($entity, $dados);
                         $del->delete();
