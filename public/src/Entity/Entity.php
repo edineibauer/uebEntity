@@ -89,11 +89,11 @@ class Entity extends EntityCreate
             } else {
 
                 //read dicionario específico
-                $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
+                $setor = !empty($_SESSION['userlogin']['setor']) ? $_SESSION['userlogin']['setor'] : "0";
                 $entidadesNaoPermitidas = \Config\Config::getEntityNotAllow();
                 $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
 
-                if(!in_array($entity, $entidadesNaoPermitidas)) {
+                if(!in_array($entity, $entidadesNaoPermitidas) || $setor === "admin") {
                     if($info)
                         return ["dicionario" => Metadados::getDicionario($entity, true, true), "info" => Metadados::getInfo($entity)];
                     else
