@@ -34,9 +34,23 @@ class Validate
     public static function dicionario(Dicionario $d)
     {
         if (Entity::checkPermission($d->getEntity(), $d->search(0)->getValue())) {
+
+            //Group User Check
+            $groupUser = "";
+            if(!empty($d->getInfo()['list'])) {
+                foreach ($d->getInfo()['list'] as $item) {
+                    $list = $d->search($item);
+                    if(Metadados::getInfo($list->getRelation())['user'] === 2) {
+                        $groupUser .= $list->getColumn() . " = " . $list->getValue();
+                        break;
+                    }
+                }
+            }
+
             foreach ($d->getDicionario() as $m) {
                 if ($m->getColumn() !== "id" && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"])) {
                     self::checkLink($d, $m);
+                    self::checkUnique($d, $m, $groupUser);
 
                     if ($m->getKey() === "link" && $m->getError()) {
                         $d->getRelevant()->setError($m->getError());
@@ -58,21 +72,6 @@ class Validate
     }
 
     /**
-     * @param string $entity
-     * @param mixed $id
-     * @return mixed
-     */
-    public static function update(string $entity, $id = null)
-    {
-        if (empty($id))
-            return false;
-
-        $read = new Read();
-        $read->exeRead($entity, "WHERE id = :id", "id={$id}");
-        return $read->getResult() ? true : false;
-    }
-
-    /**
      * Verifica se o campo é do tipo link, se for, linka o valor ao título
      *
      * @param Dicionario $d
@@ -83,6 +82,25 @@ class Validate
         if ($m->getKey() === "link") {
             if (!empty($d->getRelevant()->getValue()))
                 $m->setValue(Check::name($d->getRelevant()->getValue()), !1);
+        }
+    }
+
+    /**
+     * Verifica se o valor precisa ser único
+     *
+     * @param Dicionario $d
+     * @param Meta $m
+     * @param string $groupUser
+     */
+    private static function checkUnique(Dicionario $d, Meta $m, string $groupUser)
+    {
+        if ($m->getUnique()) {
+            $where = "WHERE {$m->getColumn()} = '{$m->getValue()}'" . (!empty($groupUser) ? " && {$groupUser}" : "");
+            $where .= (!empty($d->search(0)->getValue()) ? " && id != " . $d->search("id")->getValue() : "");
+            $read = new Read();
+            $read->exeRead($d->getEntity(), $where);
+            if ($read->getResult())
+                $m->setError("Valor já existe, informe outro");
         }
     }
 
