@@ -713,10 +713,12 @@ class Meta
                     file_put_contents(PATH_HOME . $dir, $file_data);
                     $value[$i]['url'] = HOME . $dir;
                     $value[$i]['image'] = HOME . "image/" . (preg_match('/^data:image\//i', $type) ? $dir : "assetsPublic/img/file.png");
+                    $value[$i]['preview'] = "<img src='" . $value[$i]['image'] . "&w=700' title='Imagem " . strtoupper($value[$i]['type']) .  "' class='left radius'/>";
 
                 } elseif (empty($item['url']) || !is_string($item['url'])) {
                     $value[$i]['url'] = null;
                     $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
+                    $value[$i]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$value[$i]['type']}'></use></svg>";
                 }
             }
         }
