@@ -421,27 +421,15 @@ class Dicionario
 
             if (!$this->getError()) {
 
-                // Create or Update Data
-                if (!empty($id)) {
-                    $dicDataAtual = new Dicionario($this->entity);
-                    $dicDataAtual->setData($id);
-                    $oldDados = $dicDataAtual->getDataForm();
-                    $this->updateTableData($id, $dadosEntity);
-                } elseif (!$this->getError()) {
-                    $this->createTableData($dadosEntity);
-                }
+                if (!empty($id))
+                    $data = $this->updateTableData($id, $dadosEntity);
+                elseif (!$this->getError())
+                    $data = $this->createTableData($dadosEntity);
 
                 if (!$this->getError() || !empty($id)) {
-//                $this->createRelationalData();
 
                     $dadosEntity['id'] = (int) $this->search(0)->getValue();
-                    if (!empty($id)) {
-                        $react = new React("update", $this->entity, $dadosEntity, $oldDados);
-                    } else {
-                        $react = new React("create", $this->entity, $dadosEntity);
-                    }
 
-                    $data = $react->getResponse();
                     if (!empty($data['error'])) {
                         if (is_array($data['error'])) {
                             foreach ($data['error'] as $column => $err) {
@@ -501,10 +489,8 @@ class Dicionario
                 if (!$read->getResult()) {
                     $create = new Create();
                     $create->exeCreate("usuarios", $user);
-                    if($create->getResult()) {
+                    if($create->getResult())
                         $dados['usuarios_id'] = $user['id'] = (int) $create->getResult();
-                        $r = new React("create", "usuarios", $user);
-                    }
                 } else {
                     $dados['usuarios_id'] = $read->getResult()[0]['id'];
                 }
@@ -512,14 +498,12 @@ class Dicionario
             } elseif ($action === "update" && !empty($user)) {
                 $read->exeRead("usuarios", "WHERE id = :idf", "idf={$dados['usuarios_id']}");
                 if($read->getResult()) {
-                    $oldData = $read->getResult()[0];
-                    $newData = Helper::arrayMerge($oldData, $user);
+                    $newData = Helper::arrayMerge($read->getResult()[0], $user);
                     $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}");
                     if (!$read->getResult()) {
                         $up = new Update();
                         $up->exeUpdate("usuarios", $newData, "WHERE id = :ui", "ui={$dados['usuarios_id']}");
                         $newData['id'] = $dados['usuarios_id'];
-                        $r = new React("update", "usuarios", $newData, $oldData);
                     }
                 }
             }
@@ -534,25 +518,22 @@ class Dicionario
      */
     private function updateTableData(int $id, array $dadosEntity)
     {
-        if (Validate::update($this->entity, $id)) {
-            foreach ($this->dicionario as $meta) {
-
-                //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
-                if ($meta->getError() || !$meta->getUpdate())
-                    unset($dadosEntity[$meta->getColumn()]);
-            }
-
-            if (!empty($dadosEntity)) {
-                $up = new Update();
-                $up->exeUpdate($this->entity, $dadosEntity, "WHERE id = :id", "id={$id}");
-                if ($up->getErro())
-                    $this->search(0)->setError($up->getErro());
-            }
-        } else {
-            $metaId = $this->search(0);
-            $metaId->setValue(null, !1);
-            $metaId->setError("Você não tem Permissão para Atualizar estas Informações!");
+        //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
+        foreach ($this->dicionario as $meta) {
+            if ($meta->getError() || !$meta->getUpdate())
+                unset($dadosEntity[$meta->getColumn()]);
         }
+
+        if (!empty($dadosEntity)) {
+            $up = new Update();
+            $up->exeUpdate($this->entity, $dadosEntity, "WHERE id = :id", "id={$id}");
+            if ($up->getErro())
+                $this->search(0)->setError($up->getErro());
+            else
+                return $up->getReact();
+        }
+
+        return null;
     }
 
     /**
@@ -561,14 +542,14 @@ class Dicionario
      */
     private function createTableData(array $dadosEntity)
     {
-        $create = new Create();
         unset($dadosEntity['id']);
+        $create = new Create();
         $create->exeCreate($this->entity, $dadosEntity);
         if ($create->getErro()) {
             $this->search(0)->setError($create->getErro());
         } elseif ($create->getResult()) {
             $this->search(0)->setValue((int)$create->getResult(), !1);
-//            $this->checkToSetOwnerList($create->getResult());
+            return $create->getReact();
         }
     }
 

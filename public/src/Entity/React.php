@@ -43,8 +43,8 @@ class React
                 include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
         }
 
-        $this->log($action, $entity, $dados);
-        $this->createUpdateSyncIndexedDb($action, $entity, $dados);
+        $this->log($action, $entity, $dados, $dadosOld);
+        $this->createUpdateSyncIndexedDb($action, $entity, $dados, $dadosOld);
 
         $this->response = $data;
     }
@@ -53,8 +53,9 @@ class React
      * @param string $action
      * @param string $entity
      * @param array $dados
+     * @param array $old
      */
-    private function createUpdateSyncIndexedDb(string $action, string $entity, array $dados)
+    private function createUpdateSyncIndexedDb(string $action, string $entity, array $dados, array $old)
     {
         //salva historico de alterações
         $json = new Json();
@@ -64,24 +65,26 @@ class React
 
         $d = new Dicionario($entity);
         foreach ($d->getDicionario() as $meta) {
-            if($meta->getFormat() === "password")
+            if ($meta->getFormat() === "password")
                 $dados[$meta->getColumn()] = null;
         }
 
-        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados);
+        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados, $old);
         $dados['db_action'] = $action;
 
         $store = new Json("update/{$entity}");
-        $store->setVersionamento(false);
-        $store->save($hist[$entity], $dados);
+        $store->setVersionamento(!1);
+        foreach ($old as $item)
+            $store->save($hist[$entity], ($action === "delete" ? $item : $dados));
     }
 
     /**
      * @param string $action
      * @param string $entity
      * @param array $dados
+     * @param array $old
      */
-    private function limitaAtualizaçõesArmazenadas(string $action, string $entity, array $dados)
+    private function limitaAtualizaçõesArmazenadas(string $action, string $entity, array $dados, array $old)
     {
         //remove updates anteriores de registros que serão excluídos
         if ($action === "delete") {
@@ -99,8 +102,9 @@ class React
         }
 
         //se tiver mais que 100 resultados, deleta os acima de 100
-        if (count($total = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) > 99) {
-            $excluir = 101 - count($total);
+        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + count($old);
+        if ($total > 99) {
+            $excluir = 101 - $total;
             for ($i = 0; $i < $excluir; $i++) {
                 if (isset($total[$i])) {
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$total[$i]}");
@@ -116,17 +120,24 @@ class React
      * @param string $action
      * @param string $entity
      * @param array $dados
+     * @param array $old
      */
-    public function log(string $action, string $entity, array $dados)
+    public function log(string $action, string $entity, array $dados, array $old)
     {
         $store = new Json("store/{$entity}");
+        $dados['userlogin'] = (!empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['id'] : 0);
 
-        if (!empty($_SESSION['userlogin']))
-            $dados['userlogin'] = $_SESSION['userlogin']['id'];
-
-        if ($action === "delete")
-            $store->delete($dados['id']);
-        else
+        if ($action === "create") {
             $store->save($dados['id'], $dados);
+        } else {
+            foreach ($old as $item) {
+                if ($action === "delete") {
+                    if (!empty($item['id']))
+                        $store->delete($item['id']);
+                } else {
+                    $store->save($item['id'], array_merge($dados, $item));
+                }
+            }
+        }
     }
 }

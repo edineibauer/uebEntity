@@ -45,7 +45,6 @@ abstract class EntityDelete
                     $dados = $del->getDados();
                     self::deleteLinkedContent($entity, $dados);
                     $del->delete();
-                    new React("delete", $entity, $dados, $dados);
                 } else {
                     self::$error[$entity]['id'] = "permissão negada";
                 }
@@ -61,7 +60,6 @@ abstract class EntityDelete
                         $dados = $del->getDados();
                         self::deleteLinkedContent($entity, $dados);
                         $del->delete();
-                        new React("delete", $entity, $dados, $dados);
                     } else {
                         self::$error[$entity]['id'] = "permissão negada";
                     }
