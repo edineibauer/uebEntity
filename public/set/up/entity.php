@@ -11,31 +11,21 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     $read = new \Conn\Read();
     $del = new \Conn\Delete();
 
-    $delList = [];
     foreach ($dados as $i => $dado) {
         $action = $dado['db_action'];
         if ($action === "delete") {
-            if (is_array($dado['delete'])) {
-                foreach ($dado['delete'] as $item) {
-                    $read->exeRead($entity, "WHERE id = :id", "id={$item}");
-                    if($read->getResult()) {
-                        $item = $read->getResult()[0];
-                        $del->exeDelete($entity, "WHERE id = :id", "id={$item['id']}");
-                        new \Entity\React("delete", $entity, $item, $item);
-                    }
-                    $delList[] = (int) $item;
-                }
-            } elseif (is_numeric($dado['delete'])) {
-                $read->exeRead($entity, "WHERE id = :id", "id={$dado['delete']}");
-                if($read->getResult()) {
-                    $item = $read->getResult()[0];
-                    $del->exeDelete($entity, "WHERE id = :id", "id={$item['id']}");
-                    new \Entity\React("delete", $entity, $item, $item);
-                }
-                $delList[] = (int) $dado['delete'];
+            $where = "";
+            if (is_array($dado['id'])) {
+                foreach ($dado['id'] as $item)
+                    $where .= (empty($where) ? "WHERE id = {$item}" : " || id = {$item}");
+
+            } elseif (is_numeric($dado['id'])) {
+                $where = "WHERE id = {$dado['id']}";
             }
 
-            $dado['id_old'] = $dado['delete'];
+            $del->exeDelete($entity, $where);
+
+            $dado['id_old'] = $dado['id'];
             $data['data']['data'][] = $dado;
         } else {
 

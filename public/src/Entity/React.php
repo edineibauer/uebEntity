@@ -63,19 +63,37 @@ class React
         $hist[$entity] = strtotime('now');
         $json->save("historic", $hist);
 
+        $store = new Json("update/{$entity}");
+        $store->setVersionamento(!1);
+
         $d = new Dicionario($entity);
         foreach ($d->getDicionario() as $meta) {
             if ($meta->getFormat() === "password")
                 $dados[$meta->getColumn()] = null;
         }
 
-        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados, $old);
-        $dados['db_action'] = $action;
+        if ($action === "delete") {
+            $ids = [];
+            foreach ($old as $item) {
+                if (!in_array($item['id'], $ids))
+                    $ids[] = $item["id"];
+            }
 
-        $store = new Json("update/{$entity}");
-        $store->setVersionamento(!1);
-        foreach ($old as $item)
-            $store->save($hist[$entity], ($action === "delete" ? $item : $dados));
+            $dados = ['db_action' => "delete", "id" => $ids];
+        }
+
+        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados, $old);
+
+        if ($action === "delete") {
+            $store->save($hist[$entity], $dados);
+
+        } elseif ($action === "update") {
+            foreach ($old as $item)
+                $store->save($hist[$entity], array_merge($item, ['db_action' => "update"], $dados));
+
+        } else {
+            $store->save($hist[$entity], array_merge(['db_action' => "create"], $dados));
+        }
     }
 
     /**
@@ -89,20 +107,14 @@ class React
         //remove updates anteriores de registros que serão excluídos
         if ($action === "delete") {
             foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
-                $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), true);
-                if (is_array($dadosE)) {
-                    foreach ($dadosE as $dado) {
-                        if (!empty($dado['id']) && !empty($dados['id']) && $dado['id'] == $dados['id'])
-                            unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
-                    }
-                } elseif (!empty($dadosE['id']) && $dadosE['id'] == $dados['id']) {
+                $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
+                if ($dadosE['db_action'] !== "delete" && in_array($dadosE['id'], $dados['id']))
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
-                }
             }
         }
 
         //se tiver mais que 100 resultados, deleta os acima de 100
-        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + count($old);
+        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + ($action !== "create" ? count($old) : 1);
         if ($total > 99) {
             $excluir = 101 - $total;
             for ($i = 0; $i < $excluir; $i++) {
@@ -135,7 +147,7 @@ class React
                     if (!empty($item['id']))
                         $store->delete($item['id']);
                 } else {
-                    $store->save($item['id'], array_merge($dados, $item));
+                    $store->save($item['id'], array_merge($item, $dados));
                 }
             }
         }
