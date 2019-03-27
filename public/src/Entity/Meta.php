@@ -733,7 +733,7 @@ class Meta
                     }
 
                     $value[$i]['url'] = HOME . $dir . $nameFile;
-                    $value[$i]['image'] = HOME . ($isImage ? $dir . "medium/" . $nameFile : "assetsPublic/img/file.png");
+                    $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
                     $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $item['type'] . "'></use></svg>");
 
                 } elseif (empty($item['url']) || !is_string($item['url'])) {
