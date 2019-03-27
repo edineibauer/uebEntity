@@ -62,7 +62,7 @@ class Meta
                     foreach ($d->getDicionario() as $i => $m) {
                         if ($m->key === "source" && !empty($item[$m->column])) {
                             $item[$m->column] = $this->uploadSource($item[$m->column]);
-                        } else if($m->key === "relation" && $m->type === "json" && !empty($item[$m->column])){
+                        } else if ($m->key === "relation" && $m->type === "json" && !empty($item[$m->column])) {
                             $item[$m->column] = $this->processaUploadsJson($m->relation, $item[$m->column]);
                         }
                     }
@@ -75,7 +75,7 @@ class Meta
                 foreach ($d->getDicionario() as $i => $m) {
                     if ($m->key === "source" && !empty($value[$m->column])) {
                         $value[$m->column] = $this->uploadSource($value[$m->column]);
-                    } else if($m->key === "relation" && $m->type === "json"){
+                    } else if ($m->key === "relation" && $m->type === "json") {
                         $value[$m->column] = $this->processaUploadsJson($m->relation, $value[$m->column]);
                     }
                 }
@@ -96,7 +96,7 @@ class Meta
         if ($this->type === "json")
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
-            $value = (int) (empty($_SESSION['userlogin']['setor']) && !empty($value) ? $value : $_SESSION['userlogin']['id']);
+            $value = (int)(empty($_SESSION['userlogin']['setor']) && !empty($value) ? $value : $_SESSION['userlogin']['id']);
         elseif ($this->key === "publisher")
             $this->error = "Precisa estar Logado";
         elseif ($this->group === "boolean")
@@ -698,22 +698,43 @@ class Meta
         if (is_array($value)) {
             foreach ($value as $i => $item) {
 
-                // Decode base64 data
-                if (!empty($item['url']) && is_string($item['url']) && preg_match('/;/i', $item['url'])) {
-                    list($type, $data) = explode(';', $item['url']);
-                    list(, $data) = explode(',', $data);
-                    $file_data = base64_decode(str_replace(' ', "+", $data));
-
+                if (!empty($item['url']) && is_string($item['url']) && (preg_match('/;/i', $item['url']) || preg_match('/uploads\/tmp\//i', $item['url']))) {
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads");
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y"));
                     Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m"));
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/thumb");
+                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/medium");
 
-                    $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/" . $item['name'] . "-" . strtotime('now') . '.' . $item['type'];
-                    file_put_contents(PATH_HOME . $dir, $file_data);
-                    $value[$i]['url'] = HOME . $dir;
-                    $value[$i]['image'] = HOME . "image/" . (preg_match('/^data:image\//i', $type) ? $dir : "assetsPublic/img/file.png");
-                    $value[$i]['preview'] = "<img src='" . $value[$i]['image'] . "&w=700' title='Imagem " . strtoupper($value[$i]['type']) .  "' class='left radius'/>";
+                    if (preg_match('/;/i', $item['url'])) {
+
+                        // Decode base64 data AND create image
+                        list($type, $data) = explode(';', $item['url']);
+                        list(, $data) = explode(',', $data);
+                        $file_data = base64_decode(str_replace(' ', "+", $data));
+                        $isImage = preg_match('/^data:image\//i', $type);
+                        $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                        $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
+                        file_put_contents(PATH_HOME . $dir . $nameFile, $file_data);
+                    } else{
+
+                        //move tmp to production
+                        $isImage = preg_match('/^image\//i', $item['fileType']);
+                        $dirTmp = str_replace(HOME, "", $item['url']);
+                        $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                        $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
+                        rename(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+                    }
+
+                    if($isImage) {
+                        $image = WideImage::load(PATH_HOME . $dir . $nameFile);
+                        $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                        $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                    }
+
+                    $value[$i]['url'] = HOME . $dir . $nameFile;
+                    $value[$i]['image'] = HOME . ($isImage ? $dir . "medium/" . $nameFile : "assetsPublic/img/file.png");
+                    $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $item['type'] . "'></use></svg>");
 
                 } elseif (empty($item['url']) || !is_string($item['url'])) {
                     $value[$i]['url'] = null;
