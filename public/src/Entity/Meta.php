@@ -698,6 +698,7 @@ class Meta
         if (is_array($value)) {
             foreach ($value as $i => $item) {
                 if ($item['url'] !== !1) {
+                    $icon = (in_array($item['type'], ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $item['type'] : "file");
                     if (!empty($item['url']) && is_string($item['url']) && (preg_match('/;/i', $item['url']) || preg_match('/uploads\/tmp\//i', $item['url']))) {
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads");
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
@@ -734,12 +735,12 @@ class Meta
 
                         $value[$i]['url'] = HOME . $dir . $nameFile;
                         $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
-                        $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $item['type'] . "'></use></svg>");
+                        $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
 
                     } elseif (empty($item['url']) || !is_string($item['url'])) {
                         $value[$i]['url'] = null;
                         $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
-                        $value[$i]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$value[$i]['type']}'></use></svg>";
+                        $value[$i]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
                     }
                 } else {
                     unset($value[$i]);
