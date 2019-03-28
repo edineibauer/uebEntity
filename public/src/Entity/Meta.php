@@ -697,49 +697,52 @@ class Meta
     {
         if (is_array($value)) {
             foreach ($value as $i => $item) {
+                if ($item['url'] !== !1) {
+                    if (!empty($item['url']) && is_string($item['url']) && (preg_match('/;/i', $item['url']) || preg_match('/uploads\/tmp\//i', $item['url']))) {
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y"));
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m"));
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/thumb");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/medium");
 
-                if (!empty($item['url']) && is_string($item['url']) && (preg_match('/;/i', $item['url']) || preg_match('/uploads\/tmp\//i', $item['url']))) {
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads");
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y"));
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m"));
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/thumb");
-                    Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/medium");
+                        if (preg_match('/;/i', $item['url'])) {
 
-                    if (preg_match('/;/i', $item['url'])) {
+                            // Decode base64 data AND create image
+                            list($type, $data) = explode(';', $item['url']);
+                            list(, $data) = explode(',', $data);
+                            $file_data = base64_decode(str_replace(' ', "+", $data));
+                            $isImage = preg_match('/^data:image\//i', $type);
+                            $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                            $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
+                            file_put_contents(PATH_HOME . $dir . $nameFile, $file_data);
+                        } else {
 
-                        // Decode base64 data AND create image
-                        list($type, $data) = explode(';', $item['url']);
-                        list(, $data) = explode(',', $data);
-                        $file_data = base64_decode(str_replace(' ', "+", $data));
-                        $isImage = preg_match('/^data:image\//i', $type);
-                        $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
-                        $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
-                        file_put_contents(PATH_HOME . $dir . $nameFile, $file_data);
-                    } else{
+                            //move tmp to production
+                            $isImage = preg_match('/^image\//i', $item['fileType']);
+                            $dirTmp = str_replace(HOME, "", $item['url']);
+                            $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                            $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
+                            rename(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+                        }
 
-                        //move tmp to production
-                        $isImage = preg_match('/^image\//i', $item['fileType']);
-                        $dirTmp = str_replace(HOME, "", $item['url']);
-                        $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
-                        $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
-                        rename(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+                        if ($isImage) {
+                            $image = WideImage::load(PATH_HOME . $dir . $nameFile);
+                            $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                            $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                        }
+
+                        $value[$i]['url'] = HOME . $dir . $nameFile;
+                        $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
+                        $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $item['type'] . "'></use></svg>");
+
+                    } elseif (empty($item['url']) || !is_string($item['url'])) {
+                        $value[$i]['url'] = null;
+                        $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
+                        $value[$i]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$value[$i]['type']}'></use></svg>";
                     }
-
-                    if($isImage) {
-                        $image = WideImage::load(PATH_HOME . $dir . $nameFile);
-                        $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                        $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
-                    }
-
-                    $value[$i]['url'] = HOME . $dir . $nameFile;
-                    $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
-                    $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $item['type'] . "'></use></svg>");
-
-                } elseif (empty($item['url']) || !is_string($item['url'])) {
-                    $value[$i]['url'] = null;
-                    $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
-                    $value[$i]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$value[$i]['type']}'></use></svg>";
+                } else {
+                    unset($value[$i]);
                 }
             }
         }
