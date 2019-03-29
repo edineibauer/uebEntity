@@ -722,21 +722,25 @@ class Meta
                             //move tmp to production
                             $isImage = preg_match('/^image\//i', $item['fileType']);
                             $dirTmp = str_replace(HOME, "", $item['url']);
-                            $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
-                            $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
-                            rename(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+
+                            if(file_exists(PATH_HOME . $dirTmp)) {
+                                $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                                $nameFile = $item['name'] . "-" . strtotime('now') . "." . ($isImage ? 'webp' : $item['type']);
+                                copy(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+                            }
                         }
 
-                        if ($isImage) {
-                            $image = WideImage::load(PATH_HOME . $dir . $nameFile);
-                            $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                            $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                        if(isset($nameFile)) {
+                            if ($isImage) {
+                                $image = WideImage::load(PATH_HOME . $dir . $nameFile);
+                                $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                                $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                            }
+
+                            $value[$i]['url'] = HOME . $dir . $nameFile;
+                            $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
+                            $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
-
-                        $value[$i]['url'] = HOME . $dir . $nameFile;
-                        $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
-                        $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
-
                     } elseif (empty($item['url']) || !is_string($item['url'])) {
                         $value[$i]['url'] = null;
                         $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
