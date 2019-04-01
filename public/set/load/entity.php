@@ -99,8 +99,10 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
             $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
 
+        $filterResult = "";
         if(!empty($filter))
-            $where .= exeReadApplyFilter($entity, $filter);
+            $filterResult = exeReadApplyFilter($entity, $filter);
+        $where .= $filterResult;
 
         $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
@@ -116,7 +118,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         }
 
         $sql = new SqlCommand();
-        $sql->exeCommand("SELECT count(id) as total from " . PRE . $entity);
+        $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
         $data['data']['total'] = $sql->getResult() ? $sql->getResult()[0]['total'] : 0;
         $data['data']['data'] = $results;
         $data['data']['tipo'] = 1;
