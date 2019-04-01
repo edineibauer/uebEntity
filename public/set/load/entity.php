@@ -4,7 +4,7 @@ use \Helpers\Helper;
 use \Entity\Dicionario;
 
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
-$filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT);
+$filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
 $order = filter_input(INPUT_POST, 'order', FILTER_DEFAULT);
 $reverse = filter_input(INPUT_POST, 'reverse', FILTER_VALIDATE_BOOLEAN);
 $limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT);
@@ -30,14 +30,19 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
     if (empty($historicFront) || ($historicFront < $hist[$entity] && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
         //download all data
 
-        function exeReadApplyFilter(array $filter) {
+        /**
+         * @param string $entity
+         * @param array $filter
+         * @return string
+         */
+        function exeReadApplyFilter(string $entity, array $filter) {
             $dicionario = \Entity\Metadados::getDicionario($entity);
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
                     foreach ($dicionario as $meta) {
-                        if(!in_array($meta->getKey(), ["information", "identifier"]))
-                            $where[$i][] = $meta->getColumn() . " LIKE '%{$filterOption['value']}%'";
+                        if(!in_array($meta['key'], ["information", "identifier"]))
+                            $where[$i][] = $meta['column'] . " LIKE '%{$filterOption['value']}%'";
                     }
 
                 } else {
@@ -91,7 +96,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
 
         if(!empty($filter))
-            $where .= exeReadApplyFilter($filter);
+            $where .= exeReadApplyFilter($entity, $filter);
 
         $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
