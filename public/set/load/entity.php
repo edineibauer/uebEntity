@@ -1,7 +1,11 @@
 <?php
 
 use \Helpers\Helper;
-use \Entity\Dicionario;
+use \Entity\Metadados;
+use \Entity\Json;
+use \Conn\Read;
+use \Config\Config;
+use \Conn\SqlCommand;
 
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
 $filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
@@ -13,8 +17,8 @@ $offset = filter_input(INPUT_POST, 'offset', FILTER_VALIDATE_INT);
 
 $historicFront = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
 $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
-$permissoes = \Config\Config::getPermission();
-$json = new \Entity\Json();
+$permissoes = Config::getPermission();
+$json = new Json();
 $hist = $json->get("historic");
 $data['data'] = ['historic' => 0];
 
@@ -36,7 +40,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
          * @return string
          */
         function exeReadApplyFilter(string $entity, array $filter) {
-            $dicionario = \Entity\Metadados::getDicionario($entity);
+            $dicionario = Metadados::getDicionario($entity);
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
@@ -90,7 +94,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         }
 
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
-        $info = \Entity\Metadados::getInfo($entity);
+        $info = Metadados::getInfo($entity);
         $where = "WHERE id > 0";
         if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
             $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
@@ -100,7 +104,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
 
         $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
-        $read = new \Conn\Read();
+        $read = new Read();
         $read->exeRead($entity, $where);
         $results = $read->getResult() ?? [];
         if(!empty($results)) {
@@ -111,7 +115,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             }
         }
 
-        $sql = new \Conn\SqlCommand();
+        $sql = new SqlCommand();
         $sql->exeCommand("SELECT count(id) as total from " . PRE . $entity);
         $data['data']['total'] = $sql->getResult() ? $sql->getResult()[0]['total'] : 0;
         $data['data']['data'] = $results;
