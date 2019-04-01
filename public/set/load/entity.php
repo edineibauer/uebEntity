@@ -93,7 +93,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         if(!empty($filter))
             $where .= exeReadApplyFilter($filter);
 
-        $where .= " ORDER BY " . (!empty($order) ? $order : "id") . (empty($reverse) || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
+        $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
         $read = new \Conn\Read();
         $read->exeRead($entity, $where);
