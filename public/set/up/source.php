@@ -28,7 +28,7 @@ if(!empty($_FILES['upload'])) {
 if(isset($file_data)) {
     $data['data']['url'] = HOME . $dir;
     $data['data']['image'] = HOME . ($isImage ? $dir : "assetsPublic/img/file.png");
-    $data['data']['preview'] = "<img src='" . $data['data']['image'] . "' title='Imagem " . $name . "' class='left radius'/>";
+    $data['data']['preview'] = "<img src='" . $data['data']['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
 } else {
     $data['data']['url'] = "";
 }
