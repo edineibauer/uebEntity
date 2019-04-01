@@ -1,8 +1,16 @@
 <?php
 
 use \Helpers\Helper;
+use \Entity\Dicionario;
 
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
+$filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT);
+$order = filter_input(INPUT_POST, 'order', FILTER_DEFAULT);
+$reverse = filter_input(INPUT_POST, 'reverse', FILTER_VALIDATE_BOOLEAN);
+$limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT);
+$limit = !empty($limit) && $limit > 0 ? $limit : (int) LIMITOFFLINE;
+$offset = filter_input(INPUT_POST, 'offset', FILTER_VALIDATE_INT);
+
 $historicFront = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
 $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
 $permissoes = \Config\Config::getPermission();
@@ -22,19 +30,85 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
     if (empty($historicFront) || ($historicFront < $hist[$entity] && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
         //download all data
 
+        function exeReadApplyFilter(array $filter) {
+            $dicionario = \Entity\Metadados::getDicionario($entity);
+            $where = [];
+            foreach ($filter as $i => $filterOption) {
+                if ($filterOption['operator'] === "por") {
+                    foreach ($dicionario as $meta) {
+                        if(!in_array($meta->getKey(), ["information", "identifier"]))
+                            $where[$i][] = $meta->getColumn() . " LIKE '%{$filterOption['value']}%'";
+                    }
+
+                } else {
+                    switch ($filterOption['operator']) {
+                        case 'contém':
+                            $where[$i][] = "{$filterOption['column']} LIKE '%{$filterOption['value']}%'";
+                            break;
+                        case 'igual a':
+                            $where[$i][] = "{$filterOption['column']} = '{$filterOption['value']}'";
+                            break;
+                        case 'diferente de':
+                            $where[$i][] = "{$filterOption['column']} != '{$filterOption['value']}'";
+                            break;
+                        case 'começa com':
+                            $where[$i][] = "{$filterOption['column']} LIKE '{$filterOption['value']}%'";
+                            break;
+                        case 'termina com':
+                            $where[$i][] = "{$filterOption['column']} LIKE '%{$filterOption['value']}'";
+                            break;
+                        case 'maior que':
+                            $where[$i][] = "{$filterOption['column']} > {$filterOption['value']}";
+                            break;
+                        case 'menor que':
+                            $where[$i][] = "{$filterOption['column']} < {$filterOption['value']}";
+                            break;
+                        case 'maior igual a':
+                            $where[$i][] = "{$filterOption['column']} >= {$filterOption['value']}";
+                            break;
+                        case 'menor igual a':
+                            $where[$i][] = "{$filterOption['column']} <= {$filterOption['value']}";
+                    }
+                }
+            }
+
+            $result = "";
+            foreach ($where as $andContainer) {
+                $result .= " && (";
+                foreach ($andContainer as $e => $or)
+                    $result .= ($e > 0 ? " || " : "") . $or;
+
+                $result .= ")";
+            }
+
+            return $result;
+        }
+
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
         $info = \Entity\Metadados::getInfo($entity);
-        $where = null;
+        $where = "WHERE id > 0";
         if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
-            $where = "WHERE ownerpub = " . $_SESSION['userlogin']['id'];
+            $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
+
+        if(!empty($filter))
+            $where .= exeReadApplyFilter($filter);
+
+        $where .= " ORDER BY " . (!empty($order) ? $order : "id") . (empty($reverse) || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
         $read = new \Conn\Read();
         $read->exeRead($entity, $where);
         $results = $read->getResult() ?? [];
-        if($entity === "usuarios" && !empty($results)) {
-            foreach ($results as $i => $result)
-                $results[$i]['password'] = "";
+        if(!empty($results)) {
+            foreach ($results as $i => $result) {
+                $results[$i]['db_action'] = "create";
+                if($entity === "usuarios")
+                    $results[$i]['password'] = "";
+            }
         }
+
+        $sql = new \Conn\SqlCommand();
+        $sql->exeCommand("SELECT count(id) as total from " . PRE . $entity);
+        $data['data']['total'] = $sql->getResult() ? $sql->getResult()[0]['total'] : 0;
         $data['data']['data'] = $results;
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
