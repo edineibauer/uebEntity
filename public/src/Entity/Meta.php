@@ -75,7 +75,7 @@ class Meta
                 foreach ($d->getDicionario() as $i => $m) {
                     if ($m->key === "source" && !empty($value[$m->column])) {
                         $value[$m->column] = $this->uploadSource($value[$m->column]);
-                    } else if ($m->key === "relation" && $m->type === "json") {
+                    } else if ($m->key === "relation" && $m->type === "json" && !empty($value[$m->column])) {
                         $value[$m->column] = $this->processaUploadsJson($m->relation, $value[$m->column]);
                     }
                 }
