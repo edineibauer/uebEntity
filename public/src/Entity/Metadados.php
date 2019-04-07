@@ -3,6 +3,7 @@
 namespace Entity;
 
 use \Helpers\Helper;
+use \Config\Config;
 
 class Metadados
 {
@@ -13,9 +14,15 @@ class Metadados
      */
     public static function getDicionario($entity, $keepId = null, $keepStrings = null)
     {
-        $path = PATH_HOME . "entity/cache/" . $entity . '.json';
-        $data = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
-        if ($data) {
+        $setor = !empty($_SESSION['userlogin']['setor']) ? $_SESSION['userlogin']['setor'] : "0";
+        $user = (!empty($_SESSION['userlogin']['setor']) && file_exists(PATH_HOME . "entity/" . $_SESSION['userlogin']['setor'] . "/{$entity}.json") ? $_SESSION['userlogin']['setor'] : "cache");
+
+        $permissoes = Config::getPermission();
+        $permissoes = isset($permissoes[$setor]) ? $permissoes[$setor] : [];
+
+        //Se existir o dicionário da entidade e tiver permissão para ler
+        if (file_exists(PATH_HOME . "entity/{$user}/{$entity}.json") && ($setor === "admin" || (!empty($permissoes[$entity]['read']) && $permissoes[$entity]['read']))) {
+            $data = json_decode(file_get_contents(PATH_HOME . "entity/cache/{$entity}.json"), !0);
 
             if($keepId) {
                 $data[0] = self::generatePrimary();
@@ -134,10 +141,13 @@ class Metadados
      */
     public static function getInfo($entity)
     {
-        $path = PATH_HOME . "entity/cache/info/" . $entity . '.json';
-        $data = file_exists($path) ? json_decode(file_get_contents($path), true) : null;
-        if ($data)
-            return Helper::convertStringToValueArray($data);
+        $user = (!empty($_SESSION['userlogin']['setor']) && file_exists(PATH_HOME . "entity/" . $_SESSION['userlogin']['setor']) ? $_SESSION['userlogin']['setor'] : "cache");
+
+        if($user !== "cache" && file_exists(PATH_HOME . "entity/{$user}/info/{$entity}.json")) {
+            return Helper::convertStringToValueArray(json_decode(file_get_contents(PATH_HOME . "entity/{$user}/info/{$entity}.json"), !0));
+        } elseif(file_exists(PATH_HOME . "entity/cache/info/{$entity}.json")) {
+            return Helper::convertStringToValueArray(json_decode(file_get_contents(PATH_HOME . "entity/cache/info/{$entity}.json"), !0));
+        }
 
         return null;
     }
