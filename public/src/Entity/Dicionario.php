@@ -392,6 +392,12 @@ class Dicionario
             } else {
                 $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['id'], !1);
             }
+        } elseif (!empty($this->info['autor']) && !empty($id) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
+            if($this->info['user'] === 2) {
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(999999999, !1);
+            } else {
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(999999999, !1);
+            }
         }
 
         foreach ($this->dicionario as $i => $meta) {
