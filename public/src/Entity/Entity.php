@@ -67,16 +67,16 @@ class Entity extends EntityCreate
      */
     public static function dicionario(string $entity = null, bool $info = null)
     {
-        if(file_exists(PATH_HOME . "entity/cache") && (empty($entity) || file_exists(PATH_HOME . "entity/cache/{$entity}.json"))) {
-            if(empty($entity)){
+        if (file_exists(PATH_HOME . "entity/cache") && (empty($entity) || file_exists(PATH_HOME . "entity/cache/{$entity}.json"))) {
+            if (empty($entity)) {
 
                 //read all dicionarios
                 $list = [];
                 foreach (\Helpers\Helper::listFolder(PATH_HOME . "entity/cache") as $json) {
-                    if(preg_match('/^\w+\.json$/i', $json)){
+                    if (preg_match('/^\w+\.json$/i', $json)) {
                         $entity = str_replace('.json', '', $json);
-                        if($dic = self::dicionario($entity)) {
-                            if($info)
+                        if ($dic = self::dicionario($entity)) {
+                            if ($info)
                                 $dic = ["dicionario" => $dic, "info" => Metadados::getInfo($entity)];
 
                             $list[$entity] = $dic;
@@ -90,15 +90,10 @@ class Entity extends EntityCreate
 
                 //read dicionario específico
                 $setor = !empty($_SESSION['userlogin']['setor']) ? $_SESSION['userlogin']['setor'] : "0";
-                $entidadesNaoPermitidas = \Config\Config::getEntityNotAllow();
-                $entidadesNaoPermitidas = isset($entidadesNaoPermitidas[$setor]) ? $entidadesNaoPermitidas[$setor] : [];
+                $meta = Metadados::getDicionario($entity, !0, !0);
 
-                if(!in_array($entity, $entidadesNaoPermitidas) || $setor === "admin") {
-                    if($info)
-                        return ["dicionario" => Metadados::getDicionario($entity, true, true), "info" => Metadados::getInfo($entity)];
-                    else
-                        return Metadados::getDicionario($entity, true, true);
-                }
+                if (!empty($meta))
+                    return ($info ? ["dicionario" => $meta, "info" => Metadados::getInfo($entity)] : $meta);
             }
         }
 
@@ -119,7 +114,7 @@ class Entity extends EntityCreate
         $allowCreate = file_exists(PATH_HOME . "_config/entity_not_show.json") ? json_decode(file_get_contents(PATH_HOME . "_config/entity_not_show.json"), true) : [];
 
         //permissão master
-        if(!empty($login['setor']) && $login['setor'] === 1 && $login['nivel'] === 1)
+        if (!empty($login['setor']) && $login['setor'] === 1 && $login['nivel'] === 1)
             return true;
 
         if (!$login) {
