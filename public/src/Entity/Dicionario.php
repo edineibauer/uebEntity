@@ -386,18 +386,11 @@ class Dicionario
             $this->info = Metadados::getInfo($this->entity);
 
         //verifica se possui owner ou autor
-        if (!empty($this->info['autor']) && empty($id) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)){
-            if($this->info['user'] === 2) {
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['groupData']['id'], !1);
-            } else {
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue($_SESSION['userlogin']['id'], !1);
-            }
-        } elseif (!empty($this->info['autor']) && !empty($id) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
-            if($this->info['user'] === 2) {
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(999999999, !1);
-            } else {
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(999999999, !1);
-            }
+        if (!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
+            if (empty($id))
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(($this->info['user'] === 2 ? $_SESSION['userlogin']['groupData']['id'] : $_SESSION['userlogin']['id']), !1);
+            else
+                unset($this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]);
         }
 
         foreach ($this->dicionario as $i => $meta) {
