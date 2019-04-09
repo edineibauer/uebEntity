@@ -93,11 +93,24 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             return $result;
         }
 
-        //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
-        $info = Metadados::getInfo($entity);
         $where = "WHERE id > 0";
-        if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
-            $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
+
+        // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
+        if(!empty($setor) && $setor !== "admin" && $setor !== "0") {
+            $metadados = Metadados::getDicionario($entity);
+            foreach ($metadados as $col => $meta) {
+                if($meta['format'] === "list" && $meta['relation'] === $setor)
+                    $where .= " && {$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
+            }
+        }
+
+        //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
+        if($where === "WHERE id > 0") {
+            $info = Metadados::getInfo($entity);
+            if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
+                $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
+
+        }
 
         $filterResult = "";
         if(!empty($filter))
