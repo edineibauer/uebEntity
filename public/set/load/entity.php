@@ -132,7 +132,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
 
         $sql = new SqlCommand();
         $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
-        $data['data']['total'] = $sql->getResult() ? $sql->getResult()[0]['total'] : 0;
+        $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? $sql->getResult()[0]['total'] : 0;
         $data['data']['data'] = $results;
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
