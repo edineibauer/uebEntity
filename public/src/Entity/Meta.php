@@ -704,8 +704,12 @@ class Meta
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y"));
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m"));
-                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/thumb");
-                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/medium");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/100");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/200");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/300");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/400");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/500");
+                        Helper::createFolderIfNoExist(PATH_HOME . "uploads/form/" . date("Y") . "/" . date("m") . "/700");
 
                         if (preg_match('/;/i', $item['url'])) {
 
@@ -733,13 +737,24 @@ class Meta
                         if(isset($nameFile)) {
                             if ($isImage) {
                                 $image = WideImage::load(PATH_HOME . $dir . $nameFile);
-                                $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                                $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                                $image->resize(700)->saveToFile(PATH_HOME . $dir . "700/" . $nameFile);
+                                $image->resize(500)->saveToFile(PATH_HOME . $dir . "500/" . $nameFile);
+                                $image->resize(400)->saveToFile(PATH_HOME . $dir . "400/" . $nameFile);
+                                $image->resize(300)->saveToFile(PATH_HOME . $dir . "300/" . $nameFile);
+                                $image->resize(200)->saveToFile(PATH_HOME . $dir . "200/" . $nameFile);
+                                $image->resize(100)->saveToFile(PATH_HOME . $dir . "100/" . $nameFile);
                             }
 
+                            $value[$i]['urls'] = [
+                                '100' => HOME . $dir . "100/" . $nameFile,
+                                '200' => HOME . $dir . "200/" . $nameFile,
+                                '300' => HOME . $dir . "300/" . $nameFile,
+                                '400' => HOME . $dir . "400/" . $nameFile,
+                                '500' => HOME . $dir . "500/" . $nameFile,
+                                '700' => HOME . $dir . "700/" . $nameFile
+                            ];
                             $value[$i]['url'] = HOME . $dir . $nameFile;
-                            $value[$i]['image'] = HOME . ($isImage ? $dir . "thumb/" . $nameFile : "assetsPublic/img/file.png");
-                            $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
+                            $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "200/" : "500/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
                     } elseif (empty($item['url']) || !is_string($item['url'])) {
                         $value[$i]['url'] = null;
