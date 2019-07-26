@@ -737,10 +737,10 @@ class Meta
                             if ($isImage) {
                                 $image = WideImage::load(PATH_HOME . $dir . $nameFile);
                                 $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                                $image->resize(500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "500/" . $nameFile);
-                                $image->resize(300)->crop('center', 'center', 300, 300)->saveToFile(PATH_HOME . $dir . "300/" . $nameFile);
+                                $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "500/" . $nameFile);
+                                $image->resize(1000, 300)->crop('center', 'center', 300, 300)->saveToFile(PATH_HOME . $dir . "300/" . $nameFile);
                                 $image->resize(200)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
-                                $image->resize(100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "100/" . $nameFile);
+                                $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "100/" . $nameFile);
                             }
 
                             $value[$i]['urls'] = [
