@@ -460,6 +460,13 @@ class Dicionario
     {
         $info = Metadados::getInfo($entity);
         if (!empty($info['user']) && $info['user'] === 1) {
+            if($action === "update") {
+                $read = new Read();
+                $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}");
+                if($read->getResult() && !empty($read->getResult()[0]['usuarios_id']))
+                    $dados['usuarios_id'] = (int) $read->getResult()[0]['usuarios_id'];
+            }
+
             $action = (empty($dados['usuarios_id']) ? "create" : $action);
             if ($action === "create") {
                 $user = [
