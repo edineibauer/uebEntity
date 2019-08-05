@@ -73,7 +73,7 @@ class Entity extends EntityCreate
                 //read all dicionarios
                 $list = [];
                 foreach (\Helpers\Helper::listFolder(PATH_HOME . "entity/cache") as $json) {
-                    if (preg_match('/^\w+\.json$/i', $json)) {
+                    if (preg_match('/\.json$/i', $json)) {
                         $entity = str_replace('.json', '', $json);
                         if ($dic = self::dicionario($entity)) {
                             if ($info)
