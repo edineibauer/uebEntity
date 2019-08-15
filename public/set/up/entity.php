@@ -57,6 +57,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 $data['data']['data'][] = $result;
             } else {
 
+                $registro['db_error'] = $id;
                 $store = new Json("error/{$entity}");
                 $store->setVersionamento(!1);
                 $store->save(strtotime('now'), $registro);
