@@ -34,8 +34,17 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
 
             //remove id se existir e for criar
             $idOld = $registro['id'];
-            if ($action === "create")
+
+            if ($action === "create") {
                 unset($registro['id']);
+
+            } elseif ($action === "update") {
+                $read->exeRead($entity, "WHERE id = :id", "id={$registro['id']}");
+                if (!$read->getResult()) {
+                    unset($registro['id']);
+                    $action = "create";
+                }
+            }
 
             $id = \Entity\Entity::add($entity, $registro);
 
