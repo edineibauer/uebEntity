@@ -145,7 +145,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             if ($historicFront < $historicUpdate) {
                 $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), true);
                 if (!empty($dadosUp))
-                    $data['data']['data'] = array_merge($data['data']['data'], $dadosUp);
+                    $data['data']['data'][] = $dadosUp;
             }
         }
 
