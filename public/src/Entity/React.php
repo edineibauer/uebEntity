@@ -60,7 +60,7 @@ class React
         //salva historico de alterações
         $json = new Json();
         $hist = $json->get("historic");
-        $hist[$entity] = strtotime('now');
+        $hist[$entity] = strtotime('now') . "-" . rand(1000000, 9999999);
         $json->save("historic", $hist);
 
         $store = new Json("update/{$entity}");
