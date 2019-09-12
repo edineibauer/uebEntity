@@ -72,20 +72,10 @@ class React
                 $dados[$meta->getColumn()] = null;
         }
 
-        if ($action === "delete") {
-            $ids = [];
-            foreach ($old as $item) {
-                if (!in_array($item['id'], $ids))
-                    $ids[] = $item["id"];
-            }
-
-            $dados = ['db_action' => "delete", "id" => $ids];
-        }
-
         $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados, $old);
 
         if ($action === "delete") {
-            $store->save($hist[$entity], $dados);
+            $store->save($hist[$entity], array_merge(['db_action' => "delete"], $dados));
 
         } elseif ($action === "update") {
             foreach ($old as $item)
@@ -108,7 +98,7 @@ class React
         if ($action === "delete") {
             foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
                 $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
-                if ($dadosE['db_action'] !== "delete" && in_array($dadosE['id'], $dados['id']))
+                if ($dadosE['db_action'] !== "delete" && $dadosE['id'] == $dados['id'])
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
             }
         }

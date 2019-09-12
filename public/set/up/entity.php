@@ -14,19 +14,16 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
     foreach ($dados as $i => $dado) {
         $action = $dado['db_action'];
         if ($action === "delete") {
-            $where = "";
-            if (is_array($dado['id'])) {
-                foreach ($dado['id'] as $item)
-                    $where .= (empty($where) ? "WHERE id = {$item}" : " || id = {$item}");
 
-            } elseif (is_numeric($dado['id'])) {
-                $where = "WHERE id = {$dado['id']}";
+            if (is_numeric($dado['id'])) {
+                $del->exeDelete($entity, "WHERE id = {$dado['id']}");
+            } else {
+                $data['data']['error'] += 1;
             }
-
-            $del->exeDelete($entity, $where);
 
             $dado['id_old'] = $dado['id'];
             $data['data']['data'][] = $dado;
+
         } else {
 
             $registro = $dado;
