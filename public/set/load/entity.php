@@ -15,7 +15,8 @@ $limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT);
 $limit = !empty($limit) && $limit > 0 ? $limit : (int) LIMITOFFLINE;
 $offset = filter_input(INPUT_POST, 'offset', FILTER_VALIDATE_INT);
 
-$historicFront = filter_input(INPUT_POST, 'historic', FILTER_VALIDATE_INT);
+$historicFront = filter_input(INPUT_POST, 'historic', FILTER_DEFAULT);
+$historicFrontTime = (int) (!empty($historicFront) ? explode("-", $historicFront)[0] : 0 );
 $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
 $permissoes = Config::getPermission();
 $json = new Json();
@@ -26,12 +27,14 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
 
     //preenche caso não tenha nada de informação
     if (empty($hist[$entity])) {
-        $hist[$entity] = strtotime('now');
+        $hist[$entity] = strtotime('now') . "-" . rand(1000000, 9999999);
         $json->save("historic", $hist);
     }
 
+    $histTime = (int) explode("-", $hist[$entity])[0];
+
     //verifica se há alterações nessa entidade que não forão recebidas pelo app, caso tenha, atualiza os dados
-    if (empty($historicFront) || ($historicFront < $hist[$entity] && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
+    if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
         //download all data
 
         /**
@@ -137,13 +140,14 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
 
-    } elseif ($historicFront < $hist[$entity]) {
+    } elseif ($historicFrontTime < $histTime) {
         //download updates
         $data['data']['data'] = [];
         foreach (Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $update) {
-            $historicUpdate = (int)str_replace('.json', '', $update);
-            if ($historicFront < $historicUpdate) {
-                $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), true);
+            $historicUpdate = str_replace('.json', '', $update);
+            $historicUpdateTime = (int) explode("-", $historicUpdate)[0];
+            if ($historicFrontTime < $historicUpdateTime) {
+                $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), !0);
                 if (!empty($dadosUp))
                     $data['data']['data'][] = $dadosUp;
             }
