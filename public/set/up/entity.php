@@ -25,12 +25,14 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                     function deleteImages(array $data)
                     {
                         foreach ($data as $image) {
-                            if (file_exists(PATH_HOME . str_replace(HOME, '', $image['url'])))
+                            if (!empty($image['url']) && file_exists(PATH_HOME . str_replace(HOME, '', $image['url'])))
                                 unlink(PATH_HOME . str_replace(HOME, '', $image['url']));
 
-                            foreach ($image['urls'] as $url) {
-                                if (file_exists(PATH_HOME . str_replace(HOME, '', $url)))
-                                    unlink(PATH_HOME . str_replace(HOME, '', $url));
+                            if(!empty($image['urls']) && is_array($image['urls'])) {
+                                foreach ($image['urls'] as $url) {
+                                    if (file_exists(PATH_HOME . str_replace(HOME, '', $url)))
+                                        unlink(PATH_HOME . str_replace(HOME, '', $url));
+                                }
                             }
                         }
                     }
@@ -41,22 +43,26 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
 
                         foreach ($dic->getDicionario() as $item) {
                             if ($item->getKey() === "source" && !empty($data[$item->getColumn()])) {
+                                $imageData = [];
                                 if (Check::isJson($data[$item->getColumn()]))
                                     $imageData = json_decode($data[$item->getColumn()], !0);
                                 elseif (is_array($data[$item->getColumn()]))
                                     $imageData = $data[$item->getColumn()];
 
-                                if (is_array($imageData))
+                                if (!empty($imageData) && is_array($imageData))
                                     deleteImages($imageData);
                             } elseif ($item->getKey() === "relation" && $item->getFormat() !== "list" && !empty($data[$item->getColumn()])) {
+                                $dataRelation = [];
                                 if (Check::isJson($data[$item->getColumn()]))
                                     $dataRelation = json_decode($data[$item->getColumn()], !0);
                                 elseif (is_array($data[$item->getColumn()]))
                                     $dataRelation = $data[$item->getColumn()];
 
-                                foreach ($dataRelation as $json) {
-                                    if (!empty($json) && is_array($json))
-                                        checkEntityImageDelete($item->getRelation(), $json);
+                                if (!empty($dataRelation) && is_array($dataRelation)) {
+                                    foreach ($dataRelation as $json) {
+                                        if (!empty($json) && is_array($json))
+                                            checkEntityImageDelete($item->getRelation(), $json);
+                                    }
                                 }
                             }
                         }
