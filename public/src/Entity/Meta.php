@@ -690,6 +690,25 @@ class Meta
     }
 
     /**
+     * @param string $url
+     * @return bool
+     */
+    private function urlExists(string $url) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($code == 200) {
+            $status = true;
+        } else {
+            $status = false;
+        }
+        curl_close($ch);
+        return $status;
+    }
+
+    /**
      * @param array $value
      * @return array|mixed|string
      */
@@ -753,6 +772,37 @@ class Meta
                             $value[$i]['url'] = HOME . $dir . $nameFile;
                             $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
+
+                    } elseif (!empty($item['url']) && preg_match("/^http/i", $item['url'])) {
+
+                        //import registros
+                        if($this->urlExists($item['url'])) {
+                            $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                            $isImage = preg_match('/^image\//i', $item['fileType']);
+                            $nameFile = pathinfo($item['url'], PATHINFO_FILENAME) . "-" . strtotime('now') . "." . pathinfo($item['url'], PATHINFO_EXTENSION);
+
+                            copy($item['url'], PATH_HOME . $dir . $nameFile);
+                            $value[$i]['url'] = HOME . $dir . $nameFile;
+
+                            if ($isImage) {
+                                $image = WideImage::load(PATH_HOME . $dir . $nameFile);
+                                $image->resize(700)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                                $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "500/" . $nameFile);
+                                $image->resize(1000, 300)->crop('center', 'center', 300, 300)->saveToFile(PATH_HOME . $dir . "300/" . $nameFile);
+                                $image->resize(200)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                                $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "100/" . $nameFile);
+
+                                $value[$i]['urls'] = [
+                                    '100' => HOME . $dir . "100/" . $nameFile,
+                                    'thumb' => HOME . $dir . "thumb/" . $nameFile,
+                                    '300' => HOME . $dir . "300/" . $nameFile,
+                                    '500' => HOME . $dir . "500/" . $nameFile,
+                                    'medium' => HOME . $dir . "medium/" . $nameFile
+                                ];
+                            }
+                            $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
+                        }
+
                     } elseif (empty($item['url']) || !is_string($item['url'])) {
                         $value[$i]['url'] = null;
                         $value[$i]['image'] = HOME . "assetsPublic/img/file.png";
