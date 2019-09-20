@@ -773,7 +773,8 @@ class Meta
                             $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
 
-                    } elseif (!empty($item['url']) && preg_match("/^http/i", $item['url'])) {
+                        //1===0 desativa isso pois na atualização ele fica recriando os uploads
+                    } elseif (1===0 && !empty($item['url']) && preg_match("/^http/i", $item['url'])) {
 
                         //import registros
                         if($this->urlExists($item['url'])) {
