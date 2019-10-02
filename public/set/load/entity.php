@@ -8,6 +8,8 @@ use \Config\Config;
 use \Conn\SqlCommand;
 
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$id = is_numeric($id) && $id > 0 ? (int) $id : null;
 $filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
 $order = filter_input(INPUT_POST, 'order', FILTER_DEFAULT);
 $reverse = filter_input(INPUT_POST, 'reverse', FILTER_VALIDATE_BOOLEAN);
@@ -96,7 +98,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             return $result;
         }
 
-        $where = "WHERE id > 0";
+        $where = ($id ? "WHERE id = {$id}" : "WHERE id > 0");
 
         // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
         if(!empty($setor) && $setor !== "admin" && $setor !== "0") {
@@ -133,9 +135,14 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             }
         }
 
-        $sql = new SqlCommand();
-        $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
-        $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? $sql->getResult()[0]['total'] : 0;
+        if($id) {
+            $data['data']['total'] = 1;
+        }  else {
+            $sql = new SqlCommand();
+            $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
+            $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? $sql->getResult()[0]['total'] : 0;
+
+        }
         $data['data']['data'] = $results;
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
