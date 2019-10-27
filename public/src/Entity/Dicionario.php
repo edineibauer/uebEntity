@@ -487,6 +487,8 @@ class Dicionario
                     $user['password'] = $dados[$meta['column']];
                 elseif ($meta['format'] === "status" && isset($dados[$meta['column']]))
                     $user['status'] = $dados[$meta['column']];
+                elseif ($meta['format'] === "source_list" && in_array(["valor" => "png", "representacao" => "png"] ,$meta['allow']['options']) && isset($dados[$meta['column']]))
+                    $user['imagem'] = $dados[$meta['column']];
             }
 
             $read = new Read();
