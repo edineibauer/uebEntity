@@ -123,9 +123,11 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 $result['db_error'] = $id;
                 $result['id_old'] = $idOld;
 
-                $store = new Json("error/{$entity}");
-                $store->setVersionamento(!1);
-                $store->save(strtotime('now'), $result);
+                if(empty($id) || !is_array($id)) {
+                    $store = new Json("error/{$entity}");
+                    $store->setVersionamento(!1);
+                    $store->save(strtotime('now'), $result);
+                }
 
                 $data['data']['data'][] = $result;
                 $data['data']['error'] += 1;
