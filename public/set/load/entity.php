@@ -42,10 +42,10 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         /**
          * @param string $entity
          * @param array $filter
+         * @param \Entity\Dicionario $dicionario
          * @return string
          */
-        function exeReadApplyFilter(string $entity, array $filter) {
-            $dicionario = Metadados::getDicionario($entity);
+        function exeReadApplyFilter(string $entity, array $filter, \Entity\Dicionario $dicionario) {
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
@@ -98,6 +98,8 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             return $result;
         }
 
+        $dicionario = Metadados::getDicionario($entity);
+        $info = Metadados::getInfo($entity);
         $where = ($id ? "WHERE id = {$id}" : "WHERE id > 0");
 
         // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
@@ -110,16 +112,12 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         }
 
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
-        if($where === "WHERE id > 0") {
-            $info = Metadados::getInfo($entity);
-            if ($setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
-                $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
-
-        }
+        if($where === "WHERE id > 0" && $setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
+            $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
 
         $filterResult = "";
         if(!empty($filter))
-            $filterResult = exeReadApplyFilter($entity, $filter);
+            $filterResult = exeReadApplyFilter($entity, $filter, $dicionario);
         $where .= $filterResult;
 
         $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
@@ -128,10 +126,22 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         $read->exeRead($entity, $where);
         $results = $read->getResult() ?? [];
         if(!empty($results)) {
+            //obtém nome da coluna da senha
+            if(!empty($info['password'])) {
+                foreach ($dicionario as $id => $item) {
+                    if($id == $info['password']) {
+                        $columnPassword = $item['column'];
+                        break;
+                    }
+                }
+            }
+
             foreach ($results as $i => $result) {
                 $results[$i]['db_action'] = "create";
-                if($entity === "usuarios")
-                    $results[$i]['password'] = "";
+
+                //se tiver senha, exclui valor
+                if(isset($columnPassword))
+                    $results[$i][$columnPassword] = null;
             }
         }
 
