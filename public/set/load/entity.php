@@ -42,10 +42,10 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         /**
          * @param string $entity
          * @param array $filter
-         * @param \Entity\Dicionario $dicionario
+         * @param $dicionario
          * @return string
          */
-        function exeReadApplyFilter(string $entity, array $filter, \Entity\Dicionario $dicionario) {
+        function exeReadApplyFilter(string $entity, array $filter, $dicionario) {
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
