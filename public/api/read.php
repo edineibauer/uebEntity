@@ -17,7 +17,7 @@ if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
     if($read->getResult())
         $result = $read->getResult();
 
-    $data['data'] = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    $data['data'] = $result;
 
 } else {
     $data = ['response' => 2, 'error' => 'entidade não existe'];
