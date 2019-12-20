@@ -1,6 +1,10 @@
 <?php
 
-$var = explode("/", str_replace("registros/", "", $_GET['data']));
+/**
+ * Alias to get.php
+ */
+
+$var = explode("/", str_replace("read/", "", $_GET['data']));
 $entity = $var[0];
 if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
 
