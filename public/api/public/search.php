@@ -1,7 +1,7 @@
 <?php
 
 $var = explode("/", str_replace("search/", "", $_GET['data']));
-$entity = $var[0];
+$entity = strip_tags(trim($var[0]));
 if (!empty($var[1])) {
     $campo = strip_tags(trim($var[1]));
     $busca = strip_tags(trim($var[2]));
