@@ -7,9 +7,6 @@ if (!empty($var[1])) {
     $busca = strip_tags(trim($var[2]));
     if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
 
-        /**
-         * Se anonimo tiver permissão para leitura
-         */
         $result = [];
         $limite = $var[3] ?? 100000000;
         $offset = $var[4] ?? 0;
