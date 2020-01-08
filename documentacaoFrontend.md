@@ -8,7 +8,7 @@
     podendo apenas ser acessados informando uma KEY (chave de acessso), 
     definida e fornecida pelo administrador.
     
-> ####As consultas privadas seguem o mesmo modelo das consultas Públicas, exceto que:
+> As consultas privadas seguem o mesmo modelo das consultas Públicas, exceto que:
 
 >utilizam a rota: **DOMINIO**/api/... em vez de **DOMINIO**/app/...
 
@@ -104,7 +104,7 @@
     as permissões do usuário que esta acessando/executando o comando, retornando 
     apenas dados que o usuário tem acesso/permissão.
     
-> ####Toda a função de acesso ao indexedDb retorna uma '_Promise_'
+> Toda a função de acesso ao indexedDb retorna uma '_Promise_'
 
 ## # LEITURA
     //ler todos os dados de uma entidade
