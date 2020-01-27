@@ -72,14 +72,13 @@ class React
                 $dados[$meta->getColumn()] = null;
         }
 
-        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados, $old);
+        $this->limitaAtualizaçõesArmazenadas($action, $entity, $dados);
 
         if ($action === "delete") {
             $store->save($hist[$entity], array_merge(['db_action' => "delete"], $dados));
 
         } elseif ($action === "update") {
-            foreach ($old as $item)
-                $store->save($hist[$entity], array_merge($item, ['db_action' => "update"], $dados));
+            $store->save($hist[$entity], array_merge($old, ['db_action' => "update"], $dados));
 
         } else {
             $store->save($hist[$entity], array_merge(['db_action' => "create"], $dados));
@@ -90,9 +89,8 @@ class React
      * @param string $action
      * @param string $entity
      * @param array $dados
-     * @param array $old
      */
-    private function limitaAtualizaçõesArmazenadas(string $action, string $entity, array $dados, array $old)
+    private function limitaAtualizaçõesArmazenadas(string $action, string $entity, array $dados)
     {
         //remove updates anteriores de registros que serão excluídos
         if ($action === "delete") {
@@ -104,7 +102,7 @@ class React
         }
 
         //se tiver mais que 100 resultados, deleta os acima de 100
-        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + ($action !== "create" ? count($old) : 1);
+        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + 1;
         if ($total > 99) {
             $excluir = 101 - $total;
             for ($i = 0; $i < $excluir; $i++) {
@@ -132,13 +130,11 @@ class React
         if ($action === "create") {
             $store->save($dados['id'], $dados);
         } else {
-            foreach ($old as $item) {
-                if ($action === "delete") {
-                    if (!empty($item['id']))
-                        $store->delete($item['id']);
-                } else {
-                    $store->save($item['id'], array_merge($item, $dados));
-                }
+            if ($action === "delete") {
+                if (!empty($old['id']))
+                    $store->delete($old['id']);
+            } else {
+                $store->save($old['id'], array_merge($old, $dados));
             }
         }
     }
