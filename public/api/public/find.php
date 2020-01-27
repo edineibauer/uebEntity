@@ -22,9 +22,14 @@ if (!empty($var[1])) {
             $offset = $var[4] ?? 0;
 
             $read = new \Conn\Read();
-            $read->exeRead($entity, "WHERE {$campo} = '{$busca}'");
+
+            $where = "WHERE {$campo} = '{$busca}'";
+            if($campo === "id")
+                $where = "WHERE id = {$busca}";
+
+            $read->exeRead($entity, $where);
             if ($read->getResult())
-                $result = $read->getResult();
+                $result = $read->getResult()[0];
 
             $data['data'] = $result;
         } else {
