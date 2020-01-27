@@ -12,12 +12,7 @@ if (!empty($var[1])) {
         $offset = $var[4] ?? 0;
 
         $read = new \Conn\Read();
-
-        $where = "WHERE {$campo} LIKE '%{$busca}%'";
-        if($campo === "id")
-            $where = "WHERE id = {$busca}";
-
-        $read->exeRead($entity, $where);
+        $read->exeRead($entity, "WHERE {$campo} = '{$busca}'");
         if ($read->getResult())
             $result = $read->getResult();
 

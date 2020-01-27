@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Busca registros com base em um campo e que possua parte do valor buscado
+ * Busca registros com base em um campo com valor exato
  */
 
 $var = explode("/", str_replace("search/", "", $_GET['data']));
@@ -22,12 +22,7 @@ if (!empty($var[1])) {
             $offset = $var[4] ?? 0;
 
             $read = new \Conn\Read();
-
-            $where = "WHERE {$campo} LIKE '%{$busca}%'";
-            if($campo === "id")
-                $where = "WHERE id = {$busca}";
-
-            $read->exeRead($entity, $where);
+            $read->exeRead($entity, "WHERE {$campo} = '{$busca}'");
             if ($read->getResult())
                 $result = $read->getResult();
 
