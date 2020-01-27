@@ -4,7 +4,7 @@
  * Busca registros com base em um campo com valor exato
  */
 
-$var = explode("/", str_replace("search/", "", $_GET['data']));
+$var = explode("/", str_replace("find/", "", $_GET['data']));
 $entity = strip_tags(trim($var[0]));
 if (!empty($var[1])) {
     $campo = strip_tags(trim($var[1]));
