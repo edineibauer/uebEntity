@@ -19,7 +19,7 @@ if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
         if($read->getResult())
             $result = $read->getResult();
 
-        $data['data'] = $result;
+        $data['data'] = [$entity => $result];
     } else {
         $data = ['response' => 2, 'error' => 'sem permissão de leitura para esta entidade'];
     }

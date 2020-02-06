@@ -31,7 +31,7 @@ if (!empty($var[1])) {
             if ($read->getResult())
                 $result = $read->getResult()[0];
 
-            $data['data'] = $result;
+            $data['data'] = [$entity => $result];
         } else {
             $data = ['response' => 2, 'error' => 'sem permissão de leitura para esta entidade'];
         }

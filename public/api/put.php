@@ -8,10 +8,10 @@ if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
 
     if(!empty($dados['id']) && is_numeric($dados['id'])) {
         //update
-        $data['data'] = \Helpers\Helper::postRequest(HOME . "set/up/entity", $dados);
+        $data['data'] = [$entity => \Helpers\Helper::postRequest(HOME . "set/up/entity", $dados)];
     } elseif(!empty($dados)) {
         //create
-        $data['data'] = \Helpers\Helper::postRequest(HOME . "set/up/entity", $dados);
+        $data['data'] = [$entity => \Helpers\Helper::postRequest(HOME . "set/up/entity", $dados)];
 
     } else {
         $data = ['response' => 2, 'error' => 'dados da entidade não foram submetidos via POST'];
