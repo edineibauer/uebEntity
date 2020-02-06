@@ -11,6 +11,7 @@ use Helpers\Helper;
 class Dicionario
 {
     private $entity;
+    private $dataUpdate;
     private $defaultMeta;
     private $dicionario = [];
     private $info;
@@ -38,6 +39,7 @@ class Dicionario
      */
     public function setData($data)
     {
+        $this->dataUpdate = $data;
         $this->defaultDicionarioData();
 
         // ID de dados na tabela
@@ -418,30 +420,27 @@ class Dicionario
             $dadosEntity = $this->getDataOnlyEntity();
             $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, (!empty($id) ? "update" : "create"));
 
-            if (!$this->getError()) {
+            if (!empty($id))
+                $data = $this->updateTableData($id, $dadosEntity);
+            elseif (!$this->getError())
+                $data = $this->createTableData($dadosEntity);
 
-                if (!empty($id))
-                    $data = $this->updateTableData($id, $dadosEntity);
-                elseif (!$this->getError())
-                    $data = $this->createTableData($dadosEntity);
+            if (!$this->getError() || !empty($id)) {
 
-                if (!$this->getError() || !empty($id)) {
+                $dadosEntity['id'] = (int) $this->search(0)->getValue();
 
-                    $dadosEntity['id'] = (int) $this->search(0)->getValue();
-
-                    if (!empty($data['error'])) {
-                        if (is_array($data['error'])) {
-                            foreach ($data['error'] as $column => $err) {
-                                if (is_string($column) && is_string($err) && $meta = $this->search($column)) {
-                                    $meta->setError($err);
-                                }
+                if (!empty($data['error'])) {
+                    if (is_array($data['error'])) {
+                        foreach ($data['error'] as $column => $err) {
+                            if (is_string($column) && is_string($err) && $meta = $this->search($column)) {
+                                $meta->setError($err);
                             }
-                        } else {
-                            $this->search(0)->setError($data['error']);
                         }
                     } else {
-                        $this->setData($this->search(0)->getValue());
+                        $this->search(0)->setError($data['error']);
                     }
+                } else {
+                    $this->setData($this->search(0)->getValue());
                 }
             }
         } else {
@@ -523,12 +522,14 @@ class Dicionario
     /**
      * @param int $id
      * @param array $dadosEntity
+     * @return |null
      */
     private function updateTableData(int $id, array $dadosEntity)
     {
         //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
+        $fieldsUpdate = array_keys($this->dataUpdate);
         foreach ($this->dicionario as $meta) {
-            if ($meta->getError() || !$meta->getUpdate())
+            if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $fieldsUpdate))
                 unset($dadosEntity[$meta->getColumn()]);
         }
 
