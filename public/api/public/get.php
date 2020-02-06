@@ -9,7 +9,7 @@ if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
     /**
      * Se anonimo tiver permissão para leitura
      */
-    if ($permission[0][$entity]['read'] || $_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['read']) {
+    if ($permission[0][$entity]['read'] || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['read']))) {
         $result = [];
         $limite = $var[1] ?? 100000000;
         $offset = $var[2] ?? 0;
