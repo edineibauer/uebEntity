@@ -25,7 +25,12 @@ $json = new Json();
 $hist = $json->get("historic");
 $data['data'] = ['historic' => 0];
 
-if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read'])) {
+/**
+ * Estou logado, não sou ADM, não tenho permissão de leitura, mas a entidade é o meu tipo de usuário
+ */
+$entityIsMySetor = ($setor !== "admin" && (isset($permissoes[$setor][$entity]['read']) && !$permissoes[$setor][$entity]['read']) && $setor !== "0" && $entity === $setor);
+
+if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permissoes[$setor][$entity]['read']) || $entityIsMySetor) {
 
     //preenche caso não tenha nada de informação
     if (empty($hist[$entity])) {
@@ -157,7 +162,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         $data['data']['tipo'] = 1;
         $data['data']['historic'] = $hist[$entity];
 
-    } elseif ($historicFrontTime < $histTime) {
+    } elseif (!$entityIsMySetor && $historicFrontTime < $histTime) {
         //download updates
         $data['data']['data'] = [];
         foreach (Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $update) {
