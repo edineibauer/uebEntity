@@ -407,7 +407,7 @@ class Dicionario
      */
     public function save()
     {
-        $id = $this->search(0)->getValue();
+        $id = (int) $this->search(0)->getValue();
         $passCheck = $this->search("format", "passwordRequired");
         if ($passCheck) {
             $d = new Dicionario("usuarios");
@@ -418,12 +418,30 @@ class Dicionario
             $this->checkDataToSave($id);
 
             $dadosEntity = $this->getDataOnlyEntity();
-            $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, (!empty($id) ? "update" : "create"));
+            if(!empty($id)) {
+                /**
+                 * Update
+                 */
 
-            if (!empty($id))
+                //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
+                $fieldsUpdate = array_keys($this->dataUpdate);
+                foreach ($this->dicionario as $meta) {
+                    if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $fieldsUpdate))
+                        unset($dadosEntity[$meta->getColumn()]);
+                }
+
+                $dadosEntity['id'] = $id;
+                $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "update");
                 $data = $this->updateTableData($id, $dadosEntity);
-            elseif (!$this->getError())
+
+            } else {
+
+                /**
+                 * Create
+                 */
+                $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "create");
                 $data = $this->createTableData($dadosEntity);
+            }
 
             if (!$this->getError() || !empty($id)) {
 
@@ -459,6 +477,10 @@ class Dicionario
     {
         $info = Metadados::getInfo($entity);
         if (!empty($info['user']) && $info['user'] === 1) {
+
+            /**
+             * Obtém o ID de usuário
+             */
             if($action === "update") {
                 $read = new Read();
                 $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}");
@@ -526,13 +548,6 @@ class Dicionario
      */
     private function updateTableData(int $id, array $dadosEntity)
     {
-        //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
-        $fieldsUpdate = array_keys($this->dataUpdate);
-        foreach ($this->dicionario as $meta) {
-            if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $fieldsUpdate))
-                unset($dadosEntity[$meta->getColumn()]);
-        }
-
         if (!empty($dadosEntity)) {
             $up = new Update();
             $up->exeUpdate($this->entity, $dadosEntity, "WHERE id = :id", "id={$id}");
