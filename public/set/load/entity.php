@@ -125,6 +125,12 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             $filterResult = exeReadApplyFilter($entity, $filter, $dicionario);
         $where .= $filterResult;
 
+        /**
+         * Se não tiver permissão, mas for meus dados, permite
+         */
+        if($entityIsMySetor)
+            $where .= " && id = " . $_SESSION['userlogin']['setorData']['id'];
+
         $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
         $read = new Read();
