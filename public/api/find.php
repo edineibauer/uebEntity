@@ -19,7 +19,7 @@ if (!empty($var[1])) {
 
         $read->exeRead($entity, $where);
         if ($read->getResult())
-            $result = $read->getResult()[0];
+            $result = $read->getResult();
 
         $data['data'] = [$entity => $result];
 
