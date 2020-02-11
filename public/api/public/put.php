@@ -4,23 +4,32 @@ $var = explode("/", str_replace("put/", "", $_GET['data']));
 $entity = $var[0];
 $dados = [];
 
-if(empty($_POST)) {
+if (empty($_POST)) {
     $putfp = fopen('php://input', 'r');
     $putdata = '';
     while ($dataRead = fread($putfp, 1024))
         $putdata .= $dataRead;
     fclose($putfp);
-    parse_str($putdata, $dados);
+
+    if (getallheaders()['Content-Type'] === "application/json") {
+        $dados = json_decode($putdata, !0);
+    } else {
+        parse_str($putdata, $dados);
+    }
 }
 
-if(empty($dados) && !empty($_POST))
+if (empty($dados) && !empty($_POST)) {
     $dados = $_POST;
 
-if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
+    if (getallheaders()['Content-Type'] === "application/json")
+        $dados = json_decode($putdata, !0);
+}
+
+if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
 
     $permission = \Config\Config::getPermission();
 
-    if(!empty($dados['id']) && is_numeric($dados['id'])) {
+    if (!empty($dados['id']) && is_numeric($dados['id'])) {
         //update
 
         /**
@@ -31,7 +40,7 @@ if(file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
         } else {
             $data = ['response' => 2, 'error' => 'sem permissão de atualização para esta entidade'];
         }
-    } elseif(!empty($dados)) {
+    } elseif (!empty($dados)) {
         //create
 
         /**
