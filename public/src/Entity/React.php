@@ -96,7 +96,7 @@ class React
         if ($action === "delete") {
             foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
                 $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
-                if ($dadosE['db_action'] !== "delete" && $dadosE['id'] == $dados['id'])
+                if ($dadosE['db_action'] !== "delete" && !empty($dadosE['id']) && !empty($dados['id']) && $dadosE['id'] == $dados['id'])
                     unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
             }
         }
