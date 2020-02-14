@@ -171,12 +171,13 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
     } elseif (!$entityIsMySetor && $historicFrontTime < $histTime) {
         //download updates
         $data['data']['data'] = [];
+        $info = Metadados::getInfo($entity);
         foreach (Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $update) {
             $historicUpdate = str_replace('.json', '', $update);
             $historicUpdateTime = (int) explode("-", $historicUpdate)[0];
             if ($historicFrontTime < $historicUpdateTime) {
                 $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), !0);
-                if (!empty($dadosUp))
+                if(!empty($dadosUp) && ($setor === "admin" || empty($info['autor']) || ($info['autor'] === 2 && $dadosUp['ownerpub'] === $_SESSION['userlogin']['id'])))
                     $data['data']['data'][] = $dadosUp;
             }
         }
