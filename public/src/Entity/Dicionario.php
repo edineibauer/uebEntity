@@ -122,7 +122,7 @@ class Dicionario
                     $data[$meta->getColumn()] = $lista;
                 }
             } elseif ($meta->getType() === "json") {
-                $data[$meta->getColumn()] = json_decode($meta->getValue(), true);
+                $data[$meta->getColumn()] = (is_string($meta->getValue()) ? json_decode($meta->getValue(), true) : (is_array($meta->getValue()) ? $meta->getValue() : []));
             } else {
                 $data[$meta->getColumn()] = $meta->getValue();
             }
