@@ -37,7 +37,7 @@ if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
          */
         if ($permission[0][$entity]['update'] || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['update']))) {
 
-            if(isset($dados[$entity]) && is_object($dados[$entity])) {
+            if(isset($dados[$entity]) && is_array($dados[$entity])) {
                 foreach ($dados[$entity] as $dado) {
                     //create or update
                     $data['data'] = Entity\Entity::add($entity, $dado);
@@ -58,7 +58,7 @@ if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
          */
         if ($permission[0][$entity]['create'] || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['create']))) {
 
-            if(isset($dados[$entity]) && is_object($dados[$entity])) {
+            if(isset($dados[$entity]) && is_array($dados[$entity])) {
                 foreach ($dados[$entity] as $dado) {
                     //create or update
                     $data['data'] = Entity\Entity::add($entity, $dado);

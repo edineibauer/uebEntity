@@ -27,7 +27,7 @@ if (empty($dados) && !empty($_POST)) {
 
 if (file_exists(PATH_HOME . "entity/cache/{$entity}.json") && !empty($dados)) {
 
-    if(isset($dados[$entity]) && is_object($dados[$entity])) {
+    if(isset($dados[$entity]) && is_array($dados[$entity])) {
         foreach ($dados[$entity] as $dado) {
             //create or update
             $data['data'] = Entity\Entity::add($entity, $dado);
