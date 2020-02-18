@@ -26,8 +26,17 @@ if (empty($dados) && !empty($_POST)) {
 }
 
 if (file_exists(PATH_HOME . "entity/cache/{$entity}.json") && !empty($dados)) {
-    //create or update
-    $data['data'] = Entity\Entity::add($entity, $dados);
+
+    if(isset($dados[$entity]) && is_object($dados[$entity])) {
+        foreach ($dados[$entity] as $dado) {
+            //create or update
+            $data['data'] = Entity\Entity::add($entity, $dado);
+        }
+    } else {
+        //create or update
+        $data['data'] = Entity\Entity::add($entity, $dados);
+    }
+
 } else {
     $data = ['response' => 2, 'error' => empty($dados) ? "dados não foram recebidos via POST" : 'entidade não existe'];
 }
