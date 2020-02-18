@@ -97,8 +97,8 @@ class Meta
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $value = (!empty($value) ? (int) $value : null);
-        elseif ($this->key === "publisher")
-            $this->error = "Precisa estar Logado";
+//        elseif ($this->key === "publisher")
+//            $this->error = "Precisa estar Logado";
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
         elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "percent", "card_number"]))
