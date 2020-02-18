@@ -246,6 +246,10 @@ class Validate
 
         } elseif ($m->getFormat() === "valor") {
             $value = $m->getValue();
+
+            if(is_float($value) || is_int($value))
+                $value = (string) $value;
+
             $f = "";
             for($i=0; $i < strlen($value); $i ++) {
                 if(is_numeric($value[$i]))

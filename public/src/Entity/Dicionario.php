@@ -390,7 +390,7 @@ class Dicionario
         //verifica se possui owner ou autor
         if (!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
             if (empty($id))
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue(($this->info['user'] === 2 ? $_SESSION['userlogin']['groupData']['id'] : $_SESSION['userlogin']['id']), !1);
+                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue((!empty($_SESSION['userlogin']['id']) ? $_SESSION['userlogin']['id'] : null), !1);
             else
                 unset($this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]);
         }
