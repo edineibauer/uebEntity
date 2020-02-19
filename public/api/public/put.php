@@ -22,7 +22,7 @@ if (empty($dados) && !empty($_POST)) {
     $dados = $_POST;
 
     if (getallheaders()['Content-Type'] === "application/json")
-        $dados = json_decode($putdata, !0);
+        $dados = json_decode($dados, !0);
 }
 
 if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
