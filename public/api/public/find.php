@@ -16,7 +16,7 @@ if (!empty($var[1])) {
         /**
          * Se anonimo tiver permissão para leitura
          */
-        if ($permission[0][$entity]['read'] || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['read']))) {
+        if ((!empty($permission[0][$entity]) && $permission[0][$entity]['read']) || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['read']))) {
             $result = [];
             $limite = $var[3] ?? 100000000;
             $offset = $var[4] ?? 0;

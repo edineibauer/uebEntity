@@ -35,7 +35,7 @@ if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
         /**
          * Se anonimo tiver permissão para leitura
          */
-        if ($permission[0][$entity]['update'] || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['update']))) {
+        if ((!empty($permission[0][$entity]) && $permission[0][$entity]['update']) || (!empty($_SESSION['userlogin']) && ($_SESSION['userlogin']['setor'] === "admin" || $permission[$_SESSION['userlogin']['setor']][$entity]['update']))) {
 
             if(isset($dados[$entity]) && is_array($dados[$entity])) {
                 foreach ($dados[$entity] as $dado) {
