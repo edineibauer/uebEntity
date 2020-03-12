@@ -182,6 +182,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
                 if($meta['format'] === "list" && $meta['relation'] === $setor) {
                     $relationSetor = !0;
                     $relationSetorColumn = $meta['column'];
+                    break;
                 }
             }
         }
