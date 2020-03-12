@@ -169,6 +169,23 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         $data['data']['historic'] = $hist[$entity];
 
     } elseif (!$entityIsMySetor && $historicFrontTime < $histTime) {
+
+        /**
+         * Verifica se tem colunas relacionadas ao meu usuário, ao qual vinculam o registro ao meu usuário
+         * se tiver, considera como registro meu
+         */
+        $relationSetor = !1;
+        $relationSetorColumn = "";
+        if(!empty($setor) && $setor !== "admin" && $setor !== "0" && !empty($_SESSION['userlogin']['setorData']['id'])) {
+            $metadados = Metadados::getDicionario($entity);
+            foreach ($metadados as $col => $meta) {
+                if($meta['format'] === "list" && $meta['relation'] === $setor) {
+                    $relationSetor = !0;
+                    $relationSetorColumn = $meta['column'];
+                }
+            }
+        }
+
         //download updates
         $data['data']['data'] = [];
         $info = Metadados::getInfo($entity);
@@ -177,7 +194,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             $historicUpdateTime = (int) explode("-", $historicUpdate)[0];
             if ($historicFrontTime < $historicUpdateTime) {
                 $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), !0);
-                if(!empty($dadosUp) && ($setor === "admin" || empty($info['autor']) || ($info['autor'] === 2 && $dadosUp['ownerpub'] === $_SESSION['userlogin']['id'])))
+                if(!empty($dadosUp) && ($setor === "admin" || empty($info['autor']) || ($relationSetor && $dadosUp[$relationSetorColumn] === $_SESSION['userlogin']['setorData']['id']) || ($info['autor'] === 2 && $dadosUp['ownerpub'] === $_SESSION['userlogin']['id'])))
                     $data['data']['data'][] = $dadosUp;
             }
         }
