@@ -407,7 +407,7 @@ class Dicionario
      */
     public function save()
     {
-        $id = (int) $this->search(0)->getValue();
+        $id = (int)$this->search(0)->getValue();
         $passCheck = $this->search("format", "passwordRequired");
         if ($passCheck) {
             $d = new Dicionario("usuarios");
@@ -418,7 +418,7 @@ class Dicionario
             $this->checkDataToSave($id);
 
             $dadosEntity = $this->getDataOnlyEntity();
-            if(!empty($id)) {
+            if (!empty($id)) {
                 /**
                  * Update
                  */
@@ -430,22 +430,28 @@ class Dicionario
                         unset($dadosEntity[$meta->getColumn()]);
                 }
 
-                $dadosEntity['id'] = $id;
-                $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "update");
-                $data = $this->updateTableData($id, $dadosEntity);
+                if (!$this->getError()) {
+                    $dadosEntity['id'] = $id;
+                    $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "update");
+                    if (!$this->getError())
+                        $data = $this->updateTableData($id, $dadosEntity);
+                }
 
             } else {
 
                 /**
                  * Create
                  */
-                $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "create");
-                $data = $this->createTableData($dadosEntity);
+                if (!$this->getError()) {
+                    $dadosEntity = $this->createUpdateUser($this->entity, $dadosEntity, "create");
+                    if (!$this->getError())
+                        $data = $this->createTableData($dadosEntity);
+                }
             }
 
             if (!$this->getError() || !empty($id)) {
 
-                $dadosEntity['id'] = (int) $this->search(0)->getValue();
+                $dadosEntity['id'] = (int)$this->search(0)->getValue();
 
                 if (!empty($data['error'])) {
                     if (is_array($data['error'])) {
@@ -481,11 +487,11 @@ class Dicionario
             /**
              * Obtém o ID de usuário
              */
-            if($action === "update") {
+            if ($action === "update") {
                 $read = new Read();
                 $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}");
-                if($read->getResult() && !empty($read->getResult()[0]['usuarios_id']))
-                    $dados['usuarios_id'] = (int) $read->getResult()[0]['usuarios_id'];
+                if ($read->getResult() && !empty($read->getResult()[0]['usuarios_id']))
+                    $dados['usuarios_id'] = (int)$read->getResult()[0]['usuarios_id'];
             }
 
             $action = (empty($dados['usuarios_id']) ? "create" : $action);
@@ -508,7 +514,7 @@ class Dicionario
                     $user['password'] = $dados[$meta['column']];
                 elseif ($meta['format'] === "status" && isset($dados[$meta['column']]))
                     $user['status'] = $dados[$meta['column']];
-                elseif ($meta['format'] === "source_list" && in_array(["valor" => "png", "representacao" => "png"] ,$meta['allow']['options']) && isset($dados[$meta['column']]))
+                elseif ($meta['format'] === "source_list" && in_array(["valor" => "png", "representacao" => "png"], $meta['allow']['options']) && isset($dados[$meta['column']]))
                     $user['imagem'] = $dados[$meta['column']];
             }
 
@@ -518,15 +524,15 @@ class Dicionario
                 if (!$read->getResult()) {
                     $create = new Create();
                     $create->exeCreate("usuarios", $user);
-                    if($create->getResult())
-                        $dados['usuarios_id'] = $user['id'] = (int) $create->getResult();
+                    if ($create->getResult())
+                        $dados['usuarios_id'] = $user['id'] = (int)$create->getResult();
                 } else {
                     $dados['usuarios_id'] = $read->getResult()[0]['id'];
                 }
 
             } elseif ($action === "update" && !empty($user)) {
                 $read->exeRead("usuarios", "WHERE id = :idf", "idf={$dados['usuarios_id']}");
-                if($read->getResult()) {
+                if ($read->getResult()) {
                     $newData = Helper::arrayMerge($read->getResult()[0], $user);
                     $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}");
                     if (!$read->getResult()) {
