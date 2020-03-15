@@ -426,8 +426,11 @@ class Dicionario
                 //Remove metas com erros, metas que não podem ser atualizadas e metas que não pertencem ao escopo
                 $fieldsUpdate = array_keys($this->dataUpdate);
                 foreach ($this->dicionario as $meta) {
-                    if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $fieldsUpdate))
+                    if ($meta->getError() || !$meta->getUpdate() || !in_array($meta->getColumn(), $fieldsUpdate)) {
                         unset($dadosEntity[$meta->getColumn()]);
+                        if(isset($this->getError()[$this->entity][$meta->getColumn()]))
+                            $meta->setError("");
+                    }
                 }
 
                 if (!$this->getError()) {
