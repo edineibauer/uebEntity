@@ -56,10 +56,6 @@ class Metadados
         $mode = Helper::arrayMerge($types["default"], $types['list']);
         $mode['nome'] = "Usuário Acesso Vínculo";
         $mode['column'] = "usuarios_id";
-        $mode['format'] = "list";
-        $mode['type'] = "int";
-        $mode['group'] = "one";
-        $mode['key'] = "relation";
         $mode['form'] = "false";
         $mode['datagrid'] = "false";
         $mode['unique'] = "false";
