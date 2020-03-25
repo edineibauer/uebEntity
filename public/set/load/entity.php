@@ -117,7 +117,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         }
 
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
-        if($where === "WHERE id > 0" && $setor !== "admin" && !empty($info['autor']) && $info['autor'] === 2)
+        if($where === "WHERE id > 0" && $setor !== "admin" && $setor !== "0" && !empty($info['autor']) && $info['autor'] === 2)
             $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
 
         $filterResult = "";
