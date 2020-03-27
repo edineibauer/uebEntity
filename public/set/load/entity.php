@@ -139,8 +139,8 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         if(!empty($results)) {
             //obtém nome da coluna da senha
             if(!empty($info['password'])) {
-                foreach ($dicionario as $id => $item) {
-                    if($id == $info['password']) {
+                foreach ($dicionario as $idDicionario => $item) {
+                    if($idDicionario == $info['password']) {
                         $columnPassword = $item['column'];
                         break;
                     }
@@ -161,7 +161,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         }  else {
             $sql = new SqlCommand();
             $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
-            $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? $sql->getResult()[0]['total'] : 0;
+            $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? (int) $sql->getResult()[0]['total'] : 0;
 
         }
         $data['data']['data'] = $results;
