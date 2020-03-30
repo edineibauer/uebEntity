@@ -110,10 +110,20 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
         if(!empty($setor) && $setor !== "admin" && $setor !== "0") {
             $metadados = Metadados::getDicionario($entity);
+
+            $count = 0;
             foreach ($metadados as $col => $meta) {
-                if($meta['format'] === "list" && $meta['relation'] === $setor)
-                    $where .= " && {$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
+                if($meta['format'] === "list" && $meta['relation'] === $setor) {
+                    if($count === 0)
+                        $where .= " && ({$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
+                    else
+                        $where .= " || {$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
+                    $count++;
+                }
             }
+
+            if($count > 0)
+                $where .= ")";
         }
 
         //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
