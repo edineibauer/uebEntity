@@ -110,7 +110,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 $dic = new \Entity\Dicionario($entity);
                 foreach ($dic->getDicionario() as $i => $meta) {
                     if($meta->getFormat() === "password" || $meta->getFormat() === "passwordRequired") {
-                        $result[$meta->getColumn()] = $meta->getFormat() === "password" ? $dado[$meta->getColumn()] : "";
+                        $result[$meta->getColumn()] = $meta->getFormat() === "password" ? $dado[$meta->getColumn()] ?? "" : "";
                         unset($dados[$meta->getColumn()]);
                     }
                 }
