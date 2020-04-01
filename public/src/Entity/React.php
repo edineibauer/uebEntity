@@ -31,6 +31,9 @@ class React
         $data = ["data" => "", "response" => 1, "error" => ""];
         $setor = !empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0";
 
+        $this->log($action, $entity, $dados, $dadosOld);
+        $this->createUpdateSyncIndexedDb($action, $entity, $dados, $dadosOld);
+
         if (file_exists(PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php"))
             include PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php";
         elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
@@ -42,9 +45,6 @@ class React
             elseif (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php"))
                 include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
         }
-
-        $this->log($action, $entity, $dados, $dadosOld);
-        $this->createUpdateSyncIndexedDb($action, $entity, $dados, $dadosOld);
 
         $this->response = $data;
     }
@@ -58,9 +58,13 @@ class React
     private function createUpdateSyncIndexedDb(string $action, string $entity, array $dados, array $old)
     {
         //salva historico de alterações
+
+        $list = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}");
+        $id = (!empty($list) ? ((int) str_replace(".json", "", explode("-", $list[count($list) -1])[1])) + 1 : 1);
+
         $json = new Json();
         $hist = $json->get("historic");
-        $hist[$entity] = strtotime('now') . "-" . rand(1000000, 9999999);
+        $hist[$entity] = strtotime('now') . "-" . $id;
         $json->save("historic", $hist);
 
         $store = new Json("update/{$entity}");
