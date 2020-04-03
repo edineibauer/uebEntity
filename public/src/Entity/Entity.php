@@ -2,7 +2,10 @@
 
 namespace Entity;
 
-use Conn\Read;
+use \Helpers\Helper;
+use \Conn\Read;
+use \Config\Config;
+use \Conn\SqlCommand;
 
 class Entity extends EntityCreate
 {
