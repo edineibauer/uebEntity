@@ -8,7 +8,7 @@ $extensao = strip_tags(trim(filter_input(INPUT_POST, 'type', FILTER_DEFAULT)));
 $source = strip_tags(trim(filter_input(INPUT_POST, 'url', FILTER_DEFAULT)));
 
 $isImage = preg_match('/^image/i', $fileType);
-$dir = "uploads/tmp/" . $name . "." . ($isImage ? 'webp' : $extensao);
+$dir = "uploads/tmp/" . $name . "." . $extensao;
 
 \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads");
 \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads/tmp");
