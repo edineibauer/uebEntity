@@ -732,14 +732,16 @@ class Meta
                             list($type, $data) = explode(';', $item['url']);
                             list(, $data) = explode(',', $data);
                             $file_data = base64_decode(str_replace(' ', "+", $data));
-                            $isImage = preg_match('/^data:image\//i', $type);
+                            $isSvg =  $type === "data:image/svg";
+                            $isImage = preg_match('/^data:image\//i', $type) && !$isSvg;
                             $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
                             $nameFile = $item['name'] . "-" . strtotime('now') . "." . $item['type'];
                             file_put_contents(PATH_HOME . $dir . $nameFile, $file_data);
                         } else {
 
                             //move tmp to production
-                            $isImage = preg_match('/^image\//i', $item['fileType']);
+                            $isSvg = $item['type'] === "svg";
+                            $isImage = preg_match('/^image\//i', $item['fileType']) && !$isSvg;
                             $dirTmp = str_replace(HOME, "", $item['url']);
 
                             if(file_exists(PATH_HOME . $dirTmp)) {
@@ -754,12 +756,19 @@ class Meta
                                 $image = WideImage::load(PATH_HOME . $dir . $nameFile);
                                 $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
                                 $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+
+                                $value[$i]['urls'] = [
+                                    'thumb' => HOME . $dir . "thumb/" . $nameFile,
+                                    'medium' => HOME . $dir . "medium/" . $nameFile
+                                ];
+
+                            } else {
+                                $value[$i]['urls'] = [
+                                    'thumb' => HOME . $dir . "/" . $nameFile,
+                                    'medium' => HOME . $dir . "/" . $nameFile
+                                ];
                             }
 
-                            $value[$i]['urls'] = [
-                                'thumb' => HOME . $dir . "thumb/" . $nameFile,
-                                'medium' => HOME . $dir . "medium/" . $nameFile
-                            ];
                             $value[$i]['url'] = HOME . $dir . $nameFile;
                             $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
