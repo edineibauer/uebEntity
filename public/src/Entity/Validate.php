@@ -336,7 +336,7 @@ class Validate
     private static function checkSize(Meta $m)
     {
         if ($m->getSize() && in_array($m->getType(), ["varchar", "char", "tinytext", "text", "mediumtext", "longtext", "tinyint", "smallint", "mediumint", "int", "bigint"])) {
-            $length = strlen($m->getValue());
+            $length = mb_strlen($m->getValue(), 'utf8');
             if ($m->getType() === "varchar" && $length > $m->getSize()) {
                 if ($m->getDefault() === false)
                     $m->setError("tamanho máximo de caracteres excedido. Max {$m->getSize()}");
