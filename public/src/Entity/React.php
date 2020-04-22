@@ -60,7 +60,7 @@ class React
         //salva historico de alterações
 
         $list = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}");
-        $id = (!empty($list) ? ((int) str_replace(".json", "", explode("-", $list[count($list) -1])[1])) + 1 : 1);
+        $id = (!empty($list) ? (((int) str_replace(".json", "", explode("-", $list[count($list) -1])[1])) + 1) : 1);
 
         $json = new Json();
         $hist = $json->get("historic");
@@ -106,15 +106,13 @@ class React
         }
 
         //se tiver mais que 100 resultados, deleta os acima de 100
-        $total = count(Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}")) + 1;
-        if ($total > 99) {
-            $excluir = 101 - $total;
-            for ($i = 0; $i < $excluir; $i++) {
-                if (isset($total[$i])) {
-                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$total[$i]}");
-                } else {
-                    break;
-                }
+        $lista = \Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}");
+        $limite = 100;
+        if ((count($lista) + 1) > $limite) {
+            $totalExcluir = count($lista) - 100;
+            for ($i = 0; $i < $totalExcluir; $i++) {
+                if (isset($lista[$i]))
+                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$lista[$i]}");
             }
         }
     }
