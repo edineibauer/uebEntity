@@ -14,6 +14,7 @@ $filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT, FILTER_REQUIRE_ARRA
 $order = filter_input(INPUT_POST, 'order', FILTER_DEFAULT);
 $reverse = filter_input(INPUT_POST, 'reverse', FILTER_VALIDATE_BOOLEAN);
 $limit = filter_input(INPUT_POST, 'limit', FILTER_VALIDATE_INT);
+$limit = empty($limit) ? LIMITOFFLINE : $limit;
 $offset = filter_input(INPUT_POST, 'offset', FILTER_VALIDATE_INT);
 
 $historicFront = filter_input(INPUT_POST, 'historic', FILTER_DEFAULT);
