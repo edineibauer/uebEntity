@@ -15,7 +15,7 @@ class Metadados
      */
     public static function getDicionario(string $entity = null, bool $keepId = null, bool $keepStrings = null)
     {
-        if(empty($entity)) {
+        if (empty($entity)) {
             $list = [];
             foreach (Helper::listFolder(PATH_HOME . "entity/cache") as $entity) {
                 if ($entity !== "info" && preg_match("/\.json$/i", $entity)) {
@@ -29,26 +29,26 @@ class Metadados
         } elseif (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
             $data = json_decode(file_get_contents(PATH_HOME . "entity/cache/{$entity}.json"), !0);
 
-            if($keepId) {
+            if ($keepId) {
                 $data[0] = self::generatePrimary();
 
                 $info = self::getInfo($entity);
-                if(!empty($info['user']) && $info['user'] === 1)
+                if (!empty($info['user']) && $info['user'] === 1)
                     $data["999997"] = self::generateUser();
 
-                if(!empty($info['autor'])) {
+                if (!empty($info['autor'])) {
                     $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
 
-                    if($info['autor'] === 1)
+                    if ($info['autor'] === 1)
                         $data["999998"] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999998]);
-                    elseif($info['autor'] === 2)
+                    elseif ($info['autor'] === 2)
                         $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999]);
                 }
             } elseif (isset($data[0])) {
                 unset($data[0]);
             }
 
-            if(!$keepStrings) {
+            if (!$keepStrings) {
                 foreach ($data as $i => $datum) {
                     if ($datum['key'] === 'information')
                         unset($data[$i]);
@@ -114,6 +114,7 @@ class Metadados
                 "class" => "",
                 "style" => ""
             ],
+            "datagrid" => ["grid_relevant" => "", "grid_class" => "", "grid_style" => "", "grid_template" => ""],
             "select" => [],
             "filter" => []
         ];
@@ -154,7 +155,7 @@ class Metadados
      */
     public static function getInfo($entity)
     {
-        if(file_exists(PATH_HOME . "entity/cache/info/{$entity}.json"))
+        if (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json"))
             return Helper::convertStringToValueArray(json_decode(file_get_contents(PATH_HOME . "entity/cache/info/{$entity}.json"), !0));
 
         return null;
