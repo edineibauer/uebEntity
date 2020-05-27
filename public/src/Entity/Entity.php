@@ -60,8 +60,8 @@ class Entity extends EntityCreate
      */
     public static function loadData(string $entity, array $filter = [], string $order = null, bool $reverse = false, int $limit = 1000, int $offset = -1, string $historicFront = null)
     {
-        $limit = !empty($limit) && $limit > 0 ? $limit : (int) LIMITOFFLINE;
-        $historicFrontTime = (!empty($historicFront) ? (int) explode("-", $historicFront)[0] : 0);
+        $limit = !empty($limit) && $limit > 0 ? $limit : (int)LIMITOFFLINE;
+        $historicFrontTime = (!empty($historicFront) ? (int)explode("-", $historicFront)[0] : 0);
         $setor = (!empty($_SESSION['userlogin']) ? $_SESSION['userlogin']['setor'] : "0");
         $permissoes = Config::getPermission();
         $json = new Json();
@@ -81,7 +81,7 @@ class Entity extends EntityCreate
                 $json->save("historic", $hist);
             }
 
-            $histTime = (int) explode("-", $hist[$entity])[0];
+            $histTime = (int)explode("-", $hist[$entity])[0];
 
             //verifica se há alterações nessa entidade que não forão recebidas pelo app, caso tenha, atualiza os dados
             if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
@@ -212,45 +212,79 @@ class Entity extends EntityCreate
     }
 
     /**
-     * Retorna o dicionário da entidade ou então a lista de dicionário de entidades permitida
+     * Verifica dicionários permitidos e retorna
      *
      * @param string|null $entity
-     * @param bool|null $info
-     * @return array|mixed|null
+     * @return array
      */
-    public static function dicionario(string $entity = null, bool $info = null)
+    public static function dicionario(string $entity = null): array
     {
-        if (file_exists(PATH_HOME . "entity/cache") && (empty($entity) || file_exists(PATH_HOME . "entity/cache/{$entity}.json"))) {
-            if (empty($entity)) {
+        $list = [];
+        if (empty($entity)) {
 
-                //read all dicionarios
-                $list = [];
-                foreach (\Helpers\Helper::listFolder(PATH_HOME . "entity/cache") as $json) {
-                    if (preg_match('/\.json$/i', $json)) {
-                        $entity = str_replace('.json', '', $json);
-                        if ($dic = self::dicionario($entity)) {
-                            if ($info)
-                                $dic = ["dicionario" => $dic, "info" => Metadados::getInfo($entity)];
+            //read all dicionarios
+            foreach (Helper::listFolder(PATH_HOME . "entity/cache") as $entity) {
+                if ($entity !== "info" && preg_match("/\.json$/i", $entity)) {
 
-                            $list[$entity] = $dic;
+                    $entidade = str_replace(".json", "", $entity);
+
+                    if (Config::haveEntityPermission($entidade)) {
+                        $result = Metadados::getDicionario($entidade, !0, !0);
+                        if (!empty($result)) {
+
+                            /**
+                             * Convert id key to column name
+                             */
+                            foreach ($result as $id => $metas)
+                                $list[$entidade][$metas['column']] = $metas;
                         }
                     }
                 }
+            }
 
-                return $list;
+        } elseif (file_exists(PATH_HOME . "entity/cache/{$entity}.json") && Config::haveEntityPermission($entity)) {
 
-            } else {
+            $meta = Metadados::getDicionario($entity, !0, !0);
+            if (!empty($meta)) {
 
-                //read dicionario específico
-                $setor = !empty($_SESSION['userlogin']['setor']) ? $_SESSION['userlogin']['setor'] : "0";
-                $meta = Metadados::getDicionario($entity, !0, !0);
-
-                if (!empty($meta))
-                    return ($info ? ["dicionario" => $meta, "info" => Metadados::getInfo($entity)] : $meta);
+                /**
+                 * Convert id key to column name
+                 */
+                foreach ($meta as $id => $metas)
+                    $list[$metas['column']] = $metas;
             }
         }
 
-        return null;
+        return $list;
+    }
+
+    /**
+     * Verifica dicionários info permitidos e retorna
+     *
+     * @param string|null $entity
+     * @return array
+     */
+    public static function info(string $entity = null): array
+    {
+        $list = [];
+        if (empty($entity)) {
+
+            //read all info dicionarios
+            foreach (Helper::listFolder(PATH_HOME . "entity/cache/info") as $entity) {
+                if (preg_match("/\.json$/i", $entity)) {
+
+                    $entidade = str_replace(".json", "", $entity);
+                    if (Config::haveEntityPermission($entidade))
+                        $list[$entidade] = Metadados::getInfo($entidade);
+                }
+            }
+
+        } elseif (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json") && Config::haveEntityPermission($entity)) {
+
+            $list = Metadados::getInfo($entity);
+        }
+
+        return $list;
     }
 
     /**
@@ -362,7 +396,7 @@ class Entity extends EntityCreate
             /**
              * Converte valores caso esteja com os nomes em portugues
              */
-            if(!isset($filterOption['operator']) && isset($filterOption['operador'])) {
+            if (!isset($filterOption['operator']) && isset($filterOption['operador'])) {
                 $filterOption = [
                     "column" => $filterOption['coluna'],
                     "operator" => $filterOption['operador'],

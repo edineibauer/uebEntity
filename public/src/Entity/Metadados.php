@@ -8,14 +8,25 @@ use \Config\Config;
 class Metadados
 {
     /**
-     * @param string $entity
-     * @param mixed $keepId
-     * @return mixed
+     * @param string|null $entity
+     * @param bool|null $keepId
+     * @param bool|null $keepStrings
+     * @return array|null
      */
-    public static function getDicionario($entity, $keepId = null, $keepStrings = null)
+    public static function getDicionario(string $entity = null, bool $keepId = null, bool $keepStrings = null)
     {
-        //Se existir o dicionário da entidade e tiver permissão para ler
-        if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
+        if(empty($entity)) {
+            $list = [];
+            foreach (Helper::listFolder(PATH_HOME . "entity/cache") as $entity) {
+                if ($entity !== "info" && preg_match("/\.json$/i", $entity)) {
+                    $entidade = str_replace(".json", "", $entity);
+                    $list[$entidade] = self::getDicionario($entidade);
+                }
+            }
+            return $list;
+
+            //Se existir o dicionário da entidade
+        } elseif (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
             $data = json_decode(file_get_contents(PATH_HOME . "entity/cache/{$entity}.json"), !0);
 
             if($keepId) {
@@ -44,7 +55,15 @@ class Metadados
                 }
             }
 
-            return Helper::convertStringToValueArray($data);
+            $dicionario = [];
+            foreach (Helper::convertStringToValueArray($data) as $id => $metas) {
+                if (!empty($metas['allow']['options']))
+                    $metas['allow']['options'] = array_reverse($metas['allow']['options']);
+
+                $dicionario[$id] = $metas;
+            }
+
+            return $dicionario;
         }
 
         return null;
