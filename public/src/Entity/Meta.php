@@ -200,14 +200,17 @@ class Meta
     }
 
     /**
-     * @param mixed $grid
+     * @param null $grid
+     * @param array|null $default
      */
-    public function setDatagrid($grid = null)
+    public function setDatagrid($grid = null, array $default = null)
     {
-        $default = array_keys($this->defaultDatagrid());
         if (!empty($grid) && is_array($grid)) {
+            if(empty($default))
+                $default = \EntityUi\InputType::getInputDefault();
+
             foreach ($grid as $name => $value) {
-                if (in_array($name, $default))
+                if (in_array($name, array_keys($default['datagrid'])))
                     $this->datagrid[$name] = $value;
             }
         } else {
@@ -356,7 +359,7 @@ class Meta
      */
     public function getForm()
     {
-        return $this->form ?? $this->defaultForm();
+        return $this->form ?? \EntityUi\InputType::getInputDefault()['form'];
     }
 
     /**
@@ -364,7 +367,7 @@ class Meta
      */
     public function getDatagrid()
     {
-        return $this->datagrid ?? $this->defaultDatagrid();
+        return $this->datagrid ?? \EntityUi\InputType::getInputDefault()['datagrid'];
     }
 
     /**
@@ -506,7 +509,7 @@ class Meta
     {
         if (!empty($dados)) {
             if (!$default)
-                $default = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true)['default'];
+                $default = \EntityUi\InputType::getInputDefault();
 
             foreach (array_replace_recursive($default, $dados) as $dado => $value) {
                 switch ($dado) {
@@ -532,7 +535,7 @@ class Meta
                         $this->setForm($value);
                         break;
                     case 'datagrid':
-                        $this->setDatagrid($value);
+                        $this->setDatagrid($value, $default);
                         break;
                     case 'format':
                         $this->setFormat($value);
@@ -785,25 +788,5 @@ class Meta
         }
 
         return $value;
-    }
-
-    /**
-     * Retorna form padrão caso o campo não tenha form, mas tenha sido solicitado nos $this->fields
-     * @return array
-     */
-    private function defaultForm(): array
-    {
-        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
-        return $input['default']['form'];
-    }
-
-    /**
-     * Retorna grid padrão caso o campo não tenha grid, mas tenha sido solicitado nos $this->fields
-     * @return array
-     */
-    private function defaultDatagrid(): array
-    {
-        $input = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
-        return $input['default']['datagrid'];
     }
 }

@@ -23,7 +23,7 @@ class Dicionario
     public function __construct(string $entity)
     {
         $this->entity = $entity;
-        $this->defaultMeta = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
+        $this->defaultMeta = \EntityUi\InputType::getInputDefault();
 
         if (!empty($this->entity) && file_exists(PATH_HOME . "entity/cache/{$this->entity}.json")) {
             $this->defaultDicionarioData();
@@ -684,7 +684,7 @@ class Dicionario
         $this->dicionario = [];
         if ($dicEntity = Metadados::getDicionario($this->entity, !0, !0)) {
             foreach ($dicEntity as $i => $meta)
-                $this->dicionario[$i] = new Meta(array_merge(['id' => $i], $meta), $this->defaultMeta['default']);
+                $this->dicionario[$i] = new Meta(array_merge(['id' => $i], $meta), $this->defaultMeta);
         }
     }
 

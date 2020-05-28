@@ -31,18 +31,18 @@ class Metadados
 
             if ($keepId) {
                 $data[0] = self::generatePrimary();
+                $default = \EntityUi\InputType::getInputDefault();
+                $inputType = \EntityUi\InputType::getInputTypes();
 
                 $info = self::getInfo($entity);
                 if (!empty($info['user']) && $info['user'] === 1)
-                    $data["999997"] = self::generateUser();
+                    $data["999997"] = self::generateUser($default, $inputType);
 
                 if (!empty($info['autor'])) {
-                    $inputType = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), true);
-
                     if ($info['autor'] === 1)
-                        $data["999998"] = array_replace_recursive($inputType['default'], $inputType['publisher'], ["indice" => 999998]);
+                        $data["999998"] = array_replace_recursive($default, $inputType['publisher'], ["indice" => 999998]);
                     elseif ($info['autor'] === 2)
-                        $data["999999"] = array_replace_recursive($inputType['default'], $inputType['owner'], ["indice" => 999999]);
+                        $data["999999"] = array_replace_recursive($default, $inputType['owner'], ["indice" => 999999]);
                 }
             } elseif (isset($data[0])) {
                 unset($data[0]);
@@ -69,10 +69,19 @@ class Metadados
         return null;
     }
 
-    public static function generateUser()
+    /**
+     * @param array|null $default
+     * @param array|null $inputType
+     * @return mixed
+     */
+    public static function generateUser(array $default = null, array $inputType = null)
     {
-        $types = json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/input_type.json"), !0);
-        $mode = Helper::arrayMerge($types["default"], $types['list']);
+        if(empty($default))
+            $default = \EntityUi\InputType::getInputDefault();
+        if(empty($inputType))
+            $inputType = \EntityUi\InputType::getInputTypes();
+
+        $mode = Helper::arrayMerge($default, $inputType['list']);
         $mode['nome'] = "Usuário Acesso Vínculo";
         $mode['column'] = "usuarios_id";
         $mode['form'] = "false";
