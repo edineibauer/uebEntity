@@ -46,12 +46,11 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         //download all data
 
         /**
-         * @param string $search
          * @param array $filter
          * @param $dicionario
          * @return string
          */
-        function exeReadApplyFilter(string $search, array $filter, $dicionario) {
+        function exeReadApplyFilter(array $filter, $dicionario) {
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
@@ -93,15 +92,6 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             }
 
             $result = "";
-            if(!empty($search)) {
-                $result .= " && (";
-                foreach ($dicionario as $meta) {
-                    if(!in_array($meta['key'], ["information", "identifier"]))
-                        $result .= ($result === " && (" ? "" : " || ") . $meta['column'] . " LIKE '%{$search}%'";
-                }
-                $result .= ")";
-            }
-
             foreach ($where as $andContainer) {
                 $result .= " && (";
                 foreach ($andContainer as $e => $or)
@@ -142,8 +132,18 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
 
         $filterResult = "";
         if(!empty($filter))
-            $filterResult = exeReadApplyFilter($search, $filter, $dicionario);
+            $filterResult = exeReadApplyFilter($filter, $dicionario);
+
         $where .= $filterResult;
+
+        if(!empty($search)) {
+            $searchWhere = "";
+            foreach ($dicionario as $meta) {
+                if(!in_array($meta['key'], ["information", "identifier"]))
+                    $searchWhere .= ($searchWhere === "" ? "" : " || ") . $meta['column'] . " LIKE '%{$search}%'";
+            }
+            $where .= " && (" . $searchWhere . ")";
+        }
 
         /**
          * Se não tiver permissão, mas for meus dados, permite
