@@ -131,35 +131,6 @@ class Metadados
 
     /**
      * @param string $entity
-     * @param mixed $mod
-     * @return mixed
-     */
-    public static function getRelevant(string $entity, $mod = null)
-    {
-        $id = null;
-        $info = self::getInfo($entity);
-        foreach (self::getRelevantAll($entity) as $r) {
-            if (isset($info[$r]) && !empty($info[$r]))
-                return $mod ? [$info[$r], $r] : $info[$r];
-        }
-
-        return 0;
-    }
-
-    /**
-     * @param string $entity
-     * @return mixed
-     */
-    public static function getRelevantAll(string $entity)
-    {
-        if (file_exists(PATH_HOME . "entity/relevant/{$entity}.json"))
-            return json_decode(file_get_contents(PATH_HOME . "entity/relevant/{$entity}.json"), true);
-        else
-            return json_decode(file_get_contents(PATH_HOME . VENDOR . "entity-ui/public/entity/relevant.json"), true);
-    }
-
-    /**
-     * @param string $entity
      * @return mixed
      */
     public static function getInfo($entity)

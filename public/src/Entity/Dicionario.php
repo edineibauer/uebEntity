@@ -690,7 +690,7 @@ class Dicionario
 
     private function setRelevants()
     {
-        foreach (Metadados::getRelevantAll($this->entity) as $item) {
+        foreach (\EntityUi\InputType::getInputRelevant() as $item) {
             if ($m = $this->search("format", $item)) {
                 $this->relevant = $m;
                 break;
