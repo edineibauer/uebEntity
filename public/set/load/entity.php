@@ -10,6 +10,7 @@ use \Conn\SqlCommand;
 $entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 $id = is_numeric($id) && $id > 0 ? (int) $id : null;
+$search = filter_input(INPUT_POST, 'search', FILTER_DEFAULT);
 $filter = filter_input(INPUT_POST, 'filter', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
 $order = filter_input(INPUT_POST, 'order', FILTER_DEFAULT);
 $reverse = filter_input(INPUT_POST, 'reverse', FILTER_VALIDATE_BOOLEAN);
@@ -45,12 +46,12 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
         //download all data
 
         /**
-         * @param string $entity
+         * @param string $search
          * @param array $filter
          * @param $dicionario
          * @return string
          */
-        function exeReadApplyFilter(string $entity, array $filter, $dicionario) {
+        function exeReadApplyFilter(string $search, array $filter, $dicionario) {
             $where = [];
             foreach ($filter as $i => $filterOption) {
                 if ($filterOption['operator'] === "por") {
@@ -92,6 +93,15 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
             }
 
             $result = "";
+            if(!empty($search)) {
+                $result .= " && (";
+                foreach ($dicionario as $meta) {
+                    if(!in_array($meta['key'], ["information", "identifier"]))
+                        $result .= ($result === " && (" ? "" : " || ") . $meta['column'] . " LIKE '%{$search}%'";
+                }
+                $result .= ")";
+            }
+
             foreach ($where as $andContainer) {
                 $result .= " && (";
                 foreach ($andContainer as $e => $or)
@@ -132,7 +142,7 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
 
         $filterResult = "";
         if(!empty($filter))
-            $filterResult = exeReadApplyFilter($entity, $filter, $dicionario);
+            $filterResult = exeReadApplyFilter($search, $filter, $dicionario);
         $where .= $filterResult;
 
         /**
