@@ -235,8 +235,10 @@ class Entity extends EntityCreate
                             /**
                              * Convert id key to column name
                              */
-                            foreach ($result as $id => $metas)
+                            foreach ($result as $id => $metas) {
+                                $metas['id'] = $id;
                                 $list[$entidade][$metas['column']] = $metas;
+                            }
                         }
                     }
                 }
