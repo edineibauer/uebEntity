@@ -215,9 +215,10 @@ class Entity extends EntityCreate
      * Verifica dicionários permitidos e retorna
      *
      * @param string|null $entity
+     * @param bool|false $keepId
      * @return array
      */
-    public static function dicionario(string $entity = null): array
+    public static function dicionario(string $entity = null, bool $keepId = !1): array
     {
         $list = [];
         if (empty($entity)) {
@@ -229,7 +230,7 @@ class Entity extends EntityCreate
                     $entidade = str_replace(".json", "", $entity);
 
                     if (Config::haveEntityPermission($entidade)) {
-                        $result = Metadados::getDicionario($entidade, !0, !0);
+                        $result = Metadados::getDicionario($entidade, $keepId, !0);
                         if (!empty($result)) {
 
                             /**
