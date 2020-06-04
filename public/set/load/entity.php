@@ -65,10 +65,18 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
                             $where[$i][] = "{$filterOption['column']} LIKE '%{$filterOption['value']}%'";
                             break;
                         case 'igual a':
-                            $where[$i][] = "{$filterOption['column']} = '{$filterOption['value']}'";
+                            if(empty($filterOption['value']))
+                                $where[$i][] = "{$filterOption['column']} IS NULL || {$filterOption['column']} = ''";
+                            else
+                                $where[$i][] = "{$filterOption['column']} = '{$filterOption['value']}'";
+
                             break;
                         case 'diferente de':
-                            $where[$i][] = "{$filterOption['column']} != '{$filterOption['value']}'";
+                            if(empty($filterOption['value']))
+                                $where[$i][] = "{$filterOption['column']} NOT IS NULL && {$filterOption['column']} != ''";
+                            else
+                                $where[$i][] = "{$filterOption['column']} != '{$filterOption['value']}'";
+
                             break;
                         case 'começa com':
                             $where[$i][] = "{$filterOption['column']} LIKE '{$filterOption['value']}%'";
