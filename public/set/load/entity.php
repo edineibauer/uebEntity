@@ -87,6 +87,15 @@ if ($setor === "admin" || (isset($permissoes[$setor][$entity]['read']) || $permi
                             break;
                         case 'menor igual a':
                             $where[$i][] = "{$filterOption['column']} <= {$filterOption['value']}";
+                            break;
+                        case 'não contém':
+                            $where[$i][] = "{$filterOption['column']} NOT LIKE '%{$filterOption['value']}%'";
+                            break;
+                        case 'não começa com':
+                            $where[$i][] = "{$filterOption['column']} NOT LIKE '{$filterOption['value']}%'";
+                            break;
+                        case 'não termina com':
+                            $where[$i][] = "{$filterOption['column']} NOT LIKE '%{$filterOption['value']}'";
                     }
                 }
             }
