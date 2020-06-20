@@ -527,11 +527,11 @@ class Dicionario
              * Define the social field
              */
             $facebookId = Social::facebookGetId();
-            if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && $this->entity === FACEBOOKENTITY)
+            if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
                 $user['login_social'] = 2;
 
             $googleId = Social::googleGetId();
-            if(!empty($googleId) && Check::password($googleId) === $user['password'] && $this->entity === GOOGLEENTITY)
+            if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
                 $user['login_social'] = 1;
 
             $read = new Read();
