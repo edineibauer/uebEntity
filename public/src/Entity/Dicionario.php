@@ -504,7 +504,8 @@ class Dicionario
                     "password" => "",
                     "status" => 1,
                     "data" => date("Y-m-d H:i:s"),
-                    "setor" => $entity
+                    "setor" => $entity,
+                    "login_social" => ""
                 ];
             } else {
                 $user = [];
@@ -519,6 +520,23 @@ class Dicionario
                     $user['status'] = $dados[$meta['column']];
                 elseif ($meta['format'] === "source_list" && in_array(["valor" => "png", "representacao" => "png"], $meta['allow']['options']) && isset($dados[$meta['column']]))
                     $user['imagem'] = $dados[$meta['column']];
+            }
+
+            /**
+             * Define the social field
+             */
+            if(!empty($_SESSION['facebookToken']) && defined('FACEBOOKAPLICATIONID') && !empty(FACEBOOKAPLICATIONID) && defined('FACEBOOKVERSION') && !empty(FACEBOOKVERSION) && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY) {
+                $data = file_get_contents("https://graph.facebook.com/" . FACEBOOKVERSION . "/me?fields=id&access_token=" . $_SESSION['facebookToken']);
+                if(!empty($data)) {
+                    $idFacebook = json_decode($data, !0);
+                    $user['login_social'] = (!empty($idFacebook['id']) && Check::password($idFacebook['id']) === $user['password'] ? 2 : null);
+                }
+            } elseif(!empty($_SESSION['googleToken']) && defined('GOOGLELOGINCLIENTID') && !empty(GOOGLELOGINCLIENTID) && defined('GOOGLEENTITY') && $this->entity === FACEBOOKENTITY) {
+                $data = file_get_contents("https://graph.facebook.com/" . FACEBOOKVERSION . "/me?fields=id&access_token=" . $_SESSION['googleToken']);
+                if(!empty($data)) {
+                    $idGoogle = json_decode($data, !0);
+                    $user['login_social'] = (!empty($idGoogle['id']) && Check::password($idGoogle['id']) === $user['password'] ? 1 : null);
+                }
             }
 
             $read = new Read();
