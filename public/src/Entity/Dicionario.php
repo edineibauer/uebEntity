@@ -7,6 +7,7 @@ use Conn\Delete;
 use Conn\Read;
 use Conn\Update;
 use Helpers\Helper;
+use Helpers\Check;
 use Login\Social;
 
 class Dicionario
