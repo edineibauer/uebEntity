@@ -527,11 +527,11 @@ class Dicionario
             /**
              * Define the social field
              */
-            $facebookId = Social::facebookGetId();
+            $facebookId = Social::facebookGetId($_SESSION['userlogin']['token']);
             if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
                 $user['login_social'] = 2;
 
-            $googleId = Social::googleGetId();
+            $googleId = Social::googleGetId($_SESSION['userlogin']['token']);
             if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
                 $user['login_social'] = 1;
 
@@ -548,9 +548,10 @@ class Dicionario
                 }
 
             } elseif ($action === "update" && !empty($user)) {
-                $read->exeRead("usuarios", "WHERE id = :idf", "idf={$dados['usuarios_id']}");
-                if ($read->getResult()) {
-                    $newData = Helper::arrayMerge($read->getResult()[0], $user);
+                $sql = new SqlCommand();
+                $sql->exeCommand("SELECT * FROM " . PRE . "usuarios WHERE id = {$dados['usuarios_id']}");
+                if ($sql->getResult()) {
+                    $newData = Helper::arrayMerge($sql->getResult()[0], $user);
                     $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}");
                     if (!$read->getResult()) {
                         $up = new Update();
