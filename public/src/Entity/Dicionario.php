@@ -9,6 +9,7 @@ use Conn\Update;
 use Helpers\Helper;
 use Helpers\Check;
 use Login\Social;
+use Conn\SqlCommand;
 
 class Dicionario
 {
