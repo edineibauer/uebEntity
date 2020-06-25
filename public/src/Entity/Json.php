@@ -48,8 +48,11 @@ class Json extends VersionControl
         $this->setFile($file);
         $id = Check::name(pathinfo($file, PATHINFO_FILENAME));
         try {
-            if (file_exists($this->file))
-                return array_merge(["id" => $id], json_decode(file_get_contents($this->file), true));
+            if (file_exists($this->file)) {
+                $file = json_decode(file_get_contents($this->file), !0);
+                if(is_array($file))
+                    return array_merge(["id" => $id], $file);
+            }
         } catch (\Exception $e) {
             return [];
         }
