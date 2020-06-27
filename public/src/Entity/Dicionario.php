@@ -508,7 +508,7 @@ class Dicionario
                     "status" => 1,
                     "data" => date("Y-m-d H:i:s"),
                     "setor" => $entity,
-                    "login_social" => ""
+                    "login_social" => 0
                 ];
             } else {
                 $user = [];
