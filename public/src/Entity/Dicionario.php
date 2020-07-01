@@ -515,7 +515,7 @@ class Dicionario
             }
 
             foreach (Metadados::getDicionario($entity) as $i => $meta) {
-                if ($meta['format'] === "title")
+                if ($meta['format'] === "title" && !empty($dados[$meta['column']]))
                     $user['nome'] = $dados[$meta['column']];
                 elseif ($meta['format'] === "password" && !empty($dados[$meta['column']]))
                     $user['password'] = $dados[$meta['column']];
