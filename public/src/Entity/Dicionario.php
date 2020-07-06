@@ -533,13 +533,15 @@ class Dicionario
                     /**
                      * Define the social field
                      */
-                    $facebookId = Social::facebookGetId($_SESSION['userlogin']['token']);
-                    if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
-                        $user['login_social'] = 2;
+                    if(!empty($_SESSION['userlogin']['socialToken'])) {
+                        $facebookId = Social::facebookGetId($_SESSION['userlogin']['socialToken']);
+                        if (!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
+                            $user['login_social'] = 2;
 
-                    $googleId = Social::googleGetId($_SESSION['userlogin']['token']);
-                    if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
-                        $user['login_social'] = 1;
+                        $googleId = Social::googleGetId($_SESSION['userlogin']['socialToken']);
+                        if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
+                            $user['login_social'] = 1;
+                    }
 
                     $create = new Create();
                     $create->exeCreate("usuarios", $user);
