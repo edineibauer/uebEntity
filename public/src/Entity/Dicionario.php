@@ -525,21 +525,22 @@ class Dicionario
                     $user['imagem'] = $dados[$meta['column']];
             }
 
-            /**
-             * Define the social field
-             */
-            $facebookId = Social::facebookGetId($_SESSION['userlogin']['token']);
-            if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
-                $user['login_social'] = 2;
-
-            $googleId = Social::googleGetId($_SESSION['userlogin']['token']);
-            if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
-                $user['login_social'] = 1;
-
             $read = new Read();
             if ($action === "create" && !empty($user['password']) && !empty($user['nome'])) {
                 $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p", "p={$user['password']}");
                 if (!$read->getResult()) {
+
+                    /**
+                     * Define the social field
+                     */
+                    $facebookId = Social::facebookGetId($_SESSION['userlogin']['token']);
+                    if(!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
+                        $user['login_social'] = 2;
+
+                    $googleId = Social::googleGetId($_SESSION['userlogin']['token']);
+                    if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
+                        $user['login_social'] = 1;
+
                     $create = new Create();
                     $create->exeCreate("usuarios", $user);
                     if ($create->getResult())
