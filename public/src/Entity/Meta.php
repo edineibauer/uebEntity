@@ -97,17 +97,16 @@ class Meta
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $value = (!empty($value) ? (int) $value : null);
-//        elseif ($this->key === "publisher")
-//            $this->error = "Precisa estar Logado";
+        elseif ($this->key === "date" && in_array($value, ["now", "date", "datetime", "timestamp"]))
+            $value = date("Y-m-d");
+        elseif ($this->key === "datetime" && in_array($value, ["now", "date", "datetime", "timestamp"]))
+            $value = date("Y-m-d H:i:s");
+        elseif ($this->key === "time" && in_array($value, ["now", "date", "datetime", "timestamp", "time"]))
+            $value = date("H:i:s");
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
         elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "percent", "card_number"]))
             $value = str_replace(["(", ")", " ", "-", ".", ",", "R$", "$", "/", "\\", "%"], "", $value);
-        else
-            $value = $value;
-
-//        elseif (in_array($this->key, ["list", "selecao", "checkbox_rel"]))
-//            $this->checkValueAssociacaoSimples($value);
 
         //dados relacionais em formato json
         if ($this->key === "relation" && $this->type === "json")
@@ -156,15 +155,7 @@ class Meta
      */
     public function setDefault($default)
     {
-        if ($default === "datetime")
-            $this->default = "";
-        elseif ($default === "date")
-            $this->default = "";
-        elseif ($default === "time")
-            $this->default = "";
-        else
-            $this->default = $default;
-
+        $this->default = $default;
     }
 
     /**

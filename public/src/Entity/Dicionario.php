@@ -705,6 +705,14 @@ class Dicionario
             foreach ($dicEntity as $i => $meta)
                 $this->dicionario[$i] = new Meta(array_merge(['id' => $i], $meta), $this->defaultMeta);
         }
+
+        /**
+         * Set Default data
+         */
+        foreach ($this->dicionario as $i => $meta) {
+            if($meta->get('default') !== !1)
+                $this->dicionario[$i]->setValue($meta->get('default'));
+        }
     }
 
     private function setRelevants()
