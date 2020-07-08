@@ -1,7 +1,6 @@
 <?php
 
-$var = explode("/", str_replace("put/", "", $_GET['data']));
-$entity = $var[0];
+$entity = $variaveis[0];
 $dados = [];
 
 if (empty($_POST)) {
