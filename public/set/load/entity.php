@@ -154,12 +154,6 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
         $where .= " && (" . $searchWhere . ")";
     }
 
-    /**
-     * Se não tiver permissão, mas for meus dados, permite
-     */
-    if($entityIsMySetor)
-        $where .= " && id = " . $_SESSION['userlogin']['setorData']['id'];
-
     $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
     $read = new Read();
@@ -197,7 +191,7 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
     $data['data']['tipo'] = 1;
     $data['data']['historic'] = $hist[$entity];
 
-} elseif (!$entityIsMySetor && $historicFrontTime < $histTime) {
+} elseif ($historicFrontTime < $histTime) {
 
     /**
      * Verifica se tem colunas relacionadas ao meu usuário, ao qual vinculam o registro ao meu usuário
