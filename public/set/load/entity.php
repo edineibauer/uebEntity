@@ -118,10 +118,8 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
 
     // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
     if(!empty($setor) && $setor !== "admin" && $setor !== "0") {
-        $metadados = Metadados::getDicionario($entity);
-
         $count = 0;
-        foreach ($metadados as $col => $meta) {
+        foreach ($dicionario as $col => $meta) {
             if($meta['format'] === "list" && $meta['relation'] === $setor) {
                 if($count === 0)
                     $where .= " && ({$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
