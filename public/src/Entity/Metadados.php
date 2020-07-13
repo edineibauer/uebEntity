@@ -33,17 +33,29 @@ class Metadados
                 $data[0] = self::generatePrimary();
                 $default = \EntityUi\InputType::getInputDefault();
                 $inputType = \EntityUi\InputType::getInputTypes();
-
                 $info = self::getInfo($entity);
+
+                /**
+                 * User
+                 */
                 if (!empty($info['user']) && $info['user'] === 1)
                     $data["999997"] = self::generateUser($default, $inputType);
 
+                /**
+                 * Autor e Owner
+                 */
                 if (!empty($info['autor'])) {
                     if ($info['autor'] === 1)
                         $data["999998"] = array_replace_recursive($default, $inputType['publisher'], ["indice" => 999998]);
                     elseif ($info['autor'] === 2)
                         $data["999999"] = array_replace_recursive($default, $inputType['owner'], ["indice" => 999999]);
                 }
+
+                /**
+                 * System id
+                 */
+                $data["999996"] = array_replace_recursive($default, $inputType['list'], ["indice" => 999996, "column" => "system_id", "default" => ($_SESSION['userlogin']['setor'] === "admin" && !empty($info['system']) ? !1 : ""), "nome" => ucwords(str_replace("_", " ", $info['system'])), "relation" => $info['system']]);
+
             } elseif (isset($data[0])) {
                 unset($data[0]);
             }
