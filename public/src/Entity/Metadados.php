@@ -54,7 +54,7 @@ class Metadados
                 /**
                  * System id
                  */
-                $data["999996"] = array_replace_recursive($default, $inputType['list'], ["indice" => 999996, "column" => "system_id", "default" => ($_SESSION['userlogin']['setor'] === "admin" && !empty($info['system']) ? !1 : ""), "nome" => ucwords(str_replace("_", " ", $info['system'])), "relation" => $info['system']]);
+                $data["999996"] = array_replace_recursive($default, $inputType['list'], ["indice" => 999996, "column" => "system_id", "default" => ($_SESSION['userlogin']['setor'] === "admin" && !empty($info['system']) ? !1 : ""), "nome" => ucwords(str_replace("_", " ", (!empty($info['system']) ? $info['system'] : ""))), "relation" => (!empty($info['system']) ?  $info['system'] : "")]);
 
             } elseif (isset($data[0])) {
                 unset($data[0]);
