@@ -27,8 +27,14 @@ if(!empty($_FILES['upload'])) {
 
 if(isset($file_data)) {
     $data['data']['url'] = HOME . $dir;
-    $data['data']['image'] = HOME . ($isImage ? $dir : "assetsPublic/img/file.png");
-    $data['data']['preview'] = "<img src='" . $data['data']['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
+    if($isImage) {
+        $data['data']['image'] = HOME . $dir;
+        $data['data']['preview'] = "<img src='" . $data['data']['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
+    } else {
+        $icon = (in_array($extensao, ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
+        $data['data']['image'] = HOME . "assetsPublic/img/file.png";
+        $data['data']['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
+    }
 } else {
     $data['data']['url'] = "";
 }
