@@ -118,7 +118,7 @@ class Entity extends EntityCreate
 
                     $entidade = str_replace(".json", "", $entity);
 
-                    if (Config::haveEntityPermission($entidade)) {
+                    if ($entidade === $_SESSION['userlogin']['setor'] || Config::haveEntityPermission($entidade)) {
                         $result = Metadados::getDicionario($entidade, $keepId, !0);
                         if (!empty($result)) {
 
