@@ -154,27 +154,12 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
 
     $where .= " ORDER BY " . (!empty($order) ? $order : "id") . ($reverse === null || $reverse ? " DESC" : " ASC") . " LIMIT {$limit}" . (!empty($offset) && $offset > -1 ? " OFFSET " . ($offset + 1) : "");
 
+    $results = [];
     $read = new Read();
     $read->exeRead($entity, $where);
-    $results = $read->getResult() ?? [];
-    if(!empty($results)) {
-        //obtém nome da coluna da senha
-        if(!empty($info['password'])) {
-            foreach ($dicionario as $idDicionario => $item) {
-                if($idDicionario == $info['password']) {
-                    $columnPassword = $item['column'];
-                    break;
-                }
-            }
-        }
-
-        foreach ($results as $i => $result) {
-            $results[$i]['db_action'] = "create";
-
-            //se tiver senha, exclui valor
-            if(isset($columnPassword))
-                $results[$i][$columnPassword] = null;
-        }
+    if($read->getResult()) {
+        foreach ($read->getResult() as $item)
+            $results[] = \Entity\Entity::exeRead($entity, $item['id'])[0];
     }
 
     if($id) {
