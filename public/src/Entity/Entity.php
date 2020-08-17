@@ -23,6 +23,143 @@ class Entity extends EntityCreate
     }
 
     /**
+     * Lê registros no servidor incluindo os dados relationados e decode dos JSON
+     * relationData
+     * @param string $entity
+     * @param null $id
+     * @return array|mixed|null
+     */
+    public static function exeRead(string $entity, $id = null)
+    {
+        $info = Metadados::getInfo($entity);
+        $dicionario = Metadados::getDicionario($entity);
+        $selects = "";
+        $command = "FROM " . PRE . $entity . " as e";
+        $relations = [];
+        $result = [];
+
+        /**
+         * Select the entity
+         */
+        if (!empty($info['columns_readable'])) {
+            foreach ($info['columns_readable'] as $column)
+                $selects .= ($selects === "" ? "" : ", ") . "e.{$column}";
+        }
+
+        /**
+         * Include the data from each relation
+         */
+        if (!empty($info['relation'])) {
+            foreach ($info['relation'] as $relationItem) {
+                $relationEntity = $dicionario[$relationItem]['relation'];
+                $relations[$relationEntity] = $dicionario[$relationItem]['column'];
+
+                $infoRelation = Metadados::getInfo($relationEntity);
+                if (!empty($infoRelation['columns_readable'])) {
+                    foreach ($infoRelation['columns_readable'] as $column)
+                        $selects .= ", data_" . $dicionario[$relationItem]['relation'] . ".{$column} as {$dicionario[$relationItem]['relation']}___{$column}";
+                }
+
+                $command .= " LEFT JOIN " . PRE . $dicionario[$relationItem]['relation'] . " as data_" . $dicionario[$relationItem]['relation'] . " ON data_" . $dicionario[$relationItem]['relation'] . ".id = e." . $dicionario[$relationItem]['column'];
+            }
+        }
+
+        /**
+         * Set the limit result to return to front
+         */
+        $command = "SELECT " . $selects . " {$command}" . (is_numeric($id) && $id > 0 ? " WHERE e.id = {$id}" : "") . " ORDER BY id DESC";
+
+        /**
+         * Execute the read command
+         */
+        $sql = new SqlCommand();
+        $sql->exeCommand($command);
+
+        /**
+         * Convert join values into a array of relation data
+         * Convert json values into array
+         */
+        if (empty($sql->getErro())) {
+            if (!empty($sql->getResult())) {
+                foreach ($sql->getResult() as $i => $register) {
+                    if($i >= LIMITOFFLINE)
+                        break;
+
+                    /**
+                     * Work on a variable with the data of relationData
+                     */
+                    $relationData = [];
+
+                    /**
+                     * Decode all json on base register
+                     */
+                    foreach ($dicionario as $meta) {
+                        if ($meta['type'] === "json" && !empty($register[$meta['column']]))
+                            $register[$meta['column']] = json_decode($register[$meta['column']], !0);
+                    }
+
+                    /**
+                     * If have relation data together in the base register
+                     */
+                    if (!empty($relations)) {
+
+                        /**
+                         * Create the field relationData, moving the relation fields to this
+                         */
+                        foreach ($register as $column => $value) {
+                            foreach ($relations as $relation => $RelationColumn) {
+                                if (strpos($column, $relation . '___') !== false) {
+
+                                    /**
+                                     * Add item to a relation register
+                                     */
+                                    $columnRelationName = str_replace($relation . "___", "", $column);
+                                    $relationData[$RelationColumn][$columnRelationName] = $value;
+
+                                    /**
+                                     * Remove item from base register
+                                     */
+                                    unset($register[$column]);
+                                }
+                            }
+                        }
+
+                        /**
+                         * After separate the base data from the relation data
+                         * check if the relation data have a ID an decode json
+                         */
+                        foreach ($relations as $relation => $RelationColumn) {
+
+                            /**
+                             * Check if the struct of relation data received have a ID
+                             * if not, so delete
+                             */
+                            if (empty($relationData[$RelationColumn]['id'])) {
+                                unset($relationData[$RelationColumn]);
+
+                            } else {
+
+                                /**
+                                 * Decode all json on base relation register
+                                 */
+                                foreach (Metadados::getDicionario($relation) as $meta) {
+                                    if ($meta['type'] === "json" && !empty($relationData[$RelationColumn][$meta['column']]))
+                                        $relationData[$RelationColumn][$meta['column']] = json_decode($relationData[$RelationColumn][$meta['column']], !0);
+                                }
+                            }
+                        }
+                    }
+
+                    $register["relationData"] = $relationData;
+                    $result[] = $register;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Create new entity data
      *
      * @param string $entity
