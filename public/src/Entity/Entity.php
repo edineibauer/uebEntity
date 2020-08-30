@@ -348,6 +348,36 @@ class Entity extends EntityCreate
     }
 
     /**
+     * @param string $entity
+     * @param int $id
+     * @return array
+     */
+    public static function getUserSetorData(string $entity, int $id): array
+    {
+        $read = new \Conn\Read();
+        $info = Metadados::getInfo($entity);
+        $dicionario = Metadados::getDicionario($entity);
+        $result = [];
+
+        if (!empty($info['columns_readable']))
+            $read->setSelect($info['columns_readable']);
+
+        $read->exeRead($entity, "WHERE usuarios_id = :id", "id={$id}", !0);
+        if ($read->getResult()) {
+            /**
+             * Decode all json on base relation register
+             */
+            foreach ($dicionario as $meta) {
+                $m = new \Entity\Meta($meta);
+                $m->setValue($read->getResult()[0][$meta['column']]);
+                $result[$meta['column']] = $m->getValue();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Create new entity data
      *
      * @param string $entity
