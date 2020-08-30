@@ -305,40 +305,15 @@ class Entity extends EntityCreate
              * Or if have Autorpub or Ownerpub, so include the setor data relation
              */
             if ($entity === "usuarios" || !empty($info['autor'])) {
-                $read = new \Conn\Read();
                 foreach ($result as $i => $item) {
                     $entitySetor = ($entity === "usuarios" ? $item['setor'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['setor'] : $item['relationData']["ownerpub"]['setor']));
                     if (!empty($entitySetor)) {
-
-                        if (!isset($infos[$entitySetor]))
-                            $infos[$entitySetor] = Metadados::getInfo($entitySetor);
-
-                        if (!isset($dicionarios[$entitySetor]))
-                            $dicionarios[$entitySetor] = Metadados::getDicionario($entitySetor);
-
-                        if (!empty($infos[$entitySetor]['columns_readable']))
-                            $read->setSelect($infos[$entitySetor]['columns_readable']);
-
                         $idUsuario = ($entity === "usuarios" ? $item['id'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['id'] : $item['relationData']["ownerpub"]['id']));
-                        $read->exeRead($entitySetor, "WHERE usuarios_id = :id", "id={$idUsuario}", !0);
-                        if ($read->getResult()) {
-                            if($entity === "usuarios")
-                                $result[$i]['relationData'][$entitySetor] = [];
-                            else
-                                $result[$i]['relationData'][($info['autor'] == 1 ? "autorpub" : "ownerpub")]["relationData"][$entitySetor] = [];
 
-                            /**
-                             * Decode all json on base relation register
-                             */
-                            foreach ($dicionarios[$entitySetor] as $meta) {
-                                $m = new \Entity\Meta($meta);
-                                $m->setValue($read->getResult()[0][$meta['column']]);
-                                if($entity === "usuarios")
-                                    $result[$i]['relationData'][$entitySetor][$meta['column']] = $m->getValue();
-                                else
-                                    $result[$i]['relationData'][($info['autor'] == 1 ? "autorpub" : "ownerpub")]["relationData"][$entitySetor][$meta['column']] = $m->getValue();
-                            }
-                        }
+                        if ($entity === "usuarios")
+                            $result[$i]['relationData'][$entitySetor] = self::getUserSetorData($entitySetor, $idUsuario);
+                        else
+                            $result[$i]['relationData'][($info['autor'] == 1 ? "autorpub" : "ownerpub")]["relationData"][$entitySetor] = self::getUserSetorData($entitySetor, $idUsuario);
                     }
                 }
             }
