@@ -37,6 +37,8 @@ class Entity extends EntityCreate
         $command = "FROM " . PRE . $entity . " as e";
         $relations = [];
         $result = [];
+        $dicionarios = [];
+        $infos = [];
 
         /**
          * Select the entity
@@ -47,6 +49,44 @@ class Entity extends EntityCreate
         }
 
         /**
+         * System id relation
+         */
+        if (!empty($info['system'])) {
+
+            if (!isset($dicionarios[$info['system']]))
+                $dicionarios[$info['system']] = Metadados::getDicionario($info['system']);
+
+            if (!isset($infos[$info['system']]))
+                $infos[$info['system']] = Metadados::getInfo($info['system']);
+
+            if (!empty($infos[$info['system']]['columns_readable'])) {
+                foreach ($infos[$info['system']]['columns_readable'] as $column)
+                    $selects .= ", system_" . $info['system'] . ".{$column} as {$info['system']}___{$column}";
+            }
+
+            $command .= " LEFT JOIN " . PRE . $info['system'] . " as system_" . $info['system'] . " ON system_" . $info['system'] . ".id = e.system_id";
+        }
+
+        /**
+         * Autorpub and Ownerpub id relation
+         */
+        if (!empty($info['autor'])) {
+
+            if (!isset($dicionarios["usuarios"]))
+                $dicionarios["usuarios"] = Metadados::getDicionario("usuarios");
+
+            if (!isset($infos["usuarios"]))
+                $infos["usuarios"] = Metadados::getInfo("usuarios");
+
+            if (!empty($infos["usuarios"]['columns_readable'])) {
+                foreach ($infos["usuarios"]['columns_readable'] as $column)
+                    $selects .= ", autor_user.{$column} as autor_user___{$column}";
+            }
+
+            $command .= " LEFT JOIN " . PRE . "usuarios as autor_user ON autor_user.id = e." . ($info['autor'] == 1 ? "autorpub" : "ownerpub");
+        }
+
+        /**
          * Include the data from each relation
          */
         if (!empty($info['relation'])) {
@@ -54,13 +94,18 @@ class Entity extends EntityCreate
                 $relationEntity = $dicionario[$relationItem]['relation'];
                 $relations[$relationEntity] = $dicionario[$relationItem]['column'];
 
-                $infoRelation = Metadados::getInfo($relationEntity);
-                if (!empty($infoRelation['columns_readable'])) {
-                    foreach ($infoRelation['columns_readable'] as $column)
-                        $selects .= ", data_" . $dicionario[$relationItem]['relation'] . ".{$column} as {$dicionario[$relationItem]['relation']}___{$column}";
+                if (!isset($dicionarios[$relationEntity]))
+                    $dicionarios[$relationEntity] = Metadados::getDicionario($relationEntity);
+
+                if (!isset($infos[$relationEntity]))
+                    $infos[$relationEntity] = Metadados::getInfo($relationEntity);
+
+                if (!empty($infos[$relationEntity]['columns_readable'])) {
+                    foreach ($infos[$relationEntity]['columns_readable'] as $column)
+                        $selects .= ", data_" . $dicionario[$relationItem]['column'] . ".{$column} as {$dicionario[$relationItem]['relation']}___{$column}";
                 }
 
-                $command .= " LEFT JOIN " . PRE . $dicionario[$relationItem]['relation'] . " as data_" . $dicionario[$relationItem]['relation'] . " ON data_" . $dicionario[$relationItem]['relation'] . ".id = e." . $dicionario[$relationItem]['column'];
+                $command .= " LEFT JOIN " . PRE . $dicionario[$relationItem]['relation'] . " as data_" . $dicionario[$relationItem]['column'] . " ON data_" . $dicionario[$relationItem]['column'] . ".id = e." . $dicionario[$relationItem]['column'];
             }
         }
 
@@ -76,82 +121,206 @@ class Entity extends EntityCreate
         $sql->exeCommand($command);
 
         /**
+         * Save total register if not have ID
+         */
+        if(!$id || !is_numeric($id) || $id < 1) {
+            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "_cdn/userTotalRegisterDB");
+            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "_cdn/userTotalRegisterDB/{$_SESSION['userlogin']['id']}");
+            $f = fopen(PATH_HOME . "_cdn/userTotalRegisterDB/" . $_SESSION['userlogin']['id'] . "/{$entity}.json", "w");
+            fwrite($f, $sql->getRowCount());
+            fclose($f);
+        }
+
+        /**
          * Convert join values into a array of relation data
          * Convert json values into array
          */
-        if (empty($sql->getErro())) {
-            if (!empty($sql->getResult())) {
-                foreach ($sql->getResult() as $i => $register) {
-                    if($i >= LIMITOFFLINE)
-                        break;
+        if (empty($sql->getErro()) && !empty($sql->getResult())) {
+            foreach ($sql->getResult() as $i => $register) {
+                if ($i >= LIMITOFFLINE)
+                    break;
+
+                /**
+                 * Work on a variable with the data of relationData
+                 */
+                $relationData = [];
+
+                /**
+                 * convert data from default format
+                 */
+                foreach ($dicionario as $meta) {
+                    $m = new \Entity\Meta($meta);
+                    $m->setValue($register[$meta['column']]);
+                    $register[$meta['column']] = $m->getValue();
+                }
+
+                /**
+                 * Foreach register, check if have relationData to split
+                 */
+                foreach ($register as $column => $value) {
 
                     /**
-                     * Work on a variable with the data of relationData
+                     * Check System ID relation
                      */
-                    $relationData = [];
+                    if (!empty($info['system']) && strpos($column, $info['system'] . '___') !== false) {
+
+                        /**
+                         * Add item to a relation register system_id
+                         */
+                        $relationData["system_id"][str_replace($info['system'] . "___", "", $column)] = $value;
+
+                        /**
+                         * Remove item from base register
+                         */
+                        unset($register[$column]);
+                    }
 
                     /**
-                     * Decode all json on base register
+                     * Autorpub and Ownerpub id relation
                      */
-                    foreach ($dicionario as $meta) {
-                        if ($meta['type'] === "json" && !empty($register[$meta['column']]))
-                            $register[$meta['column']] = json_decode($register[$meta['column']], !0);
+                    if (!empty($info['autor']) && strpos($column, 'autor_user___') !== false) {
+
+                        /**
+                         * Add item to a relation register
+                         */
+                        $relationData["usuarios"][str_replace("autor_user___", "", $column)] = $value;
+
+                        /**
+                         * Remove item from base register
+                         */
+                        unset($register[$column]);
                     }
 
                     /**
                      * If have relation data together in the base register
                      */
                     if (!empty($relations)) {
-
-                        /**
-                         * Create the field relationData, moving the relation fields to this
-                         */
-                        foreach ($register as $column => $value) {
-                            foreach ($relations as $relation => $RelationColumn) {
-                                if (strpos($column, $relation . '___') !== false) {
-
-                                    /**
-                                     * Add item to a relation register
-                                     */
-                                    $columnRelationName = str_replace($relation . "___", "", $column);
-                                    $relationData[$RelationColumn][$columnRelationName] = $value;
-
-                                    /**
-                                     * Remove item from base register
-                                     */
-                                    unset($register[$column]);
-                                }
-                            }
-                        }
-
-                        /**
-                         * After separate the base data from the relation data
-                         * check if the relation data have a ID an decode json
-                         */
                         foreach ($relations as $relation => $RelationColumn) {
-
-                            /**
-                             * Check if the struct of relation data received have a ID
-                             * if not, so delete
-                             */
-                            if (empty($relationData[$RelationColumn]['id'])) {
-                                unset($relationData[$RelationColumn]);
-
-                            } else {
+                            if (strpos($column, $relation . '___') !== false) {
 
                                 /**
-                                 * Decode all json on base relation register
+                                 * Add item to a relation register
                                  */
-                                foreach (Metadados::getDicionario($relation) as $meta) {
-                                    if ($meta['type'] === "json" && !empty($relationData[$RelationColumn][$meta['column']]))
-                                        $relationData[$RelationColumn][$meta['column']] = json_decode($relationData[$RelationColumn][$meta['column']], !0);
-                                }
+                                $relationData[$RelationColumn][str_replace($relation . "___", "", $column)] = $value;
+
+                                /**
+                                 * Remove item from base register
+                                 */
+                                unset($register[$column]);
                             }
                         }
                     }
+                }
 
-                    $register["relationData"] = $relationData;
-                    $result[] = $register;
+                if (!empty($info['system'])) {
+                    /**
+                     * Check if the struct of relation data received have a ID
+                     * if not, so delete
+                     */
+                    if (empty($relationData["system_id"]['id'])) {
+                        unset($relationData["system_id"]);
+
+                    } else {
+
+                        /**
+                         * Decode all json on base relation register
+                         */
+                        foreach ($dicionarios[$info['system']] as $meta) {
+                            $m = new \Entity\Meta($meta);
+                            $m->setValue($relationData["system_id"][$meta['column']]);
+                            $relationData["system_id"][$meta['column']] = $m->getValue();
+                        }
+                    }
+                }
+
+                if (!empty($info['autor'])) {
+                    /**
+                     * Check if the struct of relation data received have a ID
+                     * if not, so delete
+                     */
+                    if (empty($relationData["usuarios"]['id'])) {
+                        unset($relationData["usuarios"]);
+
+                    } else {
+
+                        /**
+                         * Decode all json on base relation register
+                         */
+
+                        foreach ($dicionarios["usuarios"] as $meta) {
+                            $m = new \Entity\Meta($meta);
+                            $m->setValue($relationData["usuarios"][$meta['column']]);
+                            $relationData["usuarios"][$meta['column']] = $m->getValue();
+                        }
+
+                        $relationData[$info['autor'] == 1 ? "autorpub" : "ownerpub"] = $relationData["usuarios"];
+                        unset($relationData["usuarios"]);
+                    }
+                }
+
+                /**
+                 * After separate the base data from the relation data
+                 * check if the relation data have a ID an decode json
+                 */
+                if (!empty($relations)) {
+                    foreach ($relations as $relation => $RelationColumn) {
+
+                        /**
+                         * Check if the struct of relation data received have a ID
+                         * if not, so delete
+                         */
+                        if (empty($relationData[$RelationColumn]['id'])) {
+                            unset($relationData[$RelationColumn]);
+
+                        } else {
+
+                            /**
+                             * Decode all json on base relation register
+                             */
+                            foreach ($dicionarios[$relation] as $meta) {
+                                $m = new \Entity\Meta($meta);
+                                $m->setValue($relationData[$RelationColumn][$meta['column']]);
+                                $relationData[$RelationColumn][$meta['column']] = $m->getValue();
+                            }
+                        }
+                    }
+                }
+
+                $register["relationData"] = $relationData;
+                $result[] = $register;
+            }
+
+            /**
+             * if is user database, include the setor data relation
+             */
+            if ($entity === "usuarios") {
+                $read = new \Conn\Read();
+                foreach ($result as $i => $item) {
+                    if (!empty($item['setor'])) {
+
+                        if (!isset($infos[$item['setor']]))
+                            $infos[$item['setor']] = Metadados::getInfo($item['setor']);
+
+                        if (!isset($dicionarios[$item['setor']]))
+                            $dicionarios[$item['setor']] = Metadados::getDicionario($item['setor']);
+
+                        if (!empty($infos[$item['setor']]['columns_readable']))
+                            $read->setSelect($infos[$item['setor']]['columns_readable']);
+
+                        $read->exeRead($item['setor'], "WHERE usuarios_id = :id", "id={$item['id']}", !0);
+                        if ($read->getResult()) {
+                            $result[$i]['relationData'][$item['setor']] = [];
+
+                            /**
+                             * Decode all json on base relation register
+                             */
+                            foreach ($dicionarios[$item['setor']] as $meta) {
+                                $m = new \Entity\Meta($meta);
+                                $m->setValue($read->getResult()[0][$meta['column']]);
+                                $result[$i]['relationData'][$item['setor']][$meta['column']] = $m->getValue();
+                            }
+                        }
+                    }
                 }
             }
         }
