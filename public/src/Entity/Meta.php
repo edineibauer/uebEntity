@@ -105,6 +105,10 @@ class Meta
             $value = date("H:i:s");
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
+        elseif (in_array($this->type, ["tinyint", "smallint", "mediumint", "int", "bigint"]))
+            $value = (int) $value;
+        elseif (in_array($this->type, ["double", "real", "float", "decimal"]))
+            $value = (float) $value;
         elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "percent", "card_number"]))
             $value = str_replace(["(", ")", " ", "-", ".", ",", "R$", "$", "/", "\\", "%"], "", $value);
 
