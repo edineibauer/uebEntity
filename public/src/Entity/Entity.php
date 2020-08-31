@@ -153,6 +153,8 @@ class Entity extends EntityCreate
                     $m->setValue($register[$meta['column']]);
                     $register[$meta['column']] = $m->getValue();
                 }
+                if(!empty($register['id']))
+                    $register['id'] = (int) $register['id'];
 
                 /**
                  * Foreach register, check if have relationData to split
@@ -230,6 +232,8 @@ class Entity extends EntityCreate
                             $m->setValue($relationData["system_id"][$meta['column']]);
                             $relationData["system_id"][$meta['column']] = $m->getValue();
                         }
+                        if(!empty($relationData["system_id"]['id']))
+                            $relationData["system_id"]['id'] = (int) $relationData["system_id"]['id'];
                     }
                 }
 
@@ -252,6 +256,8 @@ class Entity extends EntityCreate
                             $m->setValue($relationData["usuarios"][$meta['column']]);
                             $relationData["usuarios"][$meta['column']] = $m->getValue();
                         }
+                        if(!empty($relationData["usuarios"]['id']))
+                            $relationData["usuarios"]['id'] = (int) $relationData["usuarios"]['id'];
 
                         $relationData[$info['autor'] == 1 ? "autorpub" : "ownerpub"] = $relationData["usuarios"];
                         unset($relationData["usuarios"]);
@@ -282,6 +288,8 @@ class Entity extends EntityCreate
                                 $m->setValue($relationData[$RelationColumn][$meta['column']]);
                                 $relationData[$RelationColumn][$meta['column']] = $m->getValue();
                             }
+                            if(!empty($relationData[$RelationColumn]['id']))
+                                $relationData[$RelationColumn]['id'] = (int) $relationData[$RelationColumn]['id'];
 
                             /**
                              * If is a user relation entity add the relationData
@@ -342,11 +350,14 @@ class Entity extends EntityCreate
             /**
              * Decode all json on base relation register
              */
+            $result = $read->getResult()[0];
             foreach ($dicionario as $meta) {
                 $m = new \Entity\Meta($meta);
-                $m->setValue($read->getResult()[0][$meta['column']]);
+                $m->setValue($result[$meta['column']]);
                 $result[$meta['column']] = $m->getValue();
             }
+            if(!empty($result['id']))
+                $result['id'] = (int) $result['id'];
         }
 
         return $result;
