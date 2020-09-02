@@ -41,14 +41,14 @@ class Entity extends EntityCreate
             $historicEntity[$entity] = strtotime('now') . "-" . rand(1000000, 9999999);
             $json->save("historic", $historicEntity);
 
-        } elseif(!$id && file_exists(PATH_HOME . "_cdn/storeEntityCache/{$entity}/{$historicEntity[$entity]}.json")) {
+        } elseif(!$id && file_exists(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json")) {
 
             /**
              * Check if have historic ID from this entity, if have
              * check if the user historic ID is the same as the actual historic ID, if yes
              * return the cached database
              */
-            return json_decode(file_get_contents(PATH_HOME . "_cdn/storeEntityCache/{$entity}/{$historicEntity[$entity]}.json"), !0);
+            return json_decode(file_get_contents(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json"), !0);
         }
 
         $result = [];
@@ -349,17 +349,18 @@ class Entity extends EntityCreate
             /**
              * Clear all cache from this entity
              */
-            if(file_exists(PATH_HOME . "_cdn/storeEntityCache/{$entity}")) {
-                foreach (Helper::listFolder(PATH_HOME . "_cdn/storeEntityCache/{$entity}") as $item)
-                    unlink(PATH_HOME . "_cdn/storeEntityCache/{$entity}/{$item}");
+            if(file_exists(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}")) {
+                foreach (Helper::listFolder(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}") as $item)
+                    unlink(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$item}");
             }
 
             /**
              * save the entity database to cache
              */
             Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache");
-            Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache/{$entity}");
-            $f = fopen(PATH_HOME . "_cdn/storeEntityCache/{$entity}/{$historicEntity[$entity]}.json", "w");
+            Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}");
+            Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}");
+            $f = fopen(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json", "w");
             fwrite($f, json_encode($result));
             fclose($f);
         }
