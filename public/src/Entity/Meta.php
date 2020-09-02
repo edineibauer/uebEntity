@@ -103,6 +103,8 @@ class Meta
             $value = date("Y-m-d H:i:s");
         elseif ($this->key === "time" && in_array($value, ["now", "date", "datetime", "timestamp", "time"]))
             $value = date("H:i:s");
+        elseif ($this->key === "relation")
+            $value = is_numeric($value) ? (int) $value : null;
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
         elseif (in_array($this->type, ["tinyint", "smallint", "mediumint", "int", "bigint"]))
