@@ -169,9 +169,13 @@ class Entity extends EntityCreate
                  * convert data from default format
                  */
                 foreach ($dicionario as $meta) {
-                    $m = new \Entity\Meta($meta);
-                    $m->setValue($register[$meta['column']]);
-                    $register[$meta['column']] = $m->getValue();
+                    if(isset($register[$meta['column']])) {
+                        $m = new \Entity\Meta($meta);
+                        $m->setValue($register[$meta['column']]);
+                        $register[$meta['column']] = $m->getValue();
+                    } else {
+                        $register[$meta['column']] = "";
+                    }
                 }
                 if(!empty($register['id']))
                     $register['id'] = (int) $register['id'];
@@ -248,9 +252,13 @@ class Entity extends EntityCreate
                          * Decode all json on base relation register
                          */
                         foreach ($dicionarios[$info['system']] as $meta) {
-                            $m = new \Entity\Meta($meta);
-                            $m->setValue($relationData["system_id"][$meta['column']]);
-                            $relationData["system_id"][$meta['column']] = $m->getValue();
+                            if(isset($relationData["system_id"][$meta['column']])) {
+                                $m = new \Entity\Meta($meta);
+                                $m->setValue($relationData["system_id"][$meta['column']]);
+                                $relationData["system_id"][$meta['column']] = $m->getValue();
+                            } else {
+                                $relationData["system_id"][$meta['column']] = "";
+                            }
                         }
                         if(!empty($relationData["system_id"]['id']))
                             $relationData["system_id"]['id'] = (int) $relationData["system_id"]['id'];
@@ -272,9 +280,13 @@ class Entity extends EntityCreate
                          */
 
                         foreach ($dicionarios["usuarios"] as $meta) {
-                            $m = new \Entity\Meta($meta);
-                            $m->setValue($relationData["usuarios"][$meta['column']]);
-                            $relationData["usuarios"][$meta['column']] = $m->getValue();
+                            if(isset($relationData["usuarios"][$meta['column']])) {
+                                $m = new \Entity\Meta($meta);
+                                $m->setValue($relationData["usuarios"][$meta['column']]);
+                                $relationData["usuarios"][$meta['column']] = $m->getValue();
+                            } else {
+                                $relationData["usuarios"][$meta['column']] = "";
+                            }
                         }
                         if(!empty($relationData["usuarios"]['id']))
                             $relationData["usuarios"]['id'] = (int) $relationData["usuarios"]['id'];
@@ -304,9 +316,13 @@ class Entity extends EntityCreate
                              * Decode all json on base relation register
                              */
                             foreach ($dicionarios[$relation] as $meta) {
-                                $m = new \Entity\Meta($meta);
-                                $m->setValue($relationData[$RelationColumn][$meta['column']]);
-                                $relationData[$RelationColumn][$meta['column']] = $m->getValue();
+                                if(isset($relationData[$RelationColumn][$meta['column']])) {
+                                    $m = new \Entity\Meta($meta);
+                                    $m->setValue($relationData[$RelationColumn][$meta['column']]);
+                                    $relationData[$RelationColumn][$meta['column']] = $m->getValue();
+                                } else {
+                                    $relationData[$RelationColumn][$meta['column']] = "";
+                                }
                             }
                             if(!empty($relationData[$RelationColumn]['id']))
                                 $relationData[$RelationColumn]['id'] = (int) $relationData[$RelationColumn]['id'];
@@ -390,9 +406,13 @@ class Entity extends EntityCreate
              */
             $result = $read->getResult()[0];
             foreach ($dicionario as $meta) {
-                $m = new \Entity\Meta($meta);
-                $m->setValue($result[$meta['column']]);
-                $result[$meta['column']] = $m->getValue();
+                if(isset($result[$meta['column']])) {
+                    $m = new \Entity\Meta($meta);
+                    $m->setValue($result[$meta['column']]);
+                    $result[$meta['column']] = $m->getValue();
+                } else {
+                    $result[$meta['column']] = "";
+                }
             }
             if(!empty($result['id']))
                 $result['id'] = (int) $result['id'];
