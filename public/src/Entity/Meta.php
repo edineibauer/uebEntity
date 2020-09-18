@@ -94,7 +94,7 @@ class Meta
             $this->error = null;
 
         if ($this->type === "json")
-            $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) ? $value : null));
+            $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) || $this->key === "source" ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $value = (!empty($value) ? (int) $value : null);
         elseif ($this->key === "date" && in_array($value, ["now", "date", "datetime", "timestamp"]))
@@ -709,11 +709,57 @@ class Meta
     }
 
     /**
-     * @param array $value
+     * @param array|string $value
      * @return array|mixed|string
      */
-    private function uploadSource(array $value)
+    private function uploadSource($value)
     {
+        if(is_string($value)) {
+            $imageUrl = $value;
+            $name = pathinfo($imageUrl, PATHINFO_FILENAME);
+            $extensao = pathinfo($imageUrl, PATHINFO_EXTENSION);
+            $isImage = in_array($extensao, ["png", "jpg", "jpeg", "gif", "bmp", "tif", "tiff", "psd", "svg"]);
+            $dir = "uploads/tmp/" . $name . "." . $extensao;
+
+            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads");
+            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads/tmp");
+            copy($imageUrl, $dir);
+
+            $value = [
+                [
+                    "name" => $name,
+                    "type" => $extensao,
+                    "fileType" => "image/{$extensao}",
+                    "size" => "208611.7",
+                    "error" => "",
+                    "url" => $dir,
+                    "format" => [
+                        "isImage" => "true",
+                        "isVideo" => "false",
+                        "isAudio" => "false",
+                        "isDoc" => "false",
+                        "type" => "1",
+                        "isDownload" => "false"
+                    ],
+                    "shortname" => "{$name}.{$extensao}",
+                    "nome" => $name,
+                    "icon" => "file",
+                    "sizeName" => "208KB",
+                    "data" => date("Y-m-d H:i:s"),
+                    "urls" => []
+                ]
+            ];
+
+            if($isImage) {
+                $value[0]['image'] = HOME . $dir;
+                $value[0]['preview'] = "<img src='" . $value[0]['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
+            } else {
+                $icon = (in_array($extensao, ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
+                $value[0]['image'] = HOME . "assetsPublic/img/file.png";
+                $value[0]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
+            }
+        }
+
         if (is_array($value)) {
             foreach ($value as $i => $item) {
                 if ($item['url'] !== !1) {
@@ -770,6 +816,7 @@ class Meta
                             }
 
                             $value[$i]['url'] = HOME . $dir . $nameFile;
+                            $value[$i]['image'] = HOME . $dir . $nameFile;
                             $value[$i]['preview'] = ($isImage ? "<img src='" . HOME . $dir . ($this->getFormat() === "source_list" ? "thumb/" : "medium/") . $nameFile . "' title='Imagem " . $item['nome'] . "' class='left radius'/>" : "<svg class='icon svgIcon' ><use xlink:href='#" . $icon . "'></use></svg>");
                         }
 
