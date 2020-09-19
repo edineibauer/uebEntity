@@ -724,40 +724,43 @@ class Meta
             \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads");
             \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "uploads/tmp");
             try {
-                copy($imageUrl, $dir);
+                if(@copy($imageUrl, $dir)) {
 
-                $value = [
-                    [
-                        "name" => $name,
-                        "type" => $extensao,
-                        "fileType" => "image/{$extensao}",
-                        "size" => "208611.7",
-                        "error" => "",
-                        "url" => $dir,
-                        "format" => [
-                            "isImage" => "true",
-                            "isVideo" => "false",
-                            "isAudio" => "false",
-                            "isDoc" => "false",
-                            "type" => "1",
-                            "isDownload" => "false"
-                        ],
-                        "shortname" => "{$name}.{$extensao}",
-                        "nome" => $name,
-                        "icon" => "file",
-                        "sizeName" => "208KB",
-                        "data" => date("Y-m-d H:i:s"),
-                        "urls" => []
-                    ]
-                ];
+                    $value = [
+                        [
+                            "name" => $name,
+                            "type" => $extensao,
+                            "fileType" => "image/{$extensao}",
+                            "size" => "208611.7",
+                            "error" => "",
+                            "url" => $dir,
+                            "format" => [
+                                "isImage" => "true",
+                                "isVideo" => "false",
+                                "isAudio" => "false",
+                                "isDoc" => "false",
+                                "type" => "1",
+                                "isDownload" => "false"
+                            ],
+                            "shortname" => "{$name}.{$extensao}",
+                            "nome" => $name,
+                            "icon" => "file",
+                            "sizeName" => "208KB",
+                            "data" => date("Y-m-d H:i:s"),
+                            "urls" => []
+                        ]
+                    ];
 
-                if ($isImage) {
-                    $value[0]['image'] = HOME . $dir;
-                    $value[0]['preview'] = "<img src='" . $value[0]['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
+                    if ($isImage) {
+                        $value[0]['image'] = HOME . $dir;
+                        $value[0]['preview'] = "<img src='" . $value[0]['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
+                    } else {
+                        $icon = (in_array($extensao, ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
+                        $value[0]['image'] = HOME . "assetsPublic/img/file.png";
+                        $value[0]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
+                    }
                 } else {
-                    $icon = (in_array($extensao, ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
-                    $value[0]['image'] = HOME . "assetsPublic/img/file.png";
-                    $value[0]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
+                    $value = null;
                 }
             } catch (\Exception $e) {
                 $value = null;
