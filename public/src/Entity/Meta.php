@@ -799,14 +799,21 @@ class Meta
 
                         if(isset($nameFile)) {
                             if ($isImage) {
-                                $image = WideImage::load(PATH_HOME . $dir . $nameFile);
-                                $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                                $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                                try {
+                                    $image = WideImage::load(PATH_HOME . $dir . $nameFile);
+                                    $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                                    $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
 
-                                $value[$i]['urls'] = [
-                                    'thumb' => HOME . $dir . "thumb/" . $nameFile,
-                                    'medium' => HOME . $dir . "medium/" . $nameFile
-                                ];
+                                    $value[$i]['urls'] = [
+                                        'thumb' => HOME . $dir . "thumb/" . $nameFile,
+                                        'medium' => HOME . $dir . "medium/" . $nameFile
+                                    ];
+                                } catch (\Exception $e) {
+                                    $value[$i]['urls'] = [
+                                        'thumb' => HOME . $dir . $nameFile,
+                                        'medium' => HOME . $dir . $nameFile
+                                    ];
+                                }
 
                             } else {
                                 $value[$i]['urls'] = [
