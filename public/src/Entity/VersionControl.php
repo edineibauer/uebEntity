@@ -2,8 +2,6 @@
 
 namespace Entity;
 
-use Helpers\Helper;
-
 abstract class VersionControl
 {
     private $folder;
@@ -12,11 +10,12 @@ abstract class VersionControl
     /**
      * VersionControl constructor.
      * @param string $folder
+     * @param int $versionNumberControl
      */
-    public function __construct(string $folder)
+    public function __construct(string $folder, int $versionNumberControl)
     {
         $this->folder = $folder;
-        $this->backup = defined("BACKUP") ? BACKUP : 2;
+        $this->backup = $versionNumberControl ?? (defined("BACKUP") ? BACKUP : 2);
     }
 
     /**
@@ -39,7 +38,7 @@ abstract class VersionControl
         list($id, $folder) = $this->getBaseInfo($file);
         $idVersion = $this->getLastVersion(PATH_HOME . "_cdn/{$folder}/{$id}", $recursiveVersion);
 
-        $json = new Json($folder);
+        $json = new Json($folder, 20);
         $json->setVersionamento(false);
         $json->add($id . "#{$idVersion}", $data);
 

@@ -13,15 +13,16 @@ class Json extends VersionControl
 
     /**
      * Json constructor.
-     * @param string|null $folder
+     * @param string $folder
+     * @param int $versionNumberControl
      */
-    public function __construct(string $folder = "store")
+    public function __construct(string $folder = "store", int $versionNumberControl = 2)
     {
         $folder = str_replace(PATH_HOME, '', Check::name($folder, ["/"]));
         $folder = (preg_match('/^\//i', $folder) ? substr($folder, 1) : $folder);
         $folder = (preg_match('/\/$/i', $folder) ? substr($folder, 0, -1) : $folder);
 
-        parent::__construct($folder);
+        parent::__construct($folder, $versionNumberControl);
 
         $dir = "_cdn";
         Helper::createFolderIfNoExist(PATH_HOME . $dir);

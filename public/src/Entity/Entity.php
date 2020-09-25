@@ -2,6 +2,8 @@
 
 namespace Entity;
 
+use Conn\Create;
+use Conn\Update;
 use \Helpers\Helper;
 use \Conn\Read;
 use \Config\Config;
@@ -29,8 +31,9 @@ class Entity extends EntityCreate
      * @param null $id
      * @return array|mixed|null
      */
-    public static function exeRead(string $entity, $id = null)
+    public static function exeReadWithoutCache(string $entity, $id = null)
     {
+        $result = [];
         $json = new Json();
         $historicEntity = $json->get("historic");
 
@@ -40,19 +43,8 @@ class Entity extends EntityCreate
         if (empty($historicEntity[$entity])) {
             $historicEntity[$entity] = strtotime('now') . "-" . rand(1000000, 9999999);
             $json->save("historic", $historicEntity);
-
-            //disable cache until the logic is apprimored
-//        } elseif(!$id && file_exists(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json")) {
-
-            /**
-             * Check if have historic ID from this entity, if have
-             * check if the user historic ID is the same as the actual historic ID, if yes
-             * return the cached database
-             */
-//            return json_decode(file_get_contents(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json"), !0);
         }
 
-        $result = [];
         $info = Metadados::getInfo($entity);
         $dicionario = Metadados::getDicionario($entity);
         $selects = "";
@@ -362,27 +354,48 @@ class Entity extends EntityCreate
                     }
                 }
             }
-
-            /**
-             * Clear all cache from this entity
-             */
-            /*if(file_exists(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}")) {
-                foreach (Helper::listFolder(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}") as $item)
-                    unlink(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$item}");
-            }*/
-
-            /**
-             * save the entity database to cache
-             */
-            /*Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache");
-            Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}");
-            Helper::createFolderIfNoExist(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}");
-            $f = fopen(PATH_HOME . "_cdn/storeEntityCache/{$_SESSION['userlogin']['id']}/{$entity}/{$historicEntity[$entity]}.json", "w");
-            fwrite($f, json_encode($result));
-            fclose($f);*/
         }
 
         return $result;
+    }
+
+    /**
+     * Lê registros no servidor incluindo os dados relationados e decode dos JSON
+     * usa cache para acelerar o retorno da busca
+     * relationData
+     * @param string $entity
+     * @param null $id
+     * @return array|mixed|null
+     */
+    public static function exeRead(string $entity, $id = null)
+    {
+        $create = new Create();
+        $sql = new SqlCommand();
+        $results = [];
+
+        /**
+         * É necessário verificar permissões
+         * System_id, autor, setor
+         */
+        if(is_numeric($id) && $id > 0) {
+            $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id WHERE e.id = {$id}");
+        } else {
+            $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id ORDER BY e.id DESC LIMIT " . LIMITOFFLINE);
+        }
+
+        if($sql->getResult()) {
+            foreach ($sql->getResult() as $item) {
+                if(!empty($item['data'])) {
+                    $results[] = json_decode($item['data'], !0);
+                } else {
+                    $readNoCache = self::exeReadWithoutCache($entity, $item['id'])[0];
+                    $create->exeCreate("wcache_{$entity}", ["id" => $item['id'], "system_id" => null, "data" => json_encode($readNoCache)]);
+                    $results[] = $readNoCache;
+                }
+            }
+        }
+
+        return $results;
     }
 
     /**
