@@ -207,8 +207,10 @@ class React
                 $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), !0)[$entity]['belongsTo'];
                 if(!empty($general)) {
                     $sql = new SqlCommand();
-                    foreach ($general as $itemEntity => $item)
-                        $sql->exeCommand("DELETE c FROM " . PRE . "wcache_" . $itemEntity . " as c JOIN " . PRE . $itemEntity . " as e ON e.id = c.id WHERE e." . $item['column'] . " = {$dados['id']}");
+                    foreach ($general as $itemEntity => $item){
+                        if(!empty($itemEntity) && !empty($item['column']) && file_exists(PATH_HOME . "entity/cache/{$itemEntity}.json"))
+                            $sql->exeCommand("DELETE c FROM " . PRE . "wcache_" . $itemEntity . " as c JOIN " . PRE . $itemEntity . " as e ON e.id = c.id WHERE e." . $item['column'] . " = {$dados['id']}");
+                    }
                 }
             }
         }
