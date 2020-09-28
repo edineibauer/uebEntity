@@ -92,21 +92,24 @@ class React
 
         $store = new Json("update/{$entity}");
         $store->setVersionamento(!1);
-        $this->limitaAtualizaçõesArmazenadas($entity, $id);
+        $this->limitaAtualizaçõesArmazenadas($action, $entity, $id);
         $store->save($hist[$entity], ['db_action' => $action, "id" => $id]);
     }
 
     /**
+     * @param string $action
      * @param string $entity
      * @param int $id
      */
-    private function limitaAtualizaçõesArmazenadas(string $entity, int $id)
+    private function limitaAtualizaçõesArmazenadas(string $action, string $entity, int $id)
     {
         //remove updates anteriores de registros que serão excluídos
-        foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
-            $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
-            if ($dadosE['db_action'] !== "delete" && !empty($dadosE['id']) && !empty($id) && $dadosE['id'] == $id)
-                unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
+        if($action === "delete") {
+            foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
+                $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
+                if ($dadosE['db_action'] !== "delete" && !empty($dadosE['id']) && !empty($id) && $dadosE['id'] == $id)
+                    unlink(PATH_HOME . "_cdn/update/{$entity}/{$historie}");
+            }
         }
 
         //se tiver mais que 100 resultados, deleta os acima de 100
