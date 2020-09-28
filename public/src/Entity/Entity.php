@@ -125,7 +125,7 @@ class Entity extends EntityCreate
         /**
          * Set the limit result to return to front
          */
-        $command = "SELECT " . $selects . " {$command}" . (is_numeric($id) && $id > 0 ? " WHERE e.id = {$id}" : "") . " ORDER BY id DESC";
+        $command = "SELECT " . $selects . " {$command}" . (is_numeric($id) && $id > 0 ? " WHERE e.id = {$id}" : "") . " ORDER BY id DESC LIMIT " . LIMITOFFLINE;
 
         /**
          * Execute the read command
@@ -134,25 +134,11 @@ class Entity extends EntityCreate
         $sql->exeCommand($command);
 
         /**
-         * Save total register if not have ID
-         */
-        if(!$id || !is_numeric($id) || $id < 1) {
-            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "_cdn/userTotalRegisterDB");
-            \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "_cdn/userTotalRegisterDB/{$_SESSION['userlogin']['id']}");
-            $f = fopen(PATH_HOME . "_cdn/userTotalRegisterDB/" . $_SESSION['userlogin']['id'] . "/{$entity}.json", "w");
-            fwrite($f, $sql->getRowCount());
-            fclose($f);
-        }
-
-        /**
          * Convert join values into a array of relation data
          * Convert json values into array
          */
         if (empty($sql->getErro()) && !empty($sql->getResult())) {
             foreach ($sql->getResult() as $i => $register) {
-                if ($i >= LIMITOFFLINE)
-                    break;
-
                 /**
                  * Work on a variable with the data of relationData
                  */
