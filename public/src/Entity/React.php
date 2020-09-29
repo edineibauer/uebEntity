@@ -47,12 +47,12 @@ class React
              */
             if ($action === "delete") {
                 $del = new Delete();
-                $del->exeDelete("wcache_" . $entity, "WHERE id = {$dadosOld['id']}");
+                $del->exeDelete("wcache_" . $entity, "WHERE id = {$dados['id']}");
             } else {
                 $this->updateCachedDatabase($entity, $dados, $action);
             }
 
-            $this->createUpdateSyncIndexedDb($action, $entity, $dadosOld['id']);
+            $this->createUpdateSyncIndexedDb($action, $entity, $dados['id']);
 
             /**
              * Include react for this operation if have
