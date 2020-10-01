@@ -32,7 +32,7 @@ class React
     public function __construct(string $action, string $entity, array $dados, array $dadosOld = [])
     {
         $data = ["data" => "", "response" => 1, "error" => ""];
-        if(!preg_match("/^wcache_/i", $entity)) {
+        if (!preg_match("/^wcache_/i", $entity)) {
             $setor = Config::getSetor();
 
             /**
@@ -83,11 +83,11 @@ class React
     private function createUpdateSyncIndexedDb(string $action, string $entity, int $id)
     {
         $list = Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}");
-        $idHistoric = (!empty($list) ? (((int) str_replace(".json", "", explode("-", $list[count($list) -1])[1])) + 1) : 1);
+        $idHistoric = (!empty($list) ? (((int)str_replace(".json", "", explode("-", $list[count($list) - 1])[1])) + 1) : 1);
 
         $json = new Json();
         $hist = $json->get("historic");
-        $hist[$entity] = (string) strtotime('now') . "-" . $idHistoric;
+        $hist[$entity] = (string)strtotime('now') . "-" . $idHistoric;
         $json->save("historic", $hist);
 
         $store = new Json("update/{$entity}");
@@ -104,7 +104,7 @@ class React
     private function limitaAtualizaçõesArmazenadas(string $action, string $entity, int $id)
     {
         //remove updates anteriores de registros que serão excluídos
-        if($action === "delete") {
+        if ($action === "delete") {
             foreach (\Helpers\Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $historie) {
                 $dadosE = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$historie}"), !0);
                 if ($dadosE['db_action'] !== "delete" && !empty($dadosE['id']) && !empty($id) && $dadosE['id'] == $id)
@@ -158,36 +158,40 @@ class React
      */
     private function updateCachedDatabase(string $entity, array $dados, string $action)
     {
-        $register = Entity::exeReadWithoutCache($entity, $dados['id'])[0];
-        $dataCache = ["id" => $dados['id'], "system_id" => null, "data" => json_encode($register)];
+        $register = Entity::exeReadWithoutCache($entity, $dados['id']);
 
-        if($action === "create") {
-            $create = new Create();
-            $create->exeCreate("wcache_{$entity}", $dataCache);
+        if (!empty($register)) {
+            $register = $register[0];
+            $dataCache = ["id" => $dados['id'], "system_id" => null, "data" => json_encode($register)];
 
-        } else {
-
-            $read = new Read();
-            $read->exeRead("wcache_{$entity}", "WHERE id = :id", "id={$dados['id']}");
-            if ($read->getResult()) {
-                $up = new Update();
-                $up->exeUpdate("wcache_{$entity}", $dataCache, "WHERE id = :id", "id={$dados['id']}");
-            } else {
+            if ($action === "create") {
                 $create = new Create();
                 $create->exeCreate("wcache_{$entity}", $dataCache);
-            }
 
-            /**
-             * Check other databases with relation to this to
-             * delete her caches outdated
-             */
-            if(file_exists(PATH_HOME . "entity/general/general_info.json")) {
-                $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), !0)[$entity]['belongsTo'];
-                if(!empty($general)) {
-                    $sql = new SqlCommand();
-                    foreach ($general as $itemEntity => $item){
-                        if(!empty($itemEntity) && !empty($item['column']) && file_exists(PATH_HOME . "entity/cache/{$itemEntity}.json"))
-                            $sql->exeCommand("DELETE c FROM " . PRE . "wcache_" . $itemEntity . " as c JOIN " . PRE . $itemEntity . " as e ON e.id = c.id WHERE e." . $item['column'] . " = {$dados['id']}");
+            } else {
+
+                $read = new Read();
+                $read->exeRead("wcache_{$entity}", "WHERE id = :id", "id={$dados['id']}");
+                if ($read->getResult()) {
+                    $up = new Update();
+                    $up->exeUpdate("wcache_{$entity}", $dataCache, "WHERE id = :id", "id={$dados['id']}");
+                } else {
+                    $create = new Create();
+                    $create->exeCreate("wcache_{$entity}", $dataCache);
+                }
+
+                /**
+                 * Check other databases with relation to this to
+                 * delete her caches outdated
+                 */
+                if (file_exists(PATH_HOME . "entity/general/general_info.json")) {
+                    $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), !0)[$entity]['belongsTo'];
+                    if (!empty($general)) {
+                        $sql = new SqlCommand();
+                        foreach ($general as $itemEntity => $item) {
+                            if (!empty($itemEntity) && !empty($item['column']) && file_exists(PATH_HOME . "entity/cache/{$itemEntity}.json"))
+                                $sql->exeCommand("DELETE c FROM " . PRE . "wcache_" . $itemEntity . " as c JOIN " . PRE . $itemEntity . " as e ON e.id = c.id WHERE e." . $item['column'] . " = {$dados['id']}");
+                        }
                     }
                 }
             }
