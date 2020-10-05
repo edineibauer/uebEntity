@@ -369,7 +369,7 @@ class Entity extends EntityCreate
             $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id ORDER BY e.id DESC LIMIT " . LIMITOFFLINE);
         }
 
-        if($sql->getResult()) {
+        if(!empty($sql->getResult()) && is_array($sql->getResult())) {
             foreach ($sql->getResult() as $item) {
                 if(!empty($item['data'])) {
                     $results[] = json_decode($item['data'], !0);

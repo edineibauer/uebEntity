@@ -27,8 +27,13 @@ if (empty($data['error'])) {
     /**
      * Check Error
      */
-    if (!is_numeric($data['data']))
+    if (!is_numeric($data['data'])) {
         $data['error'] = $data['data'];
-    else
-        $data['data'] = \Entity\Entity::exeRead($entity, $data['data'])[0];
+    } else {
+        $o = \Entity\Entity::exeRead($entity, $data['data']);
+        if(!empty($o) && !empty($o[0]))
+            $data['data'] = $o[0];
+        else
+            $data['data'] = [];
+    }
 }
