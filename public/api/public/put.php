@@ -1,28 +1,6 @@
 <?php
 
 $entity = $variaveis[0];
-$dados = [];
-
-if (empty($_POST)) {
-    $putfp = fopen('php://input', 'r');
-    $putdata = '';
-    while ($dataRead = fread($putfp, 1024))
-        $putdata .= $dataRead;
-    fclose($putfp);
-
-    if (getallheaders()['Content-Type'] === "application/json") {
-        $dados = json_decode($putdata, !0);
-    } else {
-        parse_str($putdata, $dados);
-    }
-}
-
-if (empty($dados) && !empty($_POST)) {
-    $dados = $_POST;
-
-    if (getallheaders()['Content-Type'] === "application/json")
-        $dados = json_decode($dados, !0);
-}
 
 if (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
 
