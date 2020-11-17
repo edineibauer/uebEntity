@@ -105,7 +105,7 @@ class Entity extends EntityCreate
         if (!empty($info['relation'])) {
             foreach ($info['relation'] as $relationItem) {
                 $relationEntity = $dicionario[$relationItem]['relation'];
-                $relations[$relationEntity] = $dicionario[$relationItem]['column'];
+                $relations[$dicionario[$relationItem]['column']] = $relationEntity;
 
                 if (!isset($dicionarios[$relationEntity]))
                     $dicionarios[$relationEntity] = Metadados::getDicionario($relationEntity);
@@ -200,7 +200,7 @@ class Entity extends EntityCreate
                      * If have relation data together in the base register
                      */
                     if (!empty($relations)) {
-                        foreach ($relations as $relation => $RelationColumn) {
+                        foreach ($relations as $RelationColumn => $relation) {
                             if (strpos($column, $relation . '___') !== false) {
 
                                 /**
@@ -280,7 +280,7 @@ class Entity extends EntityCreate
                  * check if the relation data have a ID an decode json
                  */
                 if (!empty($relations)) {
-                    foreach ($relations as $relation => $RelationColumn) {
+                    foreach ($relations as $RelationColumn => $relation) {
 
                         /**
                          * Check if the struct of relation data received have a ID
