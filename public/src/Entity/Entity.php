@@ -249,30 +249,28 @@ class Entity extends EntityCreate
                      * Check if the struct of relation data received have a ID
                      * if not, so delete
                      */
-                    if (empty($relationData["usuarios"]['id'])) {
+                    if (empty($relationData["usuarios"]['id']))
                         unset($relationData["usuarios"]);
 
-                    } else {
 
-                        /**
-                         * Decode all json on base relation register
-                         */
-
-                        foreach ($dicionarios["usuarios"] as $meta) {
-                            if(isset($relationData["usuarios"][$meta['column']])) {
-                                $m = new \Entity\Meta($meta);
-                                $m->setValue($relationData["usuarios"][$meta['column']]);
-                                $relationData["usuarios"][$meta['column']] = $m->getValue();
-                            } else {
-                                $relationData["usuarios"][$meta['column']] = "";
-                            }
+                    /**
+                     * Decode all json on base relation register
+                     */
+                    foreach ($dicionarios["usuarios"] as $meta) {
+                        if(!empty($relationData["usuarios"][$meta['column']])) {
+                            $m = new \Entity\Meta($meta);
+                            $m->setValue($relationData["usuarios"][$meta['column']]);
+                            $relationData["usuarios"][$meta['column']] = $m->getValue();
+                        } else {
+                            $relationData["usuarios"][$meta['column']] = "";
                         }
-                        if(!empty($relationData["usuarios"]['id']))
-                            $relationData["usuarios"]['id'] = (int) $relationData["usuarios"]['id'];
-
-                        $relationData[$info['autor'] == 1 ? "autorpub" : "ownerpub"] = $relationData["usuarios"];
-                        unset($relationData["usuarios"]);
                     }
+
+                    if(!empty($relationData["usuarios"]['id']))
+                        $relationData["usuarios"]['id'] = (int) $relationData["usuarios"]['id'];
+
+                    $relationData[$info['autor'] == 1 ? "autorpub" : "ownerpub"] = $relationData["usuarios"];
+                    unset($relationData["usuarios"]);
                 }
 
                 /**
