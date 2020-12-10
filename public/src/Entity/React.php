@@ -55,10 +55,8 @@ class React
             /**
              * Check if need to update some sse or get
              */
-            if(!empty($_SESSION['userlogin']) && $_SESSION['userlogin']['id'] > 0) {
-                $this->checkSseUpdate($action, $entity, $dados);
-                $this->checkGetUpdate($action, $entity, $dados);
-            }
+            $this->checkSseUpdates("sse", $action, $entity, $dados);
+            $this->checkSseUpdates("get", $action, $entity, $dados);
 
             $this->createUpdateSyncIndexedDb($action, $entity, $dados['id']);
 
@@ -82,58 +80,63 @@ class React
     }
 
     /**
-     * @param string $action
-     * @param string $entity
-     * @param array $dados
-     */
-    private function checkSseUpdate(string $action, string $entity, array $dados)
-    {
-        $this->checkSseUpdates("sse", $action, $entity, $dados);
-    }
-
-    /**
-     * @param string $action
-     * @param string $entity
-     * @param array $dados
-     */
-    private function checkGetUpdate(string $action, string $entity, array $dados)
-    {
-        $this->checkSseUpdates("get", $action, $entity, $dados);
-    }
-
-    /**
      * @param string $dir
      * @param string $action
      * @param string $entity
      * @param array $dados
      */
     private function checkSseUpdates(string $dir, string $action, string $entity, array $dados) {
-        if(file_exists(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}")) {
-            foreach (Helper::listFolder(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}") as $item) {
-                $c = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}/{$item}"), !0);
+        if(!empty($_SESSION['userlogin']['id']) && $_SESSION['userlogin']['id'] > 0) {
+            $path = PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}";
+            if(file_exists($path))
+                $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $_SESSION['userlogin']);
+
+        } else {
+            if(file_exists(PATH_HOME . "_cdn/userSSE")) {
+                foreach (Helper::listFolder(PATH_HOME . "_cdn/userSSE") as $user) {
+                    $path = PATH_HOME . "_cdn/userSSE/{$user}/{$dir}";
+                    if(file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
+                        $userData = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json"), !0);
+                        $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $path
+     * @param string $action
+     * @param string $entity
+     * @param array $dados
+     * @param array $userData
+     */
+    private function _checkSseUpdatesWithUser(string $path, string $action, string $entity, array $dados, array $userData)
+    {
+        foreach (Helper::listFolder($path) as $item) {
+            $c = json_decode(file_get_contents($path . "/{$item}"), !0);
+
+            /**
+             * If is the user entity to update, so update all
+             */
+            if($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']))) {
+                $c['haveUpdate'] = "1";
+                Config::createFile($path . "/{$item}", json_encode($c));
+            }
+
+            if(isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
 
                 /**
-                 * If is the user entity to update, so update all
+                 * If the system is empty or same
                  */
-                if($action === "update" && ($entity === "usuarios" && $_SESSION['userlogin']['id'] === $dados['id']) || ($entity === $_SESSION['userlogin']['setor'] && $_SESSION['userlogin']['setorData']['id'] === $dados['id'])) {
-                    $c['haveUpdate'] = 1;
-                    Config::createFile(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}/{$item}", json_encode($c));
-                }
-
-                if(isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
+                if(empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
 
                     /**
-                     * If the system is empty or same
+                     * If the owner is empty or same
                      */
-                    if(empty($_SESSION['userlogin']['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $_SESSION['userlogin']['system_id']) {
-
-                        /**
-                         * If the owner is empty or same
-                         */
-                        if(!isset($dados['ownerpub']) || $dados['ownerpub'] === $_SESSION['userlogin']['id']) {
-                            $c['haveUpdate'] = "1";
-                            Config::createFile(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}/{$item}", json_encode($c));
-                        }
+                    if(!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
+                        $c['haveUpdate'] = "1";
+                        Config::createFile($path . "/{$item}", json_encode($c));
                     }
                 }
             }
