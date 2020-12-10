@@ -118,7 +118,6 @@ class React
                 if($action === "update" && ($entity === "usuarios" && $_SESSION['userlogin']['id'] === $dados['id']) || ($entity === $_SESSION['userlogin']['setor'] && $_SESSION['userlogin']['setorData']['id'] === $dados['id'])) {
                     $c['haveUpdate'] = 1;
                     Config::createFile(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}/{$item}", json_encode($c));
-                    break;
                 }
 
                 if(isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
@@ -134,7 +133,6 @@ class React
                         if(!isset($dados['ownerpub']) || $dados['ownerpub'] === $_SESSION['userlogin']['id']) {
                             $c['haveUpdate'] = "1";
                             Config::createFile(PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}/{$item}", json_encode($c));
-                            break;
                         }
                     }
                 }
