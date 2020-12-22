@@ -86,19 +86,12 @@ class React
      * @param array $dados
      */
     private function checkSseUpdates(string $dir, string $action, string $entity, array $dados) {
-        if(!empty($_SESSION['userlogin']['id']) && $_SESSION['userlogin']['id'] > 0) {
-            $path = PATH_HOME . "_cdn/userSSE/" . $_SESSION['userlogin']['id'] . "/{$dir}";
-            if(file_exists($path))
-                $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $_SESSION['userlogin']);
-
-        } else {
-            if(file_exists(PATH_HOME . "_cdn/userSSE")) {
-                foreach (Helper::listFolder(PATH_HOME . "_cdn/userSSE") as $user) {
-                    $path = PATH_HOME . "_cdn/userSSE/{$user}/{$dir}";
-                    if(file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
-                        $userData = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json"), !0);
-                        $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
-                    }
+        if(file_exists(PATH_HOME . "_cdn/userSSE")) {
+            foreach (Helper::listFolder(PATH_HOME . "_cdn/userSSE") as $user) {
+                $path = PATH_HOME . "_cdn/userSSE/{$user}/{$dir}";
+                if(file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
+                    $userData = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json"), !0);
+                    $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
                 }
             }
         }
@@ -119,7 +112,7 @@ class React
             /**
              * If is the user entity to update, so update all
              */
-            if($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']))) {
+            if($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']) || ($entity !== $userData['setor'] && $entity !== "usuarios"))) {
                 $c['haveUpdate'] = "1";
                 Config::createFile($path . "/{$item}", json_encode($c));
             }
