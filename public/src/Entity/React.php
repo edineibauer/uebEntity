@@ -35,6 +35,19 @@ class React
         if (!preg_match("/^wcache_/i", $entity)) {
             $setor = Config::getSetor();
 
+            if($action === "update") {
+                $isDiff = false;
+                foreach ($dados as $c => $v) {
+                    if (isset($dadosOld[$c]) && $v != $dadosOld[$c]) {
+                        $isDiff = true;
+                        break;
+                    }
+                }
+
+                if(!$isDiff)
+                    return;
+            }
+
             /**
              * Create log with the transition to general purpose
              */
