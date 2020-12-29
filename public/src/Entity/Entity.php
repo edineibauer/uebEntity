@@ -327,7 +327,7 @@ class Entity extends EntityCreate
              */
             if ($entity === "usuarios" || !empty($info['autor'])) {
                 foreach ($result as $i => $item) {
-                    $entitySetor = ($entity === "usuarios" ? $item['setor'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['setor'] : $item['relationData']["ownerpub"]['setor']));
+                    $entitySetor = ($entity === "usuarios" ? $item['setor'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['setor'] ?? "" : $item['relationData']["ownerpub"]['setor'] ?? ""));
                     if (!empty($entitySetor)) {
                         $idUsuario = ($entity === "usuarios" ? $item['id'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['id'] : $item['relationData']["ownerpub"]['id']));
 
