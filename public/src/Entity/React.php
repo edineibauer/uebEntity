@@ -32,61 +32,47 @@ class React
     public function __construct(string $action, string $entity, array $dados, array $dadosOld = [])
     {
         $data = ["data" => "", "response" => 1, "error" => ""];
-        if (!preg_match("/^wcache_/i", $entity)) {
-            $setor = Config::getSetor();
+        $setor = Config::getSetor();
 
-            if($action === "update") {
-                $isDiff = false;
-                foreach ($dados as $c => $v) {
-                    if (isset($dadosOld[$c]) && $v != $dadosOld[$c]) {
-                        $isDiff = true;
-                        break;
-                    }
+        if ($action === "update") {
+            $isDiff = false;
+            foreach ($dados as $c => $v) {
+                if (isset($dadosOld[$c]) && $v != $dadosOld[$c]) {
+                    $isDiff = true;
+                    break;
                 }
-
-                if(!$isDiff)
-                    return;
             }
 
-            /**
-             * Create log with the transition to general purpose
-             */
-            $this->log($action, $entity, $dados, $dadosOld);
+            if (!$isDiff)
+                return;
+        }
 
-            /**
-             *  generate/update cached database with this entity information
-             *  this is for keep the cached database up to date
-             *  the cached database have all relation and formatted data for general fast consult purpose
-             */
-            if ($action === "delete") {
-                $del = new Delete();
-                $del->exeDelete("wcache_" . $entity, "WHERE id = {$dados['id']}");
-            } else {
-                $this->updateCachedDatabase($entity, $dados, $action);
-            }
+        /**
+         * Create log with the transition to general purpose
+         */
+        $this->log($action, $entity, $dados, $dadosOld);
 
-            /**
-             * Check if need to update some sse or get
-             */
-            $this->checkSseUpdates("sse", $action, $entity, $dados);
-            $this->checkSseUpdates("get", $action, $entity, $dados);
+        /**
+         * Check if need to update some sse or get
+         */
+        $this->checkSseUpdates("sse", $action, $entity, $dados);
+        $this->checkSseUpdates("get", $action, $entity, $dados);
 
-            $this->createUpdateSyncIndexedDb($action, $entity, $dados['id']);
+        $this->createUpdateSyncIndexedDb($action, $entity, $dados['id']);
 
-            /**
-             * Include react for this operation if have
-             */
-            if (file_exists(PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php"))
-                include PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php";
-            elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
-                include PATH_HOME . "public/react/{$entity}/{$action}.php";
+        /**
+         * Include react for this operation if have
+         */
+        if (file_exists(PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php"))
+            include PATH_HOME . "public/react/{$setor}/{$entity}/{$action}.php";
+        elseif (file_exists(PATH_HOME . "public/react/{$entity}/{$action}.php"))
+            include PATH_HOME . "public/react/{$entity}/{$action}.php";
 
-            foreach (Helper::listFolder(PATH_HOME . VENDOR) as $lib) {
-                if (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php"))
-                    include PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php";
-                elseif (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php"))
-                    include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
-            }
+        foreach (Helper::listFolder(PATH_HOME . VENDOR) as $lib) {
+            if (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php"))
+                include PATH_HOME . VENDOR . "{$lib}/public/react/{$setor}/{$entity}/{$action}.php";
+            elseif (file_exists(PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php"))
+                include PATH_HOME . VENDOR . "{$lib}/public/react/{$entity}/{$action}.php";
         }
 
         $this->response = $data;
@@ -98,11 +84,12 @@ class React
      * @param string $entity
      * @param array $dados
      */
-    private function checkSseUpdates(string $dir, string $action, string $entity, array $dados) {
-        if(file_exists(PATH_HOME . "_cdn/userSSE")) {
+    private function checkSseUpdates(string $dir, string $action, string $entity, array $dados)
+    {
+        if (file_exists(PATH_HOME . "_cdn/userSSE")) {
             foreach (Helper::listFolder(PATH_HOME . "_cdn/userSSE") as $user) {
                 $path = PATH_HOME . "_cdn/userSSE/{$user}/{$dir}";
-                if(file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
+                if (file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
                     $userData = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json"), !0);
                     $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
                 }
@@ -125,22 +112,22 @@ class React
             /**
              * If is the user entity to update, so update all
              */
-            if($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']) || ($entity !== $userData['setor'] && $entity !== "usuarios"))) {
+            if ($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']) || ($entity !== $userData['setor'] && $entity !== "usuarios"))) {
                 $c['haveUpdate'] = "1";
                 Config::createFile($path . "/{$item}", json_encode($c));
             }
 
-            if(isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
+            if (isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
 
                 /**
                  * If the system is empty or same
                  */
-                if(empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
+                if (empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
 
                     /**
                      * If the owner is empty or same
                      */
-                    if(!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
+                    if (!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
                         $c['haveUpdate'] = "1";
                         Config::createFile($path . "/{$item}", json_encode($c));
                     }
@@ -220,56 +207,6 @@ class React
                     $store->delete($old['id']);
             } else {
                 $store->save($old['id'], array_merge($old, $dados));
-            }
-        }
-    }
-
-    /**
-     * the cached database have all relation and formatted data for general purpose
-     * fast consult on sseEngineDB when read the entity information
-     *
-     * @param string $entity
-     * @param array $dados
-     * @param string $action
-     */
-    private function updateCachedDatabase(string $entity, array $dados, string $action)
-    {
-        $register = Entity::exeReadWithoutCache($entity, $dados['id']);
-
-        if (!empty($register)) {
-            $register = $register[0];
-            $dataCache = ["id" => $dados['id'], "system_id" => null, "data" => json_encode($register)];
-
-            if ($action === "create") {
-                $create = new Create();
-                $create->exeCreate("wcache_{$entity}", $dataCache);
-
-            } else {
-
-                $read = new Read();
-                $read->exeRead("wcache_{$entity}", "WHERE id = :id", "id={$dados['id']}");
-                if ($read->getResult()) {
-                    $up = new Update();
-                    $up->exeUpdate("wcache_{$entity}", $dataCache, "WHERE id = :id", "id={$dados['id']}");
-                } else {
-                    $create = new Create();
-                    $create->exeCreate("wcache_{$entity}", $dataCache);
-                }
-
-                /**
-                 * Check other databases with relation to this to
-                 * delete her caches outdated
-                 */
-                if (file_exists(PATH_HOME . "entity/general/general_info.json")) {
-                    $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), !0)[$entity]['belongsTo'];
-                    if (!empty($general)) {
-                        $sql = new SqlCommand();
-                        foreach ($general as $itemEntity => $item) {
-                            if (!empty($itemEntity) && !empty($item['column']) && file_exists(PATH_HOME . "entity/cache/{$itemEntity}.json"))
-                                $sql->exeCommand("DELETE c FROM " . PRE . "wcache_" . $itemEntity . " as c JOIN " . PRE . $itemEntity . " as e ON e.id = c.id WHERE e." . $item['column'] . " = {$dados['id']}");
-                        }
-                    }
-                }
             }
         }
     }

@@ -27,7 +27,6 @@ class Metadados
 
             //Se existir o dicionário da entidade
         } elseif (file_exists(PATH_HOME . "entity/cache/{$entity}.json")) {
-            $entity = str_replace("wcache_", "", $entity);
             $data = json_decode(file_get_contents(PATH_HOME . "entity/cache/{$entity}.json"), !0);
 
             if ($keepId) {
@@ -148,7 +147,6 @@ class Metadados
      */
     public static function getInfo($entity)
     {
-        $entity = str_replace("wcache_", "", $entity);
         if (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json"))
             return Helper::convertStringToValueArray(json_decode(file_get_contents(PATH_HOME . "entity/cache/info/{$entity}.json"), !0));
 

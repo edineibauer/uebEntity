@@ -353,8 +353,6 @@ class Entity extends EntityCreate
      */
     public static function exeRead(string $entity, $id = null)
     {
-        $create = new Create();
-        $sql = new SqlCommand();
         $results = [];
 
         /**
@@ -362,19 +360,30 @@ class Entity extends EntityCreate
          * System_id, autor, setor
          */
         if(is_numeric($id) && $id > 0) {
-            $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id WHERE e.id = {$id}");
+            $read = new Read();
+            $read->exeRead("wcache_" . $entity, "WHERE e.id = {$id}");
+            if($read->getResult()) {
+                $results[] = json_decode($read->getResult()[0]['data'], !0);
+            } else {
+                $readNoCache = self::exeReadWithoutCache($entity, $id)[0];
+                $results[] = $readNoCache;
+                $create = new Create();
+                $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
+            }
         } else {
+            $sql = new SqlCommand();
             $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id ORDER BY e.id DESC LIMIT " . LIMITOFFLINE);
-        }
+            if(!empty($sql->getResult()) && is_array($sql->getResult())) {
 
-        if(!empty($sql->getResult()) && is_array($sql->getResult())) {
-            foreach ($sql->getResult() as $item) {
-                if(!empty($item['data'])) {
-                    $results[] = json_decode($item['data'], !0);
-                } else {
-                    $readNoCache = self::exeReadWithoutCache($entity, $item['id'])[0];
-                    $create->exeCreate("wcache_{$entity}", ["id" => $item['id'], "system_id" => null, "data" => json_encode($readNoCache)]);
-                    $results[] = $readNoCache;
+                $create = new Create();
+                foreach ($sql->getResult() as $item) {
+                    if(!empty($item['data'])) {
+                        $results[] = json_decode($item['data'], !0);
+                    } else {
+                        $readNoCache = self::exeReadWithoutCache($entity, $item['id'])[0];
+                        $results[] = $readNoCache;
+                        $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
+                    }
                 }
             }
         }
