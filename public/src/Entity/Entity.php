@@ -367,14 +367,18 @@ class Entity extends EntityCreate
             } else {
                 $readNoCache = self::exeReadWithoutCache($entity, $id)[0];
                 $results[] = $readNoCache;
-                $create = new Create();
-                $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
+                $read->exeRead("wcache_" . $entity, "WHERE e.id = {$id}");
+                if(!$read->getResult()) {
+                    $create = new Create();
+                    $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
+                }
             }
         } else {
             $sql = new SqlCommand();
             $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id ORDER BY e.id DESC LIMIT " . LIMITOFFLINE);
             if(!empty($sql->getResult()) && is_array($sql->getResult())) {
 
+                $read = new Read();
                 $create = new Create();
                 foreach ($sql->getResult() as $item) {
                     if(!empty($item['data'])) {
@@ -382,7 +386,9 @@ class Entity extends EntityCreate
                     } else {
                         $readNoCache = self::exeReadWithoutCache($entity, $item['id'])[0];
                         $results[] = $readNoCache;
-                        $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
+                        $read->exeRead("wcache_" . $entity, "WHERE e.id = {$id}");
+                        if(!$read->getResult())
+                            $create->exeCreate("wcache_{$entity}", ["id" => $readNoCache['id'], "ownerpub" => !empty($readNoCache['ownerpub']) ? $readNoCache['ownerpub'] : null, "system_id" => !empty($readNoCache['system_id']) ? $readNoCache['system_id'] : null, "data" => json_encode($readNoCache)]);
                     }
                 }
             }
