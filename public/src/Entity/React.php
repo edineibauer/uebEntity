@@ -109,27 +109,42 @@ class React
         foreach (Helper::listFolder($path) as $item) {
             $c = json_decode(file_get_contents($path . "/{$item}"), !0);
 
+            if((isset($c['rule']) && $c['rule'] !== "db") || (isset($c['haveUpdate']) && $c['haveUpdate'] == "1"))
+                continue;
+
             /**
-             * If is the user entity to update, so update all
+             * If is the user entity to update (perfil), so update all SSE
              */
             if ($action === "update" && (($entity === "usuarios" && $userData['id'] == $dados['id']) || ($entity === $userData['setor'] && $userData['setorData']['id'] == $dados['id']) || ($entity !== $userData['setor'] && $entity !== "usuarios"))) {
                 $c['haveUpdate'] = "1";
                 Config::createFile($path . "/{$item}", json_encode($c));
+
+                continue;
             }
 
-            if (isset($c['haveUpdate']) && $c['haveUpdate'] === "0" && !empty($c['db']) && is_array($c['db']) && in_array($entity, $c['db'])) {
+            /**
+             * Check action
+             * (IFs in cascate to better human understand)
+             */
+            if(!empty($c['action']) && ((is_string($c['action']) && $c['action'] === $action) || (is_array($c['action']) && in_array($action, $c['action'])))) {
 
                 /**
-                 * If the system is empty or same
+                 * Check DB
                  */
-                if (empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
+                if (!empty($c['db']) && ((is_string($c['db']) && $c['db'] === $entity) || (is_array($c['db']) && in_array($entity, $c['db'])))) {
 
                     /**
-                     * If the owner is empty or same
+                     * If the system is empty or same
                      */
-                    if (!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
-                        $c['haveUpdate'] = "1";
-                        Config::createFile($path . "/{$item}", json_encode($c));
+                    if (empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
+
+                        /**
+                         * If the owner is empty or same
+                         */
+                        if (!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
+                            $c['haveUpdate'] = "1";
+                            Config::createFile($path . "/{$item}", json_encode($c));
+                        }
                     }
                 }
             }
