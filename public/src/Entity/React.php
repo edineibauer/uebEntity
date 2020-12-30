@@ -109,7 +109,7 @@ class React
         foreach (Helper::listFolder($path) as $item) {
             $c = json_decode(file_get_contents($path . "/{$item}"), !0);
 
-            if((isset($c['rule']) && $c['rule'] !== "db") || (isset($c['haveUpdate']) && $c['haveUpdate'] == "1"))
+            if((isset($c['rule']) && $c['rule'] !== "db") || (isset($c['haveUpdate']) && $c['haveUpdate'] == "1") || empty($c['db']) || empty($c['action']))
                 continue;
 
             /**
@@ -126,12 +126,12 @@ class React
              * Check action
              * (IFs in cascate to better human understand)
              */
-            if(!empty($c['action']) && ((is_string($c['action']) && $c['action'] === $action) || (is_array($c['action']) && in_array($action, $c['action'])))) {
+            if((is_string($c['action']) && $c['action'] === $action) || (is_array($c['action']) && in_array($action, $c['action']))) {
 
                 /**
                  * Check DB
                  */
-                if (!empty($c['db']) && ((is_string($c['db']) && $c['db'] === $entity) || (is_array($c['db']) && in_array($entity, $c['db'])))) {
+                if ((is_string($c['db']) && $c['db'] === $entity) || (is_array($c['db']) && in_array($entity, $c['db']))) {
 
                     /**
                      * If the system is empty or same
