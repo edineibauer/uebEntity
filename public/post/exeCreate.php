@@ -19,9 +19,8 @@ if (empty($data['error'])) {
      * Update the historic for this user to not update the database on front
      */
     if (file_exists(PATH_HOME . "_cdn/store/historic.json")) {
-        $f = fopen(PATH_HOME . "_cdn/userSSE/{$_SESSION['userlogin']['id']}/{$entity}.json", "w");
-        fwrite($f, json_decode(file_get_contents(PATH_HOME . "_cdn/store/historic.json"), !0)[$entity]);
-        fclose($f);
+        \Helpers\Helper::createFolderIfNoExist(PATH_HOME . "_cdn/userSSE/{$_SESSION['userlogin']['id']}");
+        \Config\Config::createFile(PATH_HOME . "_cdn/userSSE/{$_SESSION['userlogin']['id']}/{$entity}.json", json_decode(file_get_contents(PATH_HOME . "_cdn/store/historic.json"), !0)[$entity]);
     }
 
     /**
