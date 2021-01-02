@@ -808,8 +808,8 @@ class Meta
                             if ($isImage) {
                                 try {
                                     $image = WideImage::load(PATH_HOME . $dir . $nameFile);
-                                    $image->resize(1500, 500)->crop('center', 'center', 500, 500)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
-                                    $image->resize(300, 100)->crop('center', 'center', 100, 100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
+                                    $image->resize(500)->saveToFile(PATH_HOME . $dir . "medium/" . $nameFile);
+                                    $image->resize(100)->saveToFile(PATH_HOME . $dir . "thumb/" . $nameFile);
 
                                     $value[$i]['urls'] = [
                                         'thumb' => HOME . $dir . "thumb/" . $nameFile,
