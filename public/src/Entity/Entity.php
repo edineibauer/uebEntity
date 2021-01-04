@@ -412,7 +412,7 @@ class Entity extends EntityCreate
         if (!empty($info['columns_readable']))
             $read->setSelect($info['columns_readable']);
 
-        $read->exeRead($entity, "WHERE usuarios_id = :id", "id={$id}", !0);
+        $read->exeRead($entity, "WHERE usuarios_id = :id", "id={$id}", !0, !0);
         if ($read->getResult()) {
             /**
              * Decode all json on base relation register
