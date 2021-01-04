@@ -136,12 +136,12 @@ class React
                     /**
                      * If the system is empty or same
                      */
-                    if (empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] === $userData['system_id']) {
+                    if (empty($userData['system_id']) || empty($dados['system_id']) || $dados['system_id'] == $userData['system_id']) {
 
                         /**
                          * If the owner is empty or same
                          */
-                        if (!isset($dados['ownerpub']) || $dados['ownerpub'] === $userData['id']) {
+                        if (!isset($dados['ownerpub']) || $dados['ownerpub'] == $userData['id']) {
                             $c['haveUpdate'] = "1";
                             Config::createFile($path . "/{$item}", json_encode($c));
                         }
