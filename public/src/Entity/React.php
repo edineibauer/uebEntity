@@ -141,7 +141,7 @@ class React
                         /**
                          * If the owner is empty or same
                          */
-                        if (!isset($dados['ownerpub']) || $dados['ownerpub'] == $userData['id']) {
+                        if (empty($dados['ownerpub']) || $dados['ownerpub'] == $userData['id']) {
                             $c['haveUpdate'] = "1";
                             Config::createFile($path . "/{$item}", json_encode($c));
                         }
