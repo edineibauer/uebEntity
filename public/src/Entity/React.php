@@ -91,7 +91,9 @@ class React
                 $path = PATH_HOME . "_cdn/userSSE/{$user}/{$dir}";
                 if (file_exists($path) && file_exists(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json")) {
                     $userData = json_decode(file_get_contents(PATH_HOME . "_cdn/userSSE/{$user}/my_data.json"), !0);
-                    $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
+
+                    if(!empty($userData) && is_array($userData))
+                        $this->_checkSseUpdatesWithUser($path, $action, $entity, $dados, $userData);
                 }
             }
         }
