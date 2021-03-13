@@ -97,11 +97,13 @@ class Meta
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) || $this->key === "source" ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $value = (!empty($value) ? (int) $value : null);
-        elseif ($this->key === "date" && in_array($value, ["now", "date", "datetime", "timestamp"]))
+        elseif ($this->format === "date" && in_array($value, ["now", "date", "datetime", "timestamp"]))
             $value = date("Y-m-d");
-        elseif ($this->key === "datetime" && in_array($value, ["now", "date", "datetime", "timestamp"]))
+        elseif (($this->format === "datetime" && in_array($value, ["now", "date", "datetime", "timestamp"])) || ($this->group === "date" && in_array($value, ["datetime", "timestamp"])))
             $value = date("Y-m-d H:i:s");
-        elseif ($this->key === "time" && in_array($value, ["now", "date", "datetime", "timestamp", "time"]))
+        elseif ($this->group === "date" && $value === "date")
+            $value = date("Y-m-d");
+        elseif ($this->format === "time" && in_array($value, ["now", "date", "datetime", "timestamp", "time"]))
             $value = date("H:i:s");
         elseif ($this->key === "relation")
             $value = is_numeric($value) ? (int) $value : null;

@@ -27,12 +27,13 @@ if (empty($data['error'])) {
      * Check Error
      */
     if (!is_numeric($data['data'])) {
-        $data['error'] = $data['data'];
+        $data['error'] = "Erro ao salvar";
+        $data['response'] = 2;
     } else {
         $o = \Entity\Entity::exeRead($entity, $data['data']);
-        if(!empty($o) && !empty($o[0]))
-            $data['data'] = $o[0];
-        else
-            $data['data'] = [];
+        $data['data'] = (!empty($o) && !empty($o[0]) ? $o[0] : []);
     }
+} else {
+    $data['data'] = $data['error'];
+    $data['response'] = 2;
 }
