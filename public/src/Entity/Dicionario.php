@@ -49,7 +49,7 @@ class Dicionario
         if (!empty($data)) {
             if (is_numeric($data)) {
                 $read = new Read();
-                $read->exeRead($this->entity, "WHERE id = :id", "id={$data}", !0, !0);
+                $read->exeRead($this->entity, "WHERE id = :id", "id={$data}", !0, !0, !0);
                 if ($read->getResult()) {
                     $dataRead = $read->getResult()[0];
                     foreach ($this->getAssociationMult() as $meta)
@@ -89,7 +89,7 @@ class Dicionario
     {
         $data = [];
         $read = new Read();
-        $read->exeRead(PRE . $this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", "id={$id}", !0, !0);
+        $read->exeRead(PRE . $this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", "id={$id}", !0, !0, !0);
         if ($read->getResult()) {
             foreach ($read->getResult() as $item)
                 $data[] = $item[$m->getRelation() . "_id"];
@@ -495,7 +495,7 @@ class Dicionario
              */
             if ($action === "update") {
                 $read = new Read();
-                $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}", !0, !0);
+                $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}", !0, !0, !0);
                 if ($read->getResult() && !empty($read->getResult()[0]['usuarios_id']))
                     $dados['usuarios_id'] = (int)$read->getResult()[0]['usuarios_id'];
             }
@@ -527,7 +527,7 @@ class Dicionario
 
             $read = new Read();
             if ($action === "create" && !empty($user['password']) && !empty($user['nome'])) {
-                $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p", "p={$user['password']}", !0, !0);
+                $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p", "p={$user['password']}", !0, !0, !0);
                 if (!$read->getResult()) {
 
                     /**
@@ -556,7 +556,7 @@ class Dicionario
                 $sql->exeCommand("SELECT * FROM " . PRE . "usuarios WHERE id = {$dados['usuarios_id']}");
                 if ($sql->getResult()) {
                     $newData = Helper::arrayMerge($sql->getResult()[0], $user);
-                    $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}", !0, !0);
+                    $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}", !0, !0, !0);
                     if (!$read->getResult()) {
                         $up = new Update();
                         $up->exeUpdate("usuarios", $newData, "WHERE id = :ui", "ui={$dados['usuarios_id']}");
