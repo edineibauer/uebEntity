@@ -677,9 +677,9 @@ class Dicionario
     {
         foreach ($data as $column => $value) {
             if (is_numeric($column) && isset($this->dicionario[$column]))
-                $this->dicionario[$column]->setValue($value);
+                $this->dicionario[$column]->setValue($value, false);
             elseif (isset($this->dicionario[$field = $this->searchValue($column)]))
-                $this->dicionario[$field]->setValue($value);
+                $this->dicionario[$field]->setValue($value, false);
         }
     }
 
@@ -711,7 +711,7 @@ class Dicionario
          */
         foreach ($this->dicionario as $i => $meta) {
             if($meta->get('default') !== !1)
-                $this->dicionario[$i]->setValue($meta->get('default'));
+                $this->dicionario[$i]->setValue($meta->get('default'), false);
         }
     }
 
