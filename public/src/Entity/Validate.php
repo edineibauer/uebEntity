@@ -17,7 +17,7 @@ class Validate
     public static function meta(Meta $m)
     {
         if ($m->getColumn() !== "id") {
-            self::checkDefaultSet($m);
+//            self::checkDefaultSet($m);
             if (!empty($m->getValue()) && !in_array($m->getKey(), ["list", "selecao", "checkbox_rel"])) {
                 self::checkRegular($m);
                 self::convertValues($m);
