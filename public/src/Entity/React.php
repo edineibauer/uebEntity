@@ -37,7 +37,7 @@ class React
         if ($action === "update") {
             $isDiff = false;
             foreach ($dados as $c => $v) {
-                if (isset($dadosOld[$c]) && $v != $dadosOld[$c]) {
+                if (!isset($dadosOld[$c]) || $v != $dadosOld[$c]) {
                     $isDiff = true;
                     break;
                 }
