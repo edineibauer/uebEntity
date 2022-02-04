@@ -358,21 +358,7 @@ class Entity extends EntityCreate
          * É necessário verificar permissões
          * System_id, autor, setor
          */
-        if(is_numeric($id) && $id > 0) {
-            $results[] = self::exeReadWithoutCache($entity, $id, $ignoreSystem, $ignoreOwner)[0];
-        } else {
-            $sql = new SqlCommand();
-            $sql->exeCommand("SELECT e.id, c.data FROM " . PRE . $entity . " as e LEFT JOIN " . PRE . "wcache_" . $entity . " as c ON e.id = c.id ORDER BY e.id DESC LIMIT " . LIMITOFFLINE, $ignoreSystem, $ignoreOwner);
-            if(!empty($sql->getResult()) && is_array($sql->getResult())) {
-                foreach ($sql->getResult() as $item) {
-                    if(!empty($item['data'])) {
-                        $results[] = json_decode($item['data'], !0);
-                    } else {
-                        $results[] = self::exeReadWithoutCache($entity, $item['id'], $ignoreSystem, $ignoreOwner)[0];
-                    }
-                }
-            }
-        }
+        $results[] = self::exeReadWithoutCache($entity, (is_numeric($id) && $id > 0 ? $id : null), $ignoreSystem, $ignoreOwner)[0];
 
         return $results;
     }
