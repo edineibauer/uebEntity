@@ -95,8 +95,12 @@ class Validate
     private static function checkUnique(Dicionario $d, Meta $m, string $groupUser)
     {
         if ($m->getUnique()) {
+            $info = Metadados::getInfo($d->getEntity())["system"];
+
             $where = "WHERE {$m->getColumn()} = '{$m->getValue()}'" . (!empty($groupUser) ? " && {$groupUser}" : "");
             $where .= (!empty($d->search(0)->getValue()) ? " && id != " . $d->search("id")->getValue() : "");
+            $where .= (!empty($info) && !empty($_SESSION["userlogin"]["system_id"]) ? " AND system_id = {$_SESSION["userlogin"]["system_id"]}" : "");
+
             $read = new Read();
             $read->exeRead($d->getEntity(), $where);
             if ($read->getResult())
