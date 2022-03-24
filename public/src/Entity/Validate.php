@@ -254,14 +254,17 @@ class Validate
             if(is_float($value) || is_int($value))
                 $value = (string) $value;
 
+            $negativo = false;
             $f = "";
             for($i=0; $i < strlen($value); $i ++) {
                 if(is_numeric($value[$i]))
                     $f .= $value[$i];
                 elseif($value[$i] === "." || $value[$i] === ",")
                     $f = str_replace([',', '.'], '', $f) . ".";
+                elseif($value[$i] === "-" && $i === 0)
+                    $negativo = true;
             }
-            $value = (float) number_format((float) $f, 2, '.', '');
+            $value = ((float) number_format((float) $f, 2, '.', '')) * ($negativo ? -1 : 1);
             $m->setValue($value, !1);
         }
 
