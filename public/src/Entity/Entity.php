@@ -36,7 +36,7 @@ class Entity extends EntityCreate
      */
     public static function exeReadWithoutCache(string $entity, $id = null, $ignoreSystem = false, $ignoreOwner = false)
     {
-        if(!\Config\Config::haveEntityPermissionRead($entity))
+        if(!\Config\Config::haveEntityPermission($entity, ["read"]))
             return [];
 
         $result = [];
