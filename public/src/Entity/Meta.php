@@ -107,7 +107,7 @@ class Meta
             $value = date("H:i:s");
         elseif ($this->key === "relation")
             $value = is_numeric($value) ? (int) $value : null;
-        elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "percent", "card_number"]))
+        elseif (in_array($this->format, ["cnpj", "cpf", "tel", "cep", "rg", "ie", "card_number"]))
             $value = str_replace(["(", ")", " ", "-", ".", ",", "R$", "$", "/", "\\", "%"], "", $value);
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
