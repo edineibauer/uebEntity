@@ -803,6 +803,7 @@ class Meta
                                 $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
                                 $nameFile = $item['name'] . "-" . strtotime('now') . "." . $item['type'];
                                 copy(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
+                                unlink(PATH_HOME . $dirTmp);
                             }
                         }
 
