@@ -798,12 +798,14 @@ class Meta
                             $isSvg = $item['type'] === "svg";
                             $isImage = preg_match('/^image\//i', $item['fileType']) && !$isSvg;
                             $dirTmp = str_replace(HOME, "", $item['url']);
+                            $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
+                            $nameFile = $item['name'] . "-" . strtotime('now') . "." . $item['type'];
 
                             if(file_exists(PATH_HOME . $dirTmp)) {
-                                $dir = "uploads/form/" . date("Y") . "/" . date("m") . "/";
-                                $nameFile = $item['name'] . "-" . strtotime('now') . "." . $item['type'];
                                 copy(PATH_HOME . $dirTmp, PATH_HOME . $dir . $nameFile);
                                 unlink(PATH_HOME . $dirTmp);
+                            } elseif(!file_exists(PATH_HOME . $dir . $nameFile)) {
+                                unset($nameFile);
                             }
                         }
 
