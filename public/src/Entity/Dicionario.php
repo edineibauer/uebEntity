@@ -89,7 +89,7 @@ class Dicionario
     {
         $data = [];
         $read = new Read();
-        $read->exeRead(PRE . $this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", "id={$id}", !0, !0, !0);
+        $read->exeRead($this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", "id={$id}", !0, !0, !0);
         if ($read->getResult()) {
             foreach ($read->getResult() as $item)
                 $data[] = $item[$m->getRelation() . "_id"];
@@ -553,7 +553,7 @@ class Dicionario
 
             } elseif ($action === "update" && !empty($user)) {
                 $sql = new SqlCommand();
-                $sql->exeCommand("SELECT * FROM " . PRE . "usuarios WHERE id = {$dados['usuarios_id']}");
+                $sql->exeCommand("SELECT * FROM usuarios WHERE id = {$dados['usuarios_id']}");
                 if ($sql->getResult()) {
                     $newData = Helper::arrayMerge($sql->getResult()[0], $user);
                     $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}", !0, !0, !0);
@@ -622,7 +622,7 @@ class Dicionario
                  if ($read->getResult()) {
                      $idUser = $read->getResult()[0]['id'];
 
-                     $tableRelational = PRE . $entityRelation . "_" . $column;
+                     $tableRelational = $entityRelation . "_" . $column;
                      $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :ai && {$this->entity}_id = :bi", "ai={$idUser}&bi={$id}");
                      if (!$read->getResult()) {
 
@@ -657,7 +657,7 @@ class Dicionario
         $id = $this->search(0)->getValue();
         foreach ($this->getAssociationMult() as $meta) {
             if (!empty($meta->getValue())) {
-                $entityRelation = PRE . $this->entity . "_" . $meta->getColumn();
+                $entityRelation = $this->entity . "_" . $meta->getColumn();
                 $del->exeDelete($entityRelation, "WHERE {$this->entity}_id = :eid", "eid={$id}");
                 $listId = [];
                 foreach (json_decode($meta->getValue(), true) as $idRelation) {

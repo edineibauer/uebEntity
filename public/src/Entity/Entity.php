@@ -43,7 +43,7 @@ class Entity extends EntityCreate
         $info = Metadados::getInfo($entity);
         $dicionario = Metadados::getDicionario($entity);
         $selects = "";
-        $command = "FROM " . PRE . $entity . " as e";
+        $command = "FROM " . $entity . " as e";
         $relations = [];
         $dicionarios = [];
         $infos = [];
@@ -72,7 +72,7 @@ class Entity extends EntityCreate
                     $selects .= ", system_" . $info['system'] . ".{$column} as {$info['system']}___{$column}";
             }
 
-            $command .= " LEFT JOIN " . PRE . $info['system'] . " as system_" . $info['system'] . " ON system_" . $info['system'] . ".id = e.system_id";
+            $command .= " LEFT JOIN " . $info['system'] . " as system_" . $info['system'] . " ON system_" . $info['system'] . ".id = e.system_id";
         }
 
         /**
@@ -91,7 +91,7 @@ class Entity extends EntityCreate
                     $selects .= ", autor_user.{$column} as autor_user___{$column}";
             }
 
-            $command .= " LEFT JOIN " . PRE . "usuarios as autor_user ON autor_user.id = e." . ($info['autor'] == 1 ? "autorpub" : "ownerpub");
+            $command .= " LEFT JOIN usuarios as autor_user ON autor_user.id = e." . ($info['autor'] == 1 ? "autorpub" : "ownerpub");
         }
 
         /**
@@ -113,7 +113,7 @@ class Entity extends EntityCreate
                         $selects .= ", data_" . $dicionario[$relationItem]['column'] . ".{$column} as {$dicionario[$relationItem]['relation']}___{$column}";
                 }
 
-                $command .= " LEFT JOIN " . PRE . $dicionario[$relationItem]['relation'] . " as data_" . $dicionario[$relationItem]['column'] . " ON data_" . $dicionario[$relationItem]['column'] . ".id = e." . $dicionario[$relationItem]['column'];
+                $command .= " LEFT JOIN " . $dicionario[$relationItem]['relation'] . " as data_" . $dicionario[$relationItem]['column'] . " ON data_" . $dicionario[$relationItem]['column'] . ".id = e." . $dicionario[$relationItem]['column'];
             }
         }
 
@@ -603,7 +603,7 @@ class Entity extends EntityCreate
                                     $entityRelation = $item[0];
                                     $column = $item[1];
                                     $userColumn = $item[2];
-                                    $tableRelational = PRE . $entityRelation . "_" . $entity . "_" . $column;
+                                    $tableRelational = $entityRelation . "_" . $entity . "_" . $column;
 
                                     $read = new Read();
                                     $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", "user={$_SESSION['userlogin']['id']}");

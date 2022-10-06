@@ -89,7 +89,7 @@ abstract class EntityDelete
             if ($info['extend_mult']) {
                 foreach ($info['extend_mult'] as $item) {
                     $read = new Read();
-                    $read->exeRead(PRE . $entity . "_" . $dic[$item]['relation'] . "_" . $dic[$item]['column'], "WHERE {$entity}_id = :id", "id={$data['id']}");
+                    $read->exeRead($entity . "_" . $dic[$item]['relation'] . "_" . $dic[$item]['column'], "WHERE {$entity}_id = :id", "id={$data['id']}");
                     if ($read->getResult()) {
                         foreach ($read->getResult() as $i)
                             self::deleteExtend($dic[$item]['relation'], $i[$dic[$item]['relation'] . "_id"]);
@@ -107,7 +107,7 @@ abstract class EntityDelete
             foreach ($dic as $id => $c) {
                 if ($c['key'] === "source" && !empty($data[$c['column']])) {
                     $read = new Read();
-                    $read->exeRead(PRE . $entity, "WHERE id != :id && " . $c['column'] . " = :s", "id={$data['id']}&s={$data[$c['column']]}");
+                    $read->exeRead($entity, "WHERE id != :id && " . $c['column'] . " = :s", "id={$data['id']}&s={$data[$c['column']]}");
                     if (!$read->getResult() && file_exists(PATH_HOME . $data[$c['column']]))
                         unlink(PATH_HOME . $data[$c['column']]);
                 }

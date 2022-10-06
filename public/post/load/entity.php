@@ -166,7 +166,7 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
         $data['data']['total'] = 1;
     }  else {
         $sql = new SqlCommand();
-        $sql->exeCommand("SELECT count(id) AS total FROM " . PRE . $entity . " WHERE id > 0" . $filterResult);
+        $sql->exeCommand("SELECT count(id) AS total FROM " . $entity . " WHERE id > 0" . $filterResult);
         $data['data']['total'] = $sql->getResult() && !empty($sql->getResult()[0]['total']) ? (int) $sql->getResult()[0]['total'] : 0;
 
     }
