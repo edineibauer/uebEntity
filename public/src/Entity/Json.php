@@ -163,7 +163,9 @@ class Json extends VersionControl
                 unset($dadosAtuais['id']);
                 parent::createVerion($this->file, $dadosAtuais);
             }
-            unlink($this->file);
+
+            if(file_exists($this->file))
+                unlink($this->file);
         }
     }
 
