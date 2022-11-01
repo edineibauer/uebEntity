@@ -50,7 +50,7 @@ class React
         /**
          * Create log with the transition to general purpose
          */
-        $this->log($action, $entity, $dados, $dadosOld);
+//        $this->log($action, $entity, $dados, $dadosOld);
 
         /**
          * Include react for this operation if have
