@@ -112,9 +112,9 @@ class Meta
         elseif ($this->group === "boolean")
             $value = $value ? 1 : 0;
         elseif (in_array($this->type, ["tinyint", "smallint", "mediumint", "int", "bigint"]))
-            $value = (int) $value;
+            $value = ($value === "" || $value === null ? null : ((int) $value));
         elseif (in_array($this->type, ["double", "real", "float", "decimal"]))
-            $value = (float) $value;
+            $value = ($value === "" || $value === null ? null : ((float) $value));
 
         //dados relacionais em formato json
         if ($this->key === "relation" && $this->type === "json")

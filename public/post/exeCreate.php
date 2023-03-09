@@ -1,6 +1,6 @@
 <?php
 
-$entity = strip_tags(trim(filter_input(INPUT_POST, 'entity', FILTER_DEFAULT)));
+$entity = strip_tags(trim(filter_input(INPUT_POST, 'entity')));
 $registro = filter_input(INPUT_POST, 'dados', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
 
 if (empty($entity))
