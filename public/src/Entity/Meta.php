@@ -513,7 +513,8 @@ class Meta
             foreach (array_replace_recursive($default, $dados) as $dado => $value) {
                 switch ($dado) {
                     case 'id':
-                        $this->setId($value);
+                        if($value !== null && $value !== "" && $value > 0)
+                            $this->setId(((int)$value));
                         break;
                     case 'allow':
                         $this->setAllow($value);
