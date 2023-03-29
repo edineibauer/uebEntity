@@ -126,7 +126,7 @@ class Entity extends EntityCreate
          * Execute the read command
          */
         $sql = new SqlCommand();
-        $sql->exeCommand($command, $ignoreSystem, $ignoreOwner);
+        $sql->exeCommand($command);
 
         /**
          * Convert join values into a array of relation data
