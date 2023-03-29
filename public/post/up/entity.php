@@ -64,7 +64,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
         if ($action === "delete") {
 
             if (is_numeric($dado['id'])) {
-                $read->exeRead($entity, "WHERE id = {$dado['id']}");
+                $read->exeRead($entity, "WHERE id = :id", ["id" => $dado['id']]);
                 if ($read->getResult()) {
                     $result = $read->getResult()[0];
 
@@ -92,7 +92,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
                 unset($registro['id']);
 
             } elseif ($action === "update") {
-                $read->exeRead($entity, "WHERE id = :id", "id={$registro['id']}");
+                $read->exeRead($entity, "WHERE id = :id", ["id" => $registro['id']]);
                 if (!$read->getResult()) {
                     unset($registro['id']);
                     $action = "create";
@@ -102,7 +102,7 @@ if (!empty($entity) && file_exists(PATH_HOME . "entity/cache/{$entity}.json") &&
             $id = \Entity\Entity::add($entity, $registro);
 
             if (is_numeric($id)) {
-                $read->exeRead($entity, "WHERE id = :id", "id={$id}");
+                $read->exeRead($entity, "WHERE id = :id", ["id" => $id]);
                 $result = ($read->getResult() ? $read->getResult()[0] : []);
                 $result['db_action'] = $action;
                 $dados[$i] = $result;

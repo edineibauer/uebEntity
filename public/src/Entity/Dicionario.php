@@ -49,7 +49,7 @@ class Dicionario
         if (!empty($data)) {
             if (is_numeric($data)) {
                 $read = new Read();
-                $read->exeRead($this->entity, "WHERE id = :id", "id={$data}", !0, !0, !0);
+                $read->exeRead($this->entity, "WHERE id = :id", ["id" => $data]);
                 if ($read->getResult()) {
                     $dataRead = $read->getResult()[0];
                     foreach ($this->getAssociationMult() as $meta)
@@ -89,7 +89,7 @@ class Dicionario
     {
         $data = [];
         $read = new Read();
-        $read->exeRead($this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", "id={$id}", !0, !0, !0);
+        $read->exeRead($this->entity . "_" . $m->getColumn(), "WHERE {$this->entity}_id = :id", ["id" => $id]);
         if ($read->getResult()) {
             foreach ($read->getResult() as $item)
                 $data[] = $item[$m->getRelation() . "_id"];
@@ -495,7 +495,7 @@ class Dicionario
              */
             if ($action === "update") {
                 $read = new Read();
-                $read->exeRead($entity, "WHERE id = :id", "id={$dados['id']}", !0, !0, !0);
+                $read->exeRead($entity, "WHERE id = :id", ["id" => $dados['id']]);
                 if ($read->getResult() && !empty($read->getResult()[0]['usuarios_id']))
                     $dados['usuarios_id'] = (int)$read->getResult()[0]['usuarios_id'];
             }
@@ -527,7 +527,7 @@ class Dicionario
 
             $read = new Read();
             if ($action === "create" && !empty($user['password']) && !empty($user['nome'])) {
-                $read->exeRead("usuarios", "WHERE nome = '{$user['nome']}' && password = :p", "p={$user['password']}", !0, !0, !0);
+                $read->exeRead("usuarios", "WHERE nome = :cc && password = :p", ["cc" => $user['nome'], "p" => $user['password']]);
                 if (!$read->getResult()) {
 
                     /**
@@ -556,7 +556,7 @@ class Dicionario
                 $sql->exeCommand("SELECT * FROM usuarios WHERE id = {$dados['usuarios_id']}");
                 if ($sql->getResult()) {
                     $newData = Helper::arrayMerge($sql->getResult()[0], $user);
-                    $read->exeRead("usuarios", "WHERE nome = '{$newData['nome']}' && password = :p && id !=:id", "p={$newData['password']}id={$dados['usuarios_id']}", !0, !0, !0);
+                    $read->exeRead("usuarios", "WHERE nome = :cc && password = :p && id !=:id", ["cc" => $newData['nome'], "p" => $newData['password'], "id" => $dados['usuarios_id']]);
                     if (!$read->getResult()) {
                         $up = new Update();
                         $up->exeUpdate("usuarios", $newData, "WHERE id = :ui", "ui={$dados['usuarios_id']}");
@@ -604,35 +604,6 @@ class Dicionario
             return $create->getReact();
         }
     }
-
-    /**
-     * @param int $id
-     */
-    /* private function checkToSetOwnerList(int $id)
-     {
-         $general = json_decode(file_get_contents(PATH_HOME . "entity/general/general_info.json"), true);
-         if (!empty($general[$this->entity]['owner']) || !empty($general[$this->entity]['ownerPublisher'])) {
-             foreach (array_merge($general[$this->entity]['owner'] ?? [], $general[$this->entity]['ownerPublisher'] ?? []) as $item) {
-                 $entityRelation = $item[0];
-                 $column = $item[1];
-                 $userColumn = $item[2];
-
-                 $read = new Read();
-                 $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", "user={$_SESSION['userlogin']['id']}");
-                 if ($read->getResult()) {
-                     $idUser = $read->getResult()[0]['id'];
-
-                     $tableRelational = $entityRelation . "_" . $column;
-                     $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :ai && {$this->entity}_id = :bi", "ai={$idUser}&bi={$id}");
-                     if (!$read->getResult()) {
-
-                         $create = new Create();
-                         $create->exeCreate($tableRelational, [$entityRelation . "_id" => $idUser, $this->entity . "_id" => $id]);
-                     }
-                 }
-             }
-         }
-     }*/
 
     private function saveAssociacaoSimples()
     {

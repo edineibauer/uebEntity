@@ -114,17 +114,21 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
 
     $dicionario = Metadados::getDicionario($entity);
     $info = Metadados::getInfo($entity);
-    $where = ($id ? "WHERE id = {$id}" : "WHERE id > 0");
+    $where = ($id ? "WHERE id = :id" : "WHERE id > :id");
+    $wherePlace = ["id" => ($id ?? 0)];
 
     // Verifica se existe um vinculo deste usuário com o conteúdo, se tiver busca também
     if(!empty($setor) && $setor !== "admin" && $setor !== "0") {
         $count = 0;
         foreach ($dicionario as $col => $meta) {
             if($meta['format'] === "list" && $meta['relation'] === $setor) {
-                if($count === 0)
-                    $where .= " && ({$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
-                else
-                    $where .= " || {$meta['column']} = " . $_SESSION['userlogin']['setorData']['id'];
+                if($count === 0) {
+                    $where .= " && ({$meta['column']} = :bbhy{$count}";
+                } else {
+                    $where .= " || {$meta['column']} = :bbhy{$count}";
+                }
+
+                $wherePlace["bbhy{$count}"] = $_SESSION['userlogin']['setorData']['id'];
                 $count++;
             }
         }
@@ -134,8 +138,10 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
     }
 
     //Verifica se é multitenancy, se for, adiciona cláusula para buscar somente os dados referentes ao usuário
-    if($where === "WHERE id > 0" && $setor !== "admin" && $setor !== "0" && !empty($info['autor']) && $info['autor'] === 2)
-        $where .= " && ownerpub = " . $_SESSION['userlogin']['id'];
+    if($where === "WHERE id > 0" && $setor !== "admin" && $setor !== "0" && !empty($info['autor']) && $info['autor'] === 2) {
+        $where .= " && ownerpub = :oownn";
+        $wherePlace["oownn"] = $_SESSION['userlogin']['id'];
+    }
 
     $filterResult = "";
     if(!empty($filter))
@@ -156,7 +162,7 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
 
     $results = [];
     $read = new Read();
-    $read->exeRead($entity, $where);
+    $read->exeRead($entity, $where, $wherePlace);
     if($read->getResult()) {
         foreach ($read->getResult() as $item)
             $results[] = \Entity\Entity::exeRead($entity, $item['id'])[0];

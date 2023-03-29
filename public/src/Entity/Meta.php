@@ -639,7 +639,7 @@ class Meta
     private function checkIdExist(int $id)
     {
         $read = new Read();
-        $read->exeRead($this->relation, "WHERE id = :id", "id={$id}");
+        $read->exeRead($this->relation, "WHERE id = :id", ["id" => $id]);
         return $read->getResult() ? (int)$id : null;
     }
 

@@ -97,12 +97,19 @@ class Validate
         if ($m->getUnique()) {
             $info = Metadados::getInfo($d->getEntity())["system"];
 
-            $where = "WHERE {$m->getColumn()} = '{$m->getValue()}'" . (!empty($groupUser) ? " && {$groupUser}" : "");
-            $where .= (!empty($d->search(0)->getValue()) ? " && id != " . $d->search("id")->getValue() : "");
-            $where .= (!empty($info) && !empty($_SESSION["userlogin"]["system_id"]) ? " AND system_id = {$_SESSION["userlogin"]["system_id"]}" : "");
+            $where = "WHERE {$m->getColumn()} = :cc" . (!empty($groupUser) ? " && {$groupUser}" : "");
+            $wherePlace = ["cc" => $m->getValue()];
+            if(!empty($d->search(0)->getValue())) {
+                $where .= " && id != :idd";
+                $wherePlace["idd"] = $d->search("id")->getValue();
+            }
+            if(!empty($info) && !empty($_SESSION["userlogin"]["system_id"])) {
+                $where .= " AND system_id = :si";
+                $wherePlace["si"] = $_SESSION["userlogin"]["system_id"];
+            }
 
             $read = new Read();
-            $read->exeRead($d->getEntity(), $where);
+            $read->exeRead($d->getEntity(), $where, $wherePlace);
             if ($read->getResult())
                 $m->setError("Valor já existe, informe outro");
         }

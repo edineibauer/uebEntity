@@ -352,7 +352,6 @@ class Entity extends EntityCreate
     public static function exeRead(string $entity, $id = null, $ignoreSystem = false, $ignoreOwner = false)
     {
         $results = [];
-        $read = new Read();
 
         /**
          * É necessário verificar permissões
@@ -378,7 +377,7 @@ class Entity extends EntityCreate
         if (!empty($info['columns_readable']))
             $read->setSelect($info['columns_readable']);
 
-        $read->exeRead($entity, "WHERE usuarios_id = :id", "id={$id}", !0, !0, !0);
+        $read->exeRead($entity, "WHERE usuarios_id = :id", ["id" => $id]);
         if ($read->getResult()) {
             /**
              * Decode all json on base relation register
@@ -588,7 +587,7 @@ class Entity extends EntityCreate
             $read = new Read();
 
             //check associação simples if have entity usuários ou if have publisher
-            $read->exeRead($entity, "WHERE id = :id", "id={$id}");
+            $read->exeRead($entity, "WHERE id = :id", ["id" => $id]);
             if ($read->getResult()) {
                 $tableData = $read->getResult()[0];
                 foreach ($dicionario->getAssociationSimple() as $meta) {
@@ -606,10 +605,10 @@ class Entity extends EntityCreate
                                     $tableRelational = $entityRelation . "_" . $entity . "_" . $column;
 
                                     $read = new Read();
-                                    $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", "user={$_SESSION['userlogin']['id']}");
+                                    $read->exeRead($entityRelation, "WHERE {$userColumn} = :user", ["user" => $_SESSION['userlogin']['id']]);
                                     if ($read->getResult()) {
                                         $idUser = $read->getResult()[0]['id'];
-                                        $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :id", "id={$idUser}");
+                                        $read->exeRead($tableRelational, "WHERE {$entityRelation}_id = :id", ["id" => $idUser]);
                                         if ($read->getResult())
                                             $continua = false;
                                     }
@@ -617,7 +616,7 @@ class Entity extends EntityCreate
                             }
 
                             if ($continua) {
-                                $read->exeRead("usuarios", "WHERE id = :id", "id={$idData}");
+                                $read->exeRead("usuarios", "WHERE id = :id", ["id" => $idData]);
                                 if ($read->getResult() && $login['setor'] >= $read->getResult()[0]['setor'])
                                     return false;
                             }
@@ -638,7 +637,7 @@ class Entity extends EntityCreate
                     if ($login['id'] == $tableData[$metadados[$dicionario->getInfo()['publisher']]['column']])
                         return true;
 
-                    $read->exeRead("usuarios", "WHERE id = :idl", "idl={$tableData[$metadados[$dicionario->getInfo()['publisher']]['column']]}");
+                    $read->exeRead("usuarios", "WHERE id = :idl", ["idl" => $tableData[$metadados[$dicionario->getInfo()['publisher']]['column']]]);
                     if ($read->getResult() && (($login['setor'] == $read->getResult()[0]['setor'] && $login['nivel'] < $read->getResult()[0]['nivel']) || $login['id'] === $read->getResult()[0]['id']))
                         return true;
                     else
