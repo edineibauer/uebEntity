@@ -93,7 +93,7 @@ class Meta
         if ($validate)
             $this->error = null;
 
-        if ($this->type === "json")
+        if ($this->type === "json" || $this->format === "extend_folder" || $this->format === "extend")
             $value = (Check::isJson($value) ? json_decode($value, true) : (is_array($value) || is_object($value) || $this->key === "source" ? $value : null));
         elseif ($this->key === "publisher" && !empty($_SESSION['userlogin']))
             $value = (!empty($value) ? (int) $value : null);
