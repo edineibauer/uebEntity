@@ -527,29 +527,24 @@ class Dicionario
 
             $read = new Read();
             if ($action === "create" && !empty($user['password']) && !empty($user['nome'])) {
-                $read->exeRead("usuarios", "WHERE nome = :cc && password = :p", ["cc" => $user['nome'], "p" => $user['password']]);
-                if (!$read->getResult()) {
 
-                    /**
-                     * Define the social field
-                     */
-                    if(!empty($_SESSION['userlogin']['socialToken'])) {
-                        $facebookId = Social::facebookGetId($_SESSION['userlogin']['socialToken']);
-                        if (!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
-                            $user['login_social'] = 2;
+                /**
+                 * Define the social field
+                 */
+                if(!empty($_SESSION['userlogin']['socialToken'])) {
+                    $facebookId = Social::facebookGetId($_SESSION['userlogin']['socialToken']);
+                    if (!empty($facebookId) && Check::password($facebookId) === $user['password'] && defined('FACEBOOKENTITY') && $this->entity === FACEBOOKENTITY)
+                        $user['login_social'] = 2;
 
-                        $googleId = Social::googleGetId($_SESSION['userlogin']['socialToken']);
-                        if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
-                            $user['login_social'] = 1;
-                    }
-
-                    $create = new Create();
-                    $create->exeCreate("usuarios", $user);
-                    if ($create->getResult())
-                        $dados['usuarios_id'] = $user['id'] = (int)$create->getResult();
-                } else {
-                    $dados['usuarios_id'] = $read->getResult()[0]['id'];
+                    $googleId = Social::googleGetId($_SESSION['userlogin']['socialToken']);
+                    if(!empty($googleId) && Check::password($googleId) === $user['password'] && defined('GOOGLEENTITY') && $this->entity === GOOGLEENTITY)
+                        $user['login_social'] = 1;
                 }
+
+                $create = new Create();
+                $create->exeCreate("usuarios", $user);
+                if ($create->getResult())
+                    $dados['usuarios_id'] = (int)$create->getResult();
 
             } elseif ($action === "update" && !empty($user)) {
                 $sql = new SqlCommand();
