@@ -504,7 +504,7 @@ class Meta
      * @param mixed $dados
      * @param mixed $default
      */
-    public function setDados($dados = null, $default)
+    public function setDados($dados, $default)
     {
         if (!empty($dados)) {
             if (!$default)

@@ -68,11 +68,13 @@ class Metadados
             }
 
             $dicionario = [];
-            foreach (Helper::convertStringToValueArray($data) as $id => $metas) {
-                if (!empty($metas['allow']['options']))
-                    $metas['allow']['options'] = array_reverse($metas['allow']['options']);
+            if(!empty($data)) {
+                foreach (Helper::convertStringToValueArray($data) as $id => $metas) {
+                    if (!empty($metas['allow']['options']))
+                        $metas['allow']['options'] = array_reverse($metas['allow']['options']);
 
-                $dicionario[$id] = $metas;
+                    $dicionario[$id] = $metas;
+                }
             }
 
             return $dicionario;
@@ -147,8 +149,12 @@ class Metadados
      */
     public static function getInfo($entity)
     {
-        if (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json"))
-            return Helper::convertStringToValueArray(json_decode(file_get_contents(PATH_HOME . "entity/cache/info/{$entity}.json"), !0));
+        if (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json")){
+            $data = json_decode(file_get_contents(PATH_HOME . "entity/cache/info/{$entity}.json"), !0);
+
+            if(!empty($data))
+                return Helper::convertStringToValueArray($data);
+        }
 
         return null;
     }
