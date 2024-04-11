@@ -758,7 +758,7 @@ class Meta
                         $value[0]['image'] = HOME . $dir;
                         $value[0]['preview'] = "<img src='" . $value[0]['image'] . "' alt='' title='Imagem " . $name . "' class='left radius'/>";
                     } else {
-                        $icon = (in_array($extensao, ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
+                        $icon = (in_array($extensao, ["doc", "docx", "csv", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $extensao : "file");
                         $value[0]['image'] = HOME . "assetsPublic/img/file.png";
                         $value[0]['preview'] = "<svg class='icon svgIcon' ><use xlink:href='#{$icon}'></use></svg>";
                     }
@@ -773,7 +773,7 @@ class Meta
         if (is_array($value)) {
             foreach ($value as $i => $item) {
                 if ($item['url'] !== !1) {
-                    $icon = (in_array($item['type'], ["doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $item['type'] : "file");
+                    $icon = (in_array($item['type'], ["doc", "docx", "csv", "pdf", "xls", "xlsx", "ppt", "pptx", "zip", "rar", "search", "txt", "json", "js", "iso", "css", "html", "xml", "mp3", "csv", "psd", "mp4", "svg", "avi"]) ? $item['type'] : "file");
                     if (!empty($item['url']) && is_string($item['url']) && (preg_match('/;/i', $item['url']) || preg_match('/uploads\/tmp\//i', $item['url']))) {
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads");
                         Helper::createFolderIfNoExist(PATH_HOME . "uploads/form");
