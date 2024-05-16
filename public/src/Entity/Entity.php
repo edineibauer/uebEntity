@@ -36,7 +36,7 @@ class Entity extends EntityCreate
      */
     public static function exeReadWithoutCache(string $entity, $id = null, $ignoreSystem = false, $ignoreOwner = false)
     {
-        if(!\Config\Config::haveEntityPermission($entity, ["read"]))
+        if(!Config::haveEntityPermission($entity, ["read"]))
             return [];
 
         $result = [];
@@ -479,23 +479,39 @@ class Entity extends EntityCreate
 
     /**
      * Verifica dicionários permitidos e retorna
-     *
      * @param string|null $entity
-     * @param bool|false $keepId
+     * @param bool $keepId
+     * @param array $permissions
      * @return array
      */
-    public static function dicionario(string $entity = null, bool $keepId = !1): array
+    public static function dicionario(string $entity = null, bool $keepId = !1, array $permissions = []): array
     {
         $list = [];
         if (empty($entity)) {
+            $setor = Config::getSetor();
+
+            if(empty($permissions)) {
+                $permissions = Config::minifyPermissions(Config::getPermission($setor));
+                if ($setor === "admin") {
+                    foreach ($permissions as $entity => $dadosP)
+                        $permissions[$entity] = 1;
+                } else {
+                    foreach ($permissions as $entity => $dadosP) {
+                        if ($entity === $setor)
+                            $permissions[$entity] = 1;
+                        elseif (is_array($dadosP))
+                            $permissions[$entity] = $dadosP[1] === 1 || $dadosP[2] === 1 || $dadosP[3] === 1 ? 1 : 0;
+                    }
+                }
+            }
 
             //read all dicionarios
             foreach (Helper::listFolder(PATH_HOME . "entity/cache") as $entity) {
-                if ($entity !== "info" && preg_match("/\.json$/i", $entity)) {
+                if (pathinfo($entity, PATHINFO_EXTENSION) === "json") {
 
                     $entidade = str_replace(".json", "", $entity);
 
-                    if ($entidade === $_SESSION['userlogin']['setor'] || Config::haveEntityPermission($entidade)) {
+                    if ($permissions[$entidade]) {
                         $result = Metadados::getDicionario($entidade, $keepId, !0);
                         if (!empty($result)) {
 
@@ -528,28 +544,43 @@ class Entity extends EntityCreate
     }
 
     /**
-     * Verifica dicionários info permitidos e retorna
+     *  Verifica dicionários info permitidos e retorna
      *
      * @param string|null $entity
+     * @param array $permissions
      * @return array
      */
-    public static function info(string $entity = null): array
+    public static function info(string $entity = null, array $permissions = []): array
     {
         $list = [];
         if (empty($entity)) {
 
+            if(empty($permissions)) {
+                $permissions = Config::minifyPermissions(Config::getPermission($setor));
+                $setor = Config::getSetor();
+                if($setor === "admin") {
+                    foreach ($permissions as $entity => $dadosP)
+                        $permissions[$entity] = 1;
+                } else {
+                    foreach ($permissions as $entity => $dadosP) {
+                        if($entity === $setor)
+                            $permissions[$entity] = 1;
+                        elseif(is_array($dadosP))
+                            $permissions[$entity] = $dadosP[1] === 1 || $dadosP[2] === 1 || $dadosP[3] === 1 ? 1 : 0;
+                    }
+                }
+            }
+
             //read all info dicionarios
             foreach (Helper::listFolder(PATH_HOME . "entity/cache/info") as $entity) {
-                if (preg_match("/\.json$/i", $entity)) {
-
+                if (pathinfo($entity, PATHINFO_EXTENSION) === "json") {
                     $entidade = str_replace(".json", "", $entity);
-                    if (Config::haveEntityPermission($entidade))
+                    if ($permissions[$entidade])
                         $list[$entidade] = Metadados::getInfo($entidade);
                 }
             }
 
         } elseif (file_exists(PATH_HOME . "entity/cache/info/{$entity}.json") && Config::haveEntityPermission($entity)) {
-
             $list = Metadados::getInfo($entity);
         }
 
