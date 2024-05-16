@@ -511,7 +511,7 @@ class Entity extends EntityCreate
 
                     $entidade = str_replace(".json", "", $entity);
 
-                    if ($permissions[$entidade]) {
+                    if (isset($permissions[$entidade]) && $permissions[$entidade]) {
                         $result = Metadados::getDicionario($entidade, $keepId, !0);
                         if (!empty($result)) {
 
@@ -575,7 +575,7 @@ class Entity extends EntityCreate
             foreach (Helper::listFolder(PATH_HOME . "entity/cache/info") as $entity) {
                 if (pathinfo($entity, PATHINFO_EXTENSION) === "json") {
                     $entidade = str_replace(".json", "", $entity);
-                    if ($permissions[$entidade])
+                    if (isset($permissions[$entidade]) && $permissions[$entidade])
                         $list[$entidade] = Metadados::getInfo($entidade);
                 }
             }
