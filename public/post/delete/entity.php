@@ -1,11 +1,14 @@
 <?php
 
-$entity = filter_input(INPUT_POST, 'entity', FILTER_DEFAULT);
+$entity = trim(strip_tags(filter_input(INPUT_POST, 'entity')));
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
-\Entity\Entity::delete($entity, ['id' => $id]);
 $data['data'] = [];
-$data['data']['data'] = 1;
+$data['data']['data'] = 0;
+if(!empty($entity) && !empty($id)) {
+    \Entity\Entity::delete($entity, ['id' => $id]);
+    $data['data']['data'] = 1;
 
-$json = new \Entity\Json();
-$data['data']['historic'] = $json->get("historic")[$entity];
+    $json = new \Entity\Json();
+    $data['data']['historic'] = $json->get("historic")[$entity];
+}
