@@ -36,7 +36,7 @@ abstract class VersionControl
     protected function createVerion(string $file, array $data, int $recursiveVersion = 99)
     {
         list($id, $folder) = $this->getBaseInfo($file);
-        $idVersion = $this->getLastVersion(PATH_HOME . "_cdn/{$folder}/{$id}", $recursiveVersion);
+        $idVersion = $this->getLastVersion(PATH_PRIVATE . "_cdn/{$folder}/{$id}", $recursiveVersion);
 
         $json = new Json($folder, 20);
         $json->setVersionamento(false);
@@ -125,7 +125,7 @@ abstract class VersionControl
     {
         $id = pathinfo($file, PATHINFO_FILENAME);
         $dir = pathinfo($file, PATHINFO_DIRNAME);
-        $folder = str_replace(PATH_HOME . '_cdn/', '', $dir) . "/version";
+        $folder = str_replace(PATH_PRIVATE . '_cdn/', '', $dir) . "/version";
 
         \Helpers\Helper::createFolderIfNoExist($dir . "/version");
 

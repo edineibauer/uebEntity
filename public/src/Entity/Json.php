@@ -25,10 +25,9 @@ class Json extends VersionControl
         parent::__construct($folder, $versionNumberControl);
 
         $dir = "_cdn";
-        Helper::createFolderIfNoExist(PATH_HOME . $dir);
         foreach (explode('/', parent::getFolder()) as $item) {
             $dir .= "/{$item}";
-            Helper::createFolderIfNoExist(PATH_HOME . $dir);
+            Helper::createFolderIfNoExist(PATH_PRIVATE . $dir);
         }
     }
 
@@ -211,7 +210,7 @@ class Json extends VersionControl
         if (!$this->id || $id != $this->id) {
             $this->id = $id;
             $id = Check::name($id, ["#"]);
-            $this->file = (preg_match("/^" . preg_quote(PATH_HOME, '/') . "/i", $id) ? $id : PATH_HOME . "_cdn/" . parent::getFolder() . "/{$id}");
+            $this->file = (preg_match("/^" . preg_quote(PATH_HOME, '/') . "/i", $id) ? $id : PATH_PRIVATE . "_cdn/" . parent::getFolder() . "/{$id}");
 
             // Verifica se é final .json
             if (!preg_match("/\.json$/i", $id))

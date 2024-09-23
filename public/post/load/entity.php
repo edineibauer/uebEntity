@@ -34,7 +34,7 @@ if (empty($hist[$entity])) {
 $histTime = (int) explode("-", $hist[$entity])[0];
 
 //verifica se há alterações nessa entidade que não forão recebidas pelo app, caso tenha, atualiza os dados
-if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PATH_HOME . "_cdn/update/{$entity}/{$historicFront}.json"))) {
+if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PATH_PRIVATE . "_cdn/update/{$entity}/{$historicFront}.json"))) {
     //download all data
 
     /**
@@ -202,11 +202,11 @@ if (empty($historicFront) || ($historicFrontTime < $histTime && !file_exists(PAT
     //download updates
     $data['data']['data'] = [];
     $info = Metadados::getInfo($entity);
-    foreach (Helper::listFolder(PATH_HOME . "_cdn/update/{$entity}") as $update) {
+    foreach (Helper::listFolder(PATH_PRIVATE . "_cdn/update/{$entity}") as $update) {
         $historicUpdate = str_replace('.json', '', $update);
         $historicUpdateTime = (int) explode("-", $historicUpdate)[0];
         if ($historicFrontTime < $historicUpdateTime) {
-            $dadosUp = json_decode(file_get_contents(PATH_HOME . "_cdn/update/{$entity}/{$update}"), !0);
+            $dadosUp = json_decode(file_get_contents(PATH_PRIVATE . "_cdn/update/{$entity}/{$update}"), !0);
             if(!empty($dadosUp) && ($setor === "admin" || empty($info['autor']) || ($relationSetor && $dadosUp[$relationSetorColumn] === $_SESSION['userlogin']['setorData']['id']) || ($info['autor'] === 2 && $dadosUp['ownerpub'] === $_SESSION['userlogin']['id'])))
                 $data['data']['data'][] = $dadosUp;
         }
