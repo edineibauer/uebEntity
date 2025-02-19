@@ -503,6 +503,8 @@ class Dicionario
             $action = (empty($dados['usuarios_id']) ? "create" : $action);
             if ($action === "create") {
                 $user = [
+                    "system_id" => $dados['system_id'],
+                    "system_entity" => $dados['system_entity'],
                     "nome" => "",
                     "password" => "",
                     "status" => 1,
