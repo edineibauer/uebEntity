@@ -91,7 +91,7 @@ class Entity extends EntityCreate
                     $selects .= ", autor_user.{$column} as autor_user___{$column}";
             }
 
-            $command .= " LEFT JOIN usuarios as autor_user ON autor_user.id = e." . ($info['autor'] == 1 ? "autorpub" : "ownerpub");
+            $command .= " LEFT JOIN usuarios as autor_user ON autor_user.id = e.ownerpub";
         }
 
         /**
@@ -264,7 +264,7 @@ class Entity extends EntityCreate
                     if(!empty($relationData["usuarios"]['id']))
                         $relationData["usuarios"]['id'] = (int) $relationData["usuarios"]['id'];
 
-                    $relationData[$info['autor'] == 1 ? "autorpub" : "ownerpub"] = $relationData["usuarios"];
+                    $relationData["ownerpub"] = $relationData["usuarios"];
                     unset($relationData["usuarios"]);
                 }
 
@@ -322,14 +322,14 @@ class Entity extends EntityCreate
              */
             if ($entity === "usuarios" || !empty($info['autor'])) {
                 foreach ($result as $i => $item) {
-                    $entitySetor = ($entity === "usuarios" ? $item['setor'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['setor'] ?? "" : $item['relationData']["ownerpub"]['setor'] ?? ""));
+                    $entitySetor = ($entity === "usuarios" ? $item['setor'] : ($item['relationData']["ownerpub"]['setor'] ?? ""));
                     if (!empty($entitySetor)) {
-                        $idUsuario = ($entity === "usuarios" ? $item['id'] : ($info['autor'] == 1 ? $item['relationData']["autorpub"]['id'] : $item['relationData']["ownerpub"]['id']));
+                        $idUsuario = ($entity === "usuarios" ? $item['id'] : ($item['relationData']["ownerpub"]['id'] ?? null));
 
                         if ($entity === "usuarios")
                             $result[$i]['relationData'][$entitySetor] = self::getUserSetorData($entitySetor, $idUsuario);
                         else
-                            $result[$i]['relationData'][($info['autor'] == 1 ? "autorpub" : "ownerpub")]["relationData"][$entitySetor] = self::getUserSetorData($entitySetor, $idUsuario);
+                            $result[$i]['relationData']["ownerpub"]["relationData"][$entitySetor] = self::getUserSetorData($entitySetor, $idUsuario);
                     }
                 }
             }

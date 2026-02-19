@@ -44,12 +44,8 @@ class Metadados
                 /**
                  * Autor e Owner
                  */
-                if (!empty($info['autor'])) {
-                    if ($info['autor'] === 1)
-                        $data["999998"] = array_replace_recursive($default, $inputType['publisher'], ["indice" => 999998]);
-                    elseif ($info['autor'] === 2)
-                        $data["999999"] = array_replace_recursive($default, $inputType['owner'], ["indice" => 999999]);
-                }
+                if (!empty($info['autor']) && ($info['autor'] === 1 || $info['autor'] === 2))
+                    $data["999999"] = array_replace_recursive($default, $inputType['owner'], ["indice" => 999999]);
 
                 /**
                  * System id
@@ -71,7 +67,7 @@ class Metadados
             $dicionario = [];
             if(!empty($data)) {
                 foreach (Helper::convertStringToValueArray($data) as $id => $metas) {
-                    if (!empty($metas['allow']['options']))
+                    if (!empty($metas['allow']['options']) && is_array($metas['allow']['options']))
                         $metas['allow']['options'] = array_reverse($metas['allow']['options']);
 
                     $dicionario[$id] = $metas;

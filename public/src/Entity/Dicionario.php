@@ -390,12 +390,12 @@ class Dicionario
         if (!$this->info)
             $this->info = Metadados::getInfo($this->entity);
 
-        //verifica se possui owner ou autor
+        //verifica se possui owner (ownerpub)
         if (!empty($this->info['autor']) && ($this->info['autor'] === 1 || $this->info['autor'] === 2)) {
             if (empty($id))
-                $this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]->setValue((!empty($_SESSION['userlogin']['id']) ? $_SESSION['userlogin']['id'] : null), !1);
+                $this->dicionario["999999"]->setValue((!empty($_SESSION['userlogin']['id']) ? $_SESSION['userlogin']['id'] : null), !1);
             else
-                unset($this->dicionario[($this->info['autor'] === 1 ? "999998" : "999999")]);
+                unset($this->dicionario["999999"]);
         }
 
         foreach ($this->dicionario as $i => $meta) {
